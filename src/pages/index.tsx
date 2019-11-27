@@ -22,24 +22,21 @@ class BlogIndex extends React.Component {
                     return (
                         <article key={post.fields.slug}>
                             <header>
-                                <h3
-                                    style={{
-                                        marginBottom: rhythm(1 / 4),
-                                    }}
-                                >
+                                <h3 style={{marginBottom: rhythm(1 / 4),}} >
                                     <Link to={post.fields.slug}>
                                         {title}
                                     </Link>
                                 </h3>
                                 <small>{post.frontmatter.date}</small>
                             </header>
-                            <section>
+                            <section >
                                 <p
                                     dangerouslySetInnerHTML={{
                                         __html: post.frontmatter.description || post.excerpt,
                                     }}
                                 />
                             </section>
+                            <hr style={{marginBottom: `1rem`}}/>
                         </article>
                     )
                 })}
