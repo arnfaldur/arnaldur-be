@@ -29,7 +29,7 @@ class BlogIndex extends React.Component {
                                 </h3>
                                 <small>{post.frontmatter.date}</small>
                             </header>
-                            <section >
+                            <section>
                                 <p
                                     dangerouslySetInnerHTML={{
                                         __html: post.frontmatter.description || post.excerpt,

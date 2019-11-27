@@ -5,8 +5,8 @@ import { rhythm } from "../utils/typography"
 
 class Layout extends React.Component {
     render() {
-        const { location, children } = this.props
-        const rootPath = `${__PATH_PREFIX__}/`
+        const { location, children } = this.props;
+        const rootPath = `${__PATH_PREFIX__}/`;
         const styleOnThem = {
             /* boxShadow: `none`,
              * textDecoration: `none`,  */
