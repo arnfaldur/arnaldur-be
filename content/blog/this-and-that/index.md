@@ -1,3 +1,0 @@
----
-title: This and that
----
