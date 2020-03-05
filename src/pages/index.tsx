@@ -54,7 +54,13 @@ export const pageQuery = graphql`
                 title
             }
         }
-        allFile(filter: {sourceInstanceName: {eq: "blog"}}, sort: {fields: childMarkdownRemark___frontmatter___date}) {
+        allFile(
+            filter: {
+                base: {eq: "index.md"},
+                sourceInstanceName: {eq: "blog"}
+            },
+            sort: {fields: childMarkdownRemark___frontmatter___date}
+        ) {
             edges {
                 node {
                     childMarkdownRemark {

@@ -6,7 +6,7 @@ pageInstances = name => {
             {
                 allFile(
                     filter: {
-                        base: {regex: "/^[^.]/"},
+                        base: {eq: "index.md"},
                         sourceInstanceName: {eq: "${name}"}
                     },
                     sort: {fields: childMarkdownRemark___frontmatter___date}
@@ -41,6 +41,8 @@ exports.createPages = async ({ graphql, actions }) => {
     // Create blog posts pages.
     const posts = blogQuery.data.allFile.edges.map(edge => {
         return edge.node.childMarkdownRemark;
+    }).filter(post => {
+        return post !== null;
     });
     console.log(posts);
     posts.forEach((post, index) => {

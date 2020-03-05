@@ -47,7 +47,6 @@ h6:first-child {
 h4,
 h5,
 h6 {
-    font-weight: bold;
     color: #444;
 }
 h1 {
@@ -83,8 +82,6 @@ hr {
     height: 2px;
     border-bottom: 2px solid rgba(0, 0, 0, 0.18);
     margin: 0;
-}
-hr:not(:first-child) {
     margin-top: 1rem;
 }
 b,
@@ -187,7 +184,9 @@ body {
  h6 {
     color: #eee;
 }
- h4,
+ h4 {
+     color: #ddd;
+ }
  h5,
  h6 {
     color: #bbb;
