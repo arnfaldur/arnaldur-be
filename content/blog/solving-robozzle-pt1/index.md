@@ -1,7 +1,8 @@
 ---
 title: "Solving Robozzle (Part 1)"
 date: "2019-11-23T18:29:41.338" 
-topic: "programming"
+topic: 
+- "programming"
 ---
 
 ### Robozzle

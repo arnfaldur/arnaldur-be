@@ -44,7 +44,6 @@ exports.createPages = async ({ graphql, actions }) => {
     }).filter(post => {
         return post !== null;
     });
-    console.log(posts);
     posts.forEach((post, index) => {
         const previous =
             index === posts.length - 1 ? null : posts[index + 1].node;
@@ -68,8 +67,6 @@ exports.createPages = async ({ graphql, actions }) => {
     const pages = pageQuery.data.allFile.edges.map(edge => {
         return edge.node.childMarkdownRemark;
     });
-    console.log("pages: ");
-    console.log(pages);
     pages.forEach(page => {
         const newPath = page.fields.slug;
         createPage({
@@ -90,12 +87,10 @@ exports.onCreateNode = ({ node, actions, getNode }) => {
             getNode,
         })}`;
 
-        console.log("inserting\n" + value);
         if (getNode(node.parent).sourceInstanceName === "blog") {
             value = `/blogging/about` + value;
         }
-        console.log(value);
-        //
+
         createNodeField({
             node,
             name: `slug`,

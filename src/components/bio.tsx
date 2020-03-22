@@ -39,7 +39,7 @@ const Bio = () => {
             }}
         >
             <p>
-                This is a list of things that I found interesting enough to write about:
+                Here are some things that I found interesting enough to write about:
             </p>
         </div>
     )
