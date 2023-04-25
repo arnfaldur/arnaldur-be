@@ -1,9 +1,18 @@
+/**
+ * Configure your Gatsby site with this file.
+ *
+ * See: https://www.gatsbyjs.com/docs/reference/config-files/gatsby-config/
+ */
+
+/**
+ * @type {import('gatsby').GatsbyConfig}
+ */
 module.exports = {
     siteMetadata: {
         title: `Arnaldur.be`,
-        author: `Arnaldur Bjarnason`,
         description: `A collection of things that have piqued my interest.`,
         siteUrl: `https://arnaldur.be/`,
+        author: `Arnaldur Bjarnason`,
         social: {
             twitter: `Chromoring`,
         },
@@ -12,8 +21,8 @@ module.exports = {
         {
             resolve: `gatsby-source-filesystem`,
             options: {
-                name: `blog`,
                 path: `${__dirname}/content/blog`,
+                name: `blog`,
             },
         },
         {
@@ -37,7 +46,7 @@ module.exports = {
                     {
                         resolve: `gatsby-remark-images`,
                         options: {
-                            maxWidth: 600,
+                            maxWidth: 630,
                         },
                     },
                     {
