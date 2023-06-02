@@ -1,100 +1,129 @@
+/**
+ * Implement Gatsby's Node APIs in this file.
+ *
+ * See: https://www.gatsbyjs.com/docs/reference/config-files/gatsby-node/
+ */
+
 const path = require(`path`);
 const { createFilePath } = require(`gatsby-source-filesystem`);
 
-pageInstances = name => {
-    return `
-            {
-                allFile(
-                    filter: {
-                        base: {eq: "index.md"},
-                        sourceInstanceName: {eq: "${name}"}
-                    },
-                    sort: {fields: childMarkdownRemark___frontmatter___date}
-                ) {
-                    edges {
-                        node {
-                            childMarkdownRemark {
-                                frontmatter {
-                                    title
-                                }
-                                fields {
-                                    slug
-                                }
-                            }
-                        }
+// Define the template for blog post
+const blogPost = path.resolve(`./src/templates/blog-post.js`);
+
+/**
+ * @type {import('gatsby').GatsbyNode['createPages']}
+ */
+exports.createPages = async ({ graphql, actions, reporter }) => {
+    const { createPage } = actions;
+
+    // Get all markdown blog posts sorted by date
+    const result = await graphql(`
+        {
+            allMarkdownRemark(
+                sort: { frontmatter: { date: ASC } }
+                limit: 1000
+            ) {
+                nodes {
+                    id
+                    fields {
+                        slug
                     }
                 }
             }
-        `;
-};
+        }
+    `);
 
-exports.createPages = async ({ graphql, actions }) => {
-    const { createPage } = actions;
-
-    const blogPost = path.resolve(`./src/templates/blog-post.tsx`);
-    const blogQuery = await graphql(pageInstances("blog"));
-
-    if (blogQuery.errors) {
-        throw blogQuery.errors;
+    if (result.errors) {
+        reporter.panicOnBuild(
+            `There was an error loading your blog posts`,
+            result.errors
+        );
+        return;
     }
 
-    // Create blog posts pages.
-    const posts = blogQuery.data.allFile.edges.map(edge => {
-        return edge.node.childMarkdownRemark;
-    }).filter(post => {
-        return post !== null;
-    });
-    posts.forEach((post, index) => {
-        const previous =
-            index === posts.length - 1 ? null : posts[index + 1].node;
-        const next = index === 0 ? null : posts[index - 1].node;
-        const newPath = post.fields.slug;
-        createPage({
-            path: newPath,
-            component: blogPost,
-            context: {
-                slug: newPath,
-                previous,
-                next,
-            },
+    const posts = result.data.allMarkdownRemark.nodes;
+
+    // Create blog posts pages
+    // But only if there's at least one markdown file found at "content/blog" (defined in gatsby-config.js)
+    // `context` is available in the template as a prop and as a variable in GraphQL
+
+    if (posts.length > 0) {
+        posts.forEach((post, index) => {
+            const previousPostId = index === 0 ? null : posts[index - 1].id;
+            const nextPostId =
+                index === posts.length - 1 ? null : posts[index + 1].id;
+
+            createPage({
+                path: post.fields.slug,
+                component: blogPost,
+                context: {
+                    id: post.id,
+                    previousPostId,
+                    nextPostId,
+                },
+            });
         });
-    });
-    const MarkdownPage = path.resolve(`./src/templates/markdown-page.tsx`);
-    const pageQuery = await graphql(pageInstances("pages"));
-    if (pageQuery.errors) {
-        throw pageQuery.errors;
     }
-    const pages = pageQuery.data.allFile.edges.map(edge => {
-        return edge.node.childMarkdownRemark;
-    });
-    pages.forEach(page => {
-        const newPath = page.fields.slug;
-        createPage({
-            path: newPath,
-            component: MarkdownPage,
-            context: {
-                slug: newPath,
-            },
-        });
-    });
 };
 
+/**
+ * @type {import('gatsby').GatsbyNode['onCreateNode']}
+ */
 exports.onCreateNode = ({ node, actions, getNode }) => {
     const { createNodeField } = actions;
-    if (node.internal.type === `MarkdownRemark`) {
-        let value = `${createFilePath({
-            node,
-            getNode,
-        })}`;
 
-        if (getNode(node.parent).sourceInstanceName === "blog") {
-            value = `/blogging/about` + value;
-        }
+    if (node.internal.type === `MarkdownRemark`) {
+        const value = createFilePath({ node, getNode });
 
         createNodeField({
-            node,
             name: `slug`,
+            node,
             value,
         });
     }
+};
+
+/**
+ * @type {import('gatsby').GatsbyNode['createSchemaCustomization']}
+ */
+exports.createSchemaCustomization = ({ actions }) => {
+    const { createTypes } = actions;
+
+    // Explicitly define the siteMetadata {} object
+    // This way those will always be defined even if removed from gatsby-config.js
+
+    // Also explicitly define the Markdown frontmatter
+    // This way the "MarkdownRemark" queries will return `null` even when no
+    // blog posts are stored inside "content/blog" instead of returning an error
+    createTypes(`
+    type SiteSiteMetadata {
+      author: Author
+      siteUrl: String
+      social: Social
+    }
+
+    type Author {
+      name: String
+      summary: String
+    }
+
+    type Social {
+      twitter: String
+    }
+
+    type MarkdownRemark implements Node {
+      frontmatter: Frontmatter
+      fields: Fields
+    }
+
+    type Frontmatter {
+      title: String
+      description: String
+      date: Date @dateformat
+    }
+
+    type Fields {
+      slug: String
+    }
+  `);
 };
