@@ -58,13 +58,8 @@ typings/
 .cache/
 public
 
-# Mac files
-.DS_Store
+# SolidJS files
+dist
 
-# Yarn
-yarn-error.log
-.pnp/
-.pnp.js
-# Yarn Integrity file
-.yarn-integrity
+# JetBrains files
 .idea
