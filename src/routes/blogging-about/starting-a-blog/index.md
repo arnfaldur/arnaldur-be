@@ -1,0 +1,28 @@
+---
+title: Starting a blog
+date: "2019-11-08T11:17:32.516Z"
+description: ""
+---
+
+As is apparent, I have decided to make a personal website. Currently it is just a simple blog but I have some ideas about adding some things that could make it more interesting.
+
+As of writing this, there is quite a bit of work to be done on the site. The aesthetic is rather bland and the routing hasn't been set up as I would like.
+
+I intend on focusing mostly on programming projects trough progress reports and post-mortems, but I might throw in some articles about other matters.
+
+The blog is made using the Gatsby starter blog as that seemed like a good starting point 
+and I believe that it can be expanded with reasonable effort.
+I want it to be a&mdash;as static as possible&mdash;website, utilizing serverless ideas where necessary.
+Serverless is a technology/methodology that I encountered during an interview that I will cover at a later date.
+I started making this site about a year ago and found myself questioning the bloat of modern JavaScript frameworks.
+Although this skepticism was not without reason, I went a bit overboard 
+and ultimately decided on making the site from scratch using pure JavaScript. 
+This wasn't a good idea for a number of reasons.
+
+I had little experience with the DOM, CSS and web development in general. 
+This lead to a number of design choices that had to be scrapped and reverted as they did not make sense in the context, 
+something that only experience and hindsight could have told me.
+Finding a router and markdown translator was easy but integrating them into the website was not.
+
+At this point my interest had waned. Letting go of the purism and just picking a framework was the obvious thing to do, upon revisiting the project.
+The fact that you are reading this is a testament to that.
