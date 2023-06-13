@@ -1,6 +1,10 @@
 import solid from "solid-start/vite";
 import staticAdapter from "solid-start-static";
 import { defineConfig } from "vite";
+import remarkGfm from "remark-gfm";
+import remarkFrontmatter from "remark-frontmatter";
+import remarkMdxFrontmatter from "remark-mdx-frontmatter";
+import remarkMdxImages from "remark-mdx-images";
 
 export default defineConfig({
   base: "/",
@@ -10,6 +14,7 @@ export default defineConfig({
         jsx: true,
         jsxImportSource: "solid-js",
         providerImportSource: "solid-mdx",
+        remarkPlugins: [remarkGfm, remarkMdxImages, remarkFrontmatter, remarkMdxFrontmatter],
       }),
       enforce: "pre",
     },
