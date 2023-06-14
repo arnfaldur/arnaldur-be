@@ -11,9 +11,7 @@ export default defineConfig({
   plugins: [
     {
       ...(await import("@mdx-js/rollup")).default({
-        jsx: true,
-        jsxImportSource: "solid-js",
-        providerImportSource: "solid-mdx",
+        jsxImportSource: "solid-jsx",
         remarkPlugins: [remarkGfm, remarkMdxImages, remarkFrontmatter, remarkMdxFrontmatter],
       }),
       enforce: "pre",

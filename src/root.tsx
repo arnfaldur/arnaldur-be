@@ -15,6 +15,7 @@ import {
 import "./root.css";
 
 export default function Root() {
+  const routes = <FileRoutes />
   return (
     <Html lang="en">
       <Head>
@@ -29,7 +30,7 @@ export default function Root() {
           <Suspense>
             <main>
               <Routes>
-                <FileRoutes />
+                {routes}
               </Routes>
             </main>
           </Suspense>
