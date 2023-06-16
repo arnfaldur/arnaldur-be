@@ -5,7 +5,7 @@ import Header from "~/components/Header";
 
 const posts = import.meta.glob<{ frontmatter: { title: string, date: string } }>("./about/**/*.{md,mdx}", { eager: true });
 
-export default function Blogging() {
+export default function Writing() {
   let postList = [];
   for (const prop in posts) {
     postList.push({
