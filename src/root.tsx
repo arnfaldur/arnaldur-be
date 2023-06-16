@@ -12,10 +12,12 @@ import {
   Scripts,
   Title,
 } from "solid-start";
+
+
 import "./root.css";
+import "katex/dist/katex.min.css";
 
 export default function Root() {
-  const routes = <FileRoutes />
   return (
     <Html lang="en">
       <Head>
@@ -25,14 +27,10 @@ export default function Root() {
       </Head>
       <Body>
         <ErrorBoundary>
-          <A href="/">Index</A>
-          <A href="/about">About</A>
           <Suspense>
-            <main>
-              <Routes>
-                {routes}
-              </Routes>
-            </main>
+            <Routes>
+              <FileRoutes />
+            </Routes>
           </Suspense>
         </ErrorBoundary>
         <Scripts />
