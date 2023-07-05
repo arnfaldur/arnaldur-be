@@ -10,17 +10,17 @@ As of writing this, there is quite a bit of work to be done on the site. The aes
 
 I intend on focusing mostly on programming projects trough progress reports and post-mortems, but I might throw in some articles about other matters.
 
-The blog is made using the Gatsby starter blog as that seemed like a good starting point 
+The blog is made using the Gatsby starter blog as that seemed like a good starting point
 and I believe that it can be expanded with reasonable effort.
 I want it to be a&mdash;as static as possible&mdash;website, utilizing serverless ideas where necessary.
 Serverless is a technology/methodology that I encountered during an interview that I will cover at a later date.
 I started making this site about a year ago and found myself questioning the bloat of modern JavaScript frameworks.
-Although this skepticism was not without reason, I went a bit overboard 
-and ultimately decided on making the site from scratch using pure JavaScript. 
+Although this skepticism was not without reason, I went a bit overboard
+and ultimately decided on making the site from scratch using pure JavaScript.
 This wasn't a good idea for a number of reasons.
 
-I had little experience with the DOM, CSS and web development in general. 
-This lead to a number of design choices that had to be scrapped and reverted as they did not make sense in the context, 
+I had little experience with the DOM, CSS and web development in general.
+This lead to a number of design choices that had to be scrapped and reverted as they did not make sense in the context,
 something that only experience and hindsight could have told me.
 Finding a router and markdown translator was easy but integrating them into the website was not.
 
