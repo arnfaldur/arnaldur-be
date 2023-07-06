@@ -5,14 +5,17 @@ topic:
   - "programming"
 ---
 
-### Robozzle
+## Robozzle
 
-$$ \frac{\sqrt{a^2 + b^2}}{e^{e^e}} $$
-
-is a game about programming a robot using a [context-sensitive grammar-like](https://en.wikipedia.org/wiki/Context-sensitive_grammar) programming language.
-The game consists of multiple user designed puzzles. Each puzzle is designed on a 12\*16 grid, where each square is either a tile or empty. A tile has one of three colors, red, green, or blue and might have a star on it. The objective is to instruct the robot to collect all the stars.
+is a game about programming a robot using a [context-sensitive grammar](https://en.wikipedia.org/wiki/Context-sensitive_grammar).
+The game consists of multiple user designed puzzles.
+Each puzzle is designed on a 12\*16 grid, where each square can either be empty or a tile in one of three colors, red, green, or blue.
+A tile can have a star on it.
+The goal of the game is to program the robot to collect all the stars.
 
 ![https://robozzle.com/beta](./Robozzle-puzzle.png)
+
+### The rules of the game
 
 The robot is programmed using a set of symbols, arranged into functions. The length and number of functions can be controlled by the puzzle designer and is embedded in the puzzle. The constraints are that there can be at most five functions and each functions maximum length is 10 symbols. At the start of the execution of the program, the first function is pushed on top of the stack. There are 11 symbols in total, they include: forward, left, and right, one symbol for each function, and three marker symbols. The designer can specify which marker symbols are available. A function symbol pushes it's respective function on top of the stack. A marker symbol colors the tile the robot is standing on in the color of the marker.
 
@@ -30,7 +33,7 @@ This turned out to be a bit more difficult than I anticipated but about 2 months
 
 The saying goes "When all you have is a hammer, everything is a nail". When you combine that with the Frequency illusion, also known as the Baader-Meinhof effect, you end with greedygrasping[^2]. I had recently learned about GA and may have greedygrasped the problem.
 
-##### A Genetic Algorithm
+### A Genetic Algorithm
 
 is a type of [evolutionary algorithm](https://en.wikipedia.org/wiki/Evolutionary_algorithm) that aims to find solutions to problems that draws inspiration from the way genetics work.
 
