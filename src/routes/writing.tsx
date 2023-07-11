@@ -8,13 +8,14 @@ const posts = import.meta.glob<{
   component: any, frontmatter: { title: string, date: string }
 }>("./writing/about/**/*.{md,mdx}", { eager: true });
 
-const entries = Object
+const entries: { [t: string]: { title: string, date: Date } } = Object
   .fromEntries(Object.entries(posts)
-    .map(([post, { frontmatter }]): [string, { title: any; date: string; }] => (
+    .map(([post, { frontmatter }]): [string, { title: string; date: Date; }] => (
       [post.slice(1).replace(/\/\(.*\)\.mdx/, ""), {
         title: frontmatter.title,
-        date: new Date(frontmatter.date).toLocaleDateString("en-GB", { dateStyle: "medium" }),
-      }])));
+        date: new Date(frontmatter.date),
+      }]))
+  );
 export const PostsContext = createContext(entries);
 
 export default function WritingLayout() {

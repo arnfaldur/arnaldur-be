@@ -30,7 +30,7 @@ export default function Header() {
         </h1>
         <Show when={context[location.pathname]}>
           <p>
-            {context[location.pathname].date}
+            {context[location.pathname].date.toLocaleDateString("en-GB", { dateStyle: "long" })}
           </p>
         </Show>
       </header>
