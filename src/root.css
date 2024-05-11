@@ -73,8 +73,13 @@ main {
 }
 
 header {
-  max-width: 40rem;
+  width: fit-content;
   margin: auto;
+}
+
+#breadcrumb {
+  min-width: 40rem;
+  width: fit-content;
 }
 
 img {
