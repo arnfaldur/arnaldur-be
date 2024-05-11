@@ -2,24 +2,16 @@
 title: "Explaining the URL"
 ---
 
-The url of this website is a natural english sentence that uses / and - instead of spaces. It is highlighted on the top of the page and there it serves as a [breadcrumb](https://en.wikipedia.org/wiki/Breadcrumb_navigation) as well.
+The url of this website and it's subdomains are natural english sentences that use / and - instead of spaces.
+It is highlighted on the top of the page and there it serves as a [breadcrumb](https://en.wikipedia.org/wiki/Breadcrumb_navigation) as well.
 
 I had a precursor of this idea when I first heard of [this.is](https://this.is) in the early 2000s.
-[this.is](https://this.is) is a website in the vain of geocities where people could obtain a subdomain e.g. [this.is/birgitta](https://this.is/birgitta). Although the site doesn't seem to be available, many of the subdomains still are.
+[this.is](https://this.is) is a website in the vain of geocities where people could obtain a subdomain e.g. [this.is/birgitta](https://this.is/birgitta).
 
-Later, I had the idea of stucturing my website such that each page was a sentence like _Arnaldur is writing a compiler_ or _Arnaldur is making a game_. Unfortunately, [Arnaldur.is](https://arnaldur.is) is taken and my namefellow[^1] wants to hold on to it.
+Later, I had the idea of stucturing my website such that each page was a sentence like _Arnaldur is writing a compiler_ or _Arnaldur is making a game_.
+Unfortunately, [Arnaldur.is](https://arnaldur.is) is taken and my namefellow wants to hold on to it.
 
-### African American Vernacular English
+Armed with this mediocre joke, I was looking for a domain for this website and stumbled upon `arnaldur.be`.
+Unfortunately, the Belgians who decide the usage of their top level domain are liberal in their liscencing policies and let me lease the domain.
 
-also known as [AAVE](https://en.wikipedia.org/wiki/African-American_Vernacular_English), is a dialect of english.
-It has an interesting word which is called the habitual be.
-In a sentence it goes: _he be working_ or _they be hustling_.
-This would roughly translate to _he is in the habit of working_ and _they are in the habit of hustling_.
-What is interesting is that this is unique to AAVE and does not .
-
-I looked at many of the available top level domains and noticed that the Arnaldur.is pun could be salvaged through the belgian domain `.be`.
-I find the casuality of the habitual be even more relevant than _is_ as the present tense doesn't apply to pages made in the past, i.e. I do what the url says occasionally, rather than currently but this is just a post-hoc rationalization.
-
-There is some irony in the fact that AAVE is a really non-AAVE name for itself.
-
-[^1]: Namefellow is a person who who has the same name as you. This word is rather obscure in english but the Icelandic translation nafni is commonly used due to the strict [Icelandic naming laws](https://www.island.is/en/icelandic-names/).
+The joke works better in many ways when using the interesting [habitual _be_](https://en.wikipedia.org/wiki/Habitual_be) instead of _is_, whose tense is more present.
