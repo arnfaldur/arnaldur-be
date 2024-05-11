@@ -5,11 +5,13 @@ import { Outlet } from "solid-start";
 import Header from "~/components/Header";
 
 const posts = import.meta.glob<{
-  component: any, frontmatter: { title: string, date: string }
+  component: any, frontmatter: { title: string, date: string, hidden?: boolean }
 }>("./writing/about/**/*.{md,mdx}", { eager: true });
 
-const entries: { [t: string]: { title: string, date: Date } } = Object
+console.log('posts',posts);
+const entries: { [t: string]: { title: string, date: Date, hidden?: boolean } } = Object
   .fromEntries(Object.entries(posts)
+    .filter(([post, { frontmatter }]) => !frontmatter?.hidden)
     .map(([post, { frontmatter }]): [string, { title: string; date: Date; }] => (
       [post.slice(1).replace(/\/\(.*\)\.mdx/, ""), {
         title: frontmatter.title,
