@@ -1,11 +1,8 @@
-import { createEffect, createMemo, For, Show, useContext } from "solid-js";
-import { Title, A, useLocation } from "solid-start";
-import { PostsContext } from "~/routes/writing";
+import { createMemo, For, JSX } from "solid-js";
+import { A, useLocation } from "@solidjs/router";
 
-export default function Header() {
+export default function Header(props: { children?: JSX.ArrayElement }) {
   const location = useLocation();
-  const context = useContext(PostsContext);
-  const url = createMemo(() => "Arnaldur.be" + location.pathname);
 
   // construct each url of the breadcrumb and it's least significant slug
   const partUrls = createMemo(() =>
@@ -23,8 +20,6 @@ export default function Header() {
   );
   return (
     <>
-      <Title>{url()}</Title>
-      {/* TODO: make the punctuation marks quieter visibly */}
       <header>
         <h1 id="breadcrumb">
           <A href="/">Arnaldur</A>
@@ -39,13 +34,7 @@ export default function Header() {
             )}
           </For>
         </h1>
-        <Show when={context[location.pathname]}>
-          <p style={{ width: "40rem", margin: "1rem auto" }}>
-            {context[location.pathname].date.toLocaleDateString("en-GB", {
-              dateStyle: "long",
-            })}
-          </p>
-        </Show>
+        {props.children}
       </header>
     </>
   );

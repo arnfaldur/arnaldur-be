@@ -80,6 +80,7 @@ header {
 #breadcrumb {
   min-width: 40rem;
   width: fit-content;
+  font-size: 1.5rem;
 }
 
 img {

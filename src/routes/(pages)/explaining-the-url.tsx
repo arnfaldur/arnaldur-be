@@ -1,14 +1,12 @@
-import { Outlet } from "solid-start";
-
+import Title from "~/components/Title";
 import Header from "~/components/Header";
 
-export default function ExplainingTheUrlLayout() {
+export default function ExplainingTheUrlLayout(props) {
   return (
     <>
+      <Title />
       <Header />
-      <main>
-        <Outlet />
-      </main>
+      <main>{props.children}</main>
     </>
   );
 }
