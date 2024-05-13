@@ -62,8 +62,8 @@
 }
 
 body {
-  background-color: #000c18;
-  color: #bbb;
+  background-color: oklch(15% 0.05 240);
+  color: oklch(85% 0 0);
   font-family: "Open Sans", sans-serif;
 }
 
@@ -98,6 +98,18 @@ a:hover {
 
 a:visited {
   color: oklch(80% 0.2 310);
+}
+
+a.autolink-heading {
+  position: relative;
+  color: white;
+}
+
+a.autolink-heading:hover::before {
+  content: "#";
+  position: absolute;
+  right: 100%;
+  color: oklch(80% 0.2 0);
 }
 
 h1,

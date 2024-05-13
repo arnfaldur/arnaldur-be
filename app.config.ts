@@ -37,7 +37,10 @@ export default defineConfig({
           rehypeMdxImportMedia,
           rehypeKatex,
           rehypeSlug,
-          [rehypeAutolinkHeadings, { behavior: "wrap" }],
+          [
+            rehypeAutolinkHeadings,
+            { properties: { class: "autolink-heading" }, behavior: "wrap" },
+          ],
         ],
         stylePropertyNameCase: "css",
         elementAttributeNameCase: "html",

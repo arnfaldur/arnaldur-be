@@ -1,4 +1,4 @@
-import { createMemo, For, Show, useContext } from "solid-js";
+import { For, Show } from "solid-js";
 import { A } from "@solidjs/router";
 
 const unfilteredPosts: {
