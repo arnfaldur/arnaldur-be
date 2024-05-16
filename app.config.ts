@@ -17,6 +17,7 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 export default defineConfig({
   extensions: ["mdx", "md"],
   server: {
+    preset: "aws-amplify",
     prerender: {
       crawlLinks: true,
     },

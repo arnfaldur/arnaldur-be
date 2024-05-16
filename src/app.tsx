@@ -9,10 +9,14 @@ import "./app.css";
 
 export default function App() {
   return (
-    <MetaProvider>
-      <Router root={(props) => <Suspense>{props.children}</Suspense>}>
-        <FileRoutes />
-      </Router>
-    </MetaProvider>
+    <Router
+      root={(props) => (
+        <MetaProvider>
+          <Suspense>{props.children}</Suspense>
+        </MetaProvider>
+      )}
+    >
+      <FileRoutes />
+    </Router>
   );
 }
