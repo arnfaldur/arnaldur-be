@@ -3,6 +3,7 @@ dist
 .solid
 .output
 .vinxi
+.amplify-hosting
 .vercel
 .netlify
 netlify
