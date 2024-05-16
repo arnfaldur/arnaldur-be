@@ -18,9 +18,6 @@ export default defineConfig({
   extensions: ["tsx", "mdx", "md"],
   server: {
     preset: "aws-amplify",
-    // prerender: {
-    //   crawlLinks: true,
-    // },
   },
   vite: {
     plugins: [
@@ -50,30 +47,3 @@ export default defineConfig({
     ],
   },
 });
-// export default defineConfig({
-//   base: "/",
-//   plugins: [
-//     {
-//       ...mdx({
-//         jsxImportSource: "solid-jsx",
-//         remarkPlugins: [
-//           remarkGfm,
-//           remarkFrontmatter,
-//           remarkMdxFrontmatter,
-//           remarkMath,
-//         ],
-//         rehypePlugins: [
-//           rehypeMdxImportMedia,
-//           rehypeKatex,
-//           rehypeSlug,
-//           [rehypeAutolinkHeadings, { behavior: "wrap" }],
-//         ],
-//         stylePropertyNameCase: "css",
-//         elementAttributeNameCase: "html",
-//       }),
-//       enforce: "pre",
-//     },
-
-//     solid({ adapter: staticAdapter(), extensions: [".mdx", ".md"] }),
-//   ],
-// });
