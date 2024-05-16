@@ -7,72 +7,76 @@ topic:
 
 # Robozzle
 
-is a game about programming a robot using a [context-sensitive grammar](https://en.wikipedia.org/wiki/Context-sensitive_grammar).
-The game consists of multiple user designed puzzles.
-Each puzzle is designed on a 12\*16 grid, where each square can either be empty or a tile in one of three colors, red, green, or blue.
+Is a game about programming a robot using a [context-sensitive grammar](https://en.wikipedia.org/wiki/Context-sensitive_grammar).
+The game consists of multiple user-designed puzzles.
+A puzzle is designed within a 12⨯16 grid, where each square can either be empty or a tile in one of three colors: red, green, or blue.
 A tile can have a star on it.
 The goal of the game is to program the robot to collect all the stars.
 Click on the picture to try it out. I recommend it, it's fun.
-<br/><del>As I was writing this I discovered that the Robozzle website is down.
-I got in touch with its creator with the hope of bringing it back online.</del>
+<br/><del>As I wrote this, I discovered that the Robozzle website is down.
+I got in touch with its creator, hoping to bring it back online.</del>
 <br/><ins>He has responded and reinstated the website.</ins>
 
 [![https://robozzle.com/beta](./Robozzle-puzzle.png)](https://robozzle.com/beta)
 
 ## The rules of the game
 
-The robot is programmed using a set of symbols, arranged into functions.
-The length and number of functions can be controlled by the puzzle designer and is embedded in the puzzle.
-The constraints are that there can be at most five functions and each functions maximum length is 10 symbols.
-At the start of the execution of the program, the first function is pushed on top of the stack.
-There are 11 symbols in total, they include: forward, left, and right, one symbol for each function, and three marker symbols.
-The designer can specify which marker symbols are available.
-A function symbol pushes it's respective function on top of the stack. A marker symbol colors the tile the robot is standing on in the color of the marker.
+The player programs the robot using a set of symbols arranged into functions.
+The puzzle's design dictates the length and number of functions available.
+The constraints are that there can be no more than five functions, and each function can be up to 10 symbols long.
+At the start of the program's execution, the first function is pushed on top of the stack.
+There are 11 symbols: forward, left, and right, one symbol for each available function, and three marker symbols.
+A function symbol pushes its respective function on top of the stack. A marker symbol colors the tile the robot is standing on in the color of the marker.
+The puzzle designer can specify which marker symbols are available. They are usually only enabled in complex puzzles.
 
-Each symbol can either be gray or colored. If it's gray, it's executed whenever it's popped off the stack. If it's colored it is only executed if it's color matches the color of the tile which the robot is currently on.
+Each symbol can be gray or colored. If it's gray, it's executed whenever it is popped off the stack. If it's colored, it is only executed if it matches the color of the tile the robot is currently on.
 
-These rules allow for a wide variety of puzzles that can require very complex programs to solve.
+These rules allow for a wide variety of puzzles that can require complex programs to solve.
 
 ## Back in university
 
-I was in a class called problem solving. This was the most interesting and engaging course I have taken.
-There was one assignment where we had to solve 10 [Robozzle](https://robozzle.com) puzzles with increasing difficulty.
+I was in a class called problem-solving. It was the most interesting and engaging course I have taken.
+One of the course's assignments involved solving 10 [Robozzle](https://robozzle.com) puzzles with increasing difficulty.
 The puzzles in question are unfortunately lost to time.
-The first 8 were pretty easy with the last of those posing an interesting challenge. The ninth did however have me stumped and I could see no rhyme or reason to its layout.
-Thus I promptly decided to just write a program to solve it for me.
+The first 8 were easy, with the last of those posing an interesting challenge. The ninth, however, had me stumped and I could see no rhyme or reason to its layout.
+Thus, I promptly decided to write a program to solve it for me.
 
-This turned out to be a bit more difficult than I anticipated but about 2 months worth of spare time later I had written a solver that could solve puzzle 9.
-The solver was written in [Julia](https://julialang.org) and utilized a [Genetic Algorithm (GA)](https://en.wikipedia.org/wiki/Genetic_algorithm) to find solutions.
+This turned out to be a bit more difficult than I had anticipated, but about two months' worth of spare time later, I had written a solver that could solve puzzle 9.
+I wrote the solver in [Julia](https://julialang.org) and utilized a [Genetic Algorithm (GA)](https://en.wikipedia.org/wiki/Genetic_algorithm) to find solutions.
 
-I had recently learned about genetic algorithms and was very excited about them.
-I don't think they were a good fit for the problem however.
+I had recently learned about genetic algorithms and was excited to find a use for them.
 
 ## Genetic Algorithms
 
-Are a type of [evolutionary algorithm](https://en.wikipedia.org/wiki/Evolutionary_algorithm) that aim to find solutions to problems drawing inspiration from the way genetics work.
+Are a type of [evolutionary algorithm](https://en.wikipedia.org/wiki/Evolutionary_algorithm) that aims to find solutions to problems by drawing inspiration from the way genetics work.
 
 A GA requires a fitness function that evaluates candidates and gives them a score.
 A candidate is a program that consists of one or more functions, each containing nil or more symbols. A solution is a candidate that makes the robot get all the stars.
 All non-solutions should have lower scores than solutions.
 The GA maintains a pool of candidates that are initially randomly generated.
-The properties of the fitness function are critical to the success of the algorithm.
-The fitness function I designed valued collecting stars highly and included a couple of heuristics that were designed to guide the search.
-For example, moving to a heretofore untouched tiles was rewarded while each move had a small penalty to encourage shorter solutions.
+The properties of the fitness function are critical to the algorithm's success.
+The fitness function I designed valued collecting stars highly and included a couple of heuristics whose purpose was to guide the search.
+For example, it rewarded moving to a heretofore untouched tile while incurring a small penalty for each move to encourage shorter solutions.
 
-Ideally, solutions have the highest scores, candidates that are genetically similar to a solution have high scores and candidates that are genetically dissimilar to solutions have the lowest scores.
-This means that genetic transformations like crossover and mutation, applied to high scoring candidates, should have an increased chance of generating other high scoring candidates.
+Ideally, solutions have the highest scores, candidates genetically similar to a solution have high scores, and candidates genetically dissimilar to solutions have the lowest scores.
+This means that when applied to high-scoring candidates, genetic transformations like crossover and mutation should have an increased chance of generating other high-scoring candidates.
 
-![This vector drawing illustrates the three primary stages of a genetic algorithm: Selection, Crossover, and Mutation. The Selection stage shows the choice of the fittest individuals from a population. The Crossover stage depicts the combination of genetic information from two parents to create new offspring. The Mutation stage represents the introduction of small, random changes to the offspring's traits to ensure genetic diversity.](./selection-crossover-mutation.png "Source: http://www.turingfinance.com/wp-content/uploads/2014/04/Genetic-Algorithm1.png")
+This vector drawing illustrates the three primary stages of a genetic algorithm: Selection, Crossover, and Mutation.
+During the Selection stage, the algorithm chooses the fittest individuals from the population.
+The Crossover stage combines genetic information from two parents to create new offspring.
+The Mutation stage introduces small, random changes to the offspring's traits to ensure genetic diversity.
 
-The GA starts by selecting some of the highest scoring candidates. Then it breeds them together as seen in step two of the diagram. Then random mutations are applied to the offspring.
+![A vector drawing of the three primary stages of a genetic algorithm](./selection-crossover-mutation.png "Source: http://www.turingfinance.com/wp-content/uploads/2014/04/Genetic-Algorithm1.png")
 
-With the help of a crude multithreading method[^1] and a lot of optimizations I managed to solve puzzle 9 but there was no way it would solve problem 10.
+The GA starts by selecting some of the highest-scoring candidates. Then, as seen in step two of the diagram, it breeds them together, and finally, it applies random mutations to the offspring.
 
-I suspect that GA is not a good fit for this problem as there is very little correlation between genetic similarity of candidates and their score.
-It's easy to imagine a solution that would stop working if any one symbol were changed giving it a low score.
-This method could only find such a solution by randomly guessing it from scratch or through a very lucky crossover and mutation, which is likely not much better than a brute force solver.
+With the help of a crude multithreading method[^1] and many optimizations, I solved puzzle 9, but there was no way it would solve problem 10.
 
-The solver could solve the first 8 puzzles and given plenty of time, the ninth as well. 
-It could also solve many of the simpler puzzles I found on the official Robozzle website but was stumped by medium to hard difficulty challenges.
+I suspect that GA is not a good fit for this problem as there is little correlation between the genetic similarity of candidates and their scores.
+It's easy to imagine a solution that would stop working if any one symbol were changed, giving it a low score.
+This method could only find such a solution by randomly guessing it from scratch or through a lucky crossover and mutation, which is likely not much better than a brute force solver.
 
-[^1]: I simply ran multiple instances of the solver manually and monitored the output of each. The solver worked by randomly sampling the solution space so conflicts and repeated work were unlikely.
+The solver could solve the first eight puzzles and, given plenty of time, the ninth. 
+It could also solve many of the simpler puzzles I found on the official Robozzle website but it got lost when attempting most medium to hard difficulty challenges.
+
+[^1]: I simply ran multiple instances of the solver manually and monitored the output of each. The solver randomly sampled the solution space, so conflicts and repeated work were unlikely.
