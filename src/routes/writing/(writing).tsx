@@ -8,7 +8,7 @@ const unfilteredPosts: {
 
 const posts = Object.fromEntries(
   Object.entries(unfilteredPosts).filter(
-    ([post, { frontmatter }]) => !frontmatter?.hidden,
+    ([post, { frontmatter }]) => !frontmatter?.hidden && frontmatter?.title,
   ),
 );
 
@@ -20,7 +20,7 @@ const entries: {
       "/writing" + post.slice(1).replace(/\/\(.*\)\.mdx/, ""),
       {
         title: frontmatter.title,
-        date: new Date(frontmatter.date),
+        ...(frontmatter?.date && { date: new Date(frontmatter.date) }),
       },
     ],
   ),
