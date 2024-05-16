@@ -3,11 +3,6 @@ import {
   createHandler,
 } from "@solidjs/start/server";
 
-
-// export default createHandler(
-//   renderAsync((event) => <StartServer event={event} />)
-// );
-
 export default createHandler(() => (
   <StartServer
     document={({ assets, children, scripts }) => (
@@ -25,4 +20,6 @@ export default createHandler(() => (
       </html>
     )}
   />
-));
+), {
+  mode: "async",
+});

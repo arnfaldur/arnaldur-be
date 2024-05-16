@@ -15,12 +15,12 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 // TODO: consider remark-smartypants
 
 export default defineConfig({
-  extensions: ["mdx", "md"],
+  extensions: ["tsx", "mdx", "md"],
   server: {
     preset: "aws-amplify",
-    prerender: {
-      crawlLinks: true,
-    },
+    // prerender: {
+    //   crawlLinks: true,
+    // },
   },
   vite: {
     plugins: [
