@@ -130,3 +130,12 @@ h3 {
   font-weight: 600;
   margin: 0.8em 0;
 }
+
+del {
+  text-decoration-color: oklch(100% 0 0 / 0.5);
+  background-color: oklch(50% 0.2 30 / 0.3333);
+}
+ins {
+  text-decoration-color: oklch(100% 0 0 / 0.5);
+  background-color: oklch(50% 0.2 140 / 0.3333);
+}
