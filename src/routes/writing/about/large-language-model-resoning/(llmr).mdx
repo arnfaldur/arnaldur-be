@@ -1,0 +1,119 @@
+---
+title: "Large Language Model Reasoning"
+date: "2024-05-16T02:43:19+02:00"
+topic:
+  - "llm"
+---
+
+# Large Language Model Reasoning
+
+There is an idea floating around, which has some traction, that LLM intelligence
+is illusory. LLMs are an impressive piece of technology, capable of generating
+text of higher quality than an average person. As is common---when the magic
+wears off and the initial hype dies down---a counter culture forms around the
+best ideas of cynics, skeptics, and those who were never impressed. 
+
+## _Just_ a next-token predictor
+
+[Search for "token predictor" on X for context](https://x.com/search?q=token%20predictor).
+
+LLMs are \'_just_ a next-token predictor\'. The only problem with this phrasing is the implication of the use of the word \'_just_\'.
+Architecturally speaking, LLMs are designed to estimate the probabilities of tokens, making them next-token predictors as a matter of fact. 
+That is no small feat, however. The implication is that they can't possess real intelligence.
+
+Let's consider a hypothetical situation in the year 2000. A group of people receive funding to create an API that performs next-token prediction.
+The tokens predicted by the API should be, above all else, as human-like as possible.
+It can come at the cost of high latency and low throughput.
+The group would look into the state of the art in natural language processing research and find that we had some ways to go.
+Ultimately, the best solution would be to place humans behind the API. They hire people to man the API and create a system to divvy up the prediction tasks.
+
+This API would be expensive and slow, but it is a next-token predictor, you might even say that it is _just_ a next-token predictor.
+If we control for the latency of the API, there is no way to tell what process is behind it, similar to modern LLMs.
+
+The humans behind the API possess real intelligence and by extension, so does the API.
+Therefore, the intelligence implication falls apart, as something being a next-token predictor doesn't preclude it from possessing real intelligence.
+
+There are [pitfalls with next-token prediction](https://arxiv.org/abs/2403.06963), but they are issues with the interface to the intelligence, not the nature of it.
+
+## Incapable of reasoning or thought
+
+[](https://x.com/tokyobymouth/status/1789833641117335766 "Because it’s not counting sides. It doesn’t reason or think in any sense of the word.")
+
+https://x.com/tokyobymouth/status/1789833641117335766
+
+This was a part of a discussion about ChatGPT being unable to identify the number of sides of a regular polygon.
+It was off by one most of the time---calling heptagons octagons, or hexagons---and couldn't reliably correct itself.
+I'll get to the particulars of this case later, but we start broadly.
+
+LLMs can reason but their architecture limits their capacity for contemplation.
+All the thoughts required to obtain an answer to a question must happen in one forward pass of the neural network.
+If the LLM isn't smart enough to think of the right answer in one go, it has committed to a token that contains, or leads to an incorrect answer.
+[Chain of thought (CoT)](https://arxiv.org/abs/2205.11916 "arXiv:[2205.11916] Large Language Models are Zero-Shot Reasoners") prompting mitigates this problem to a degree. 
+The intuition is that the CoT gives the LLM space to generate tokens that don't commit to a final answer, but can contain information than can steer the LLM towards the correct answer. 
+[Tree of thoughts](https://arxiv.org/abs/2305.10601 "arXiv:[2305.10601] Tree of Thoughts: Deliberate Problem Solving with Large Language Models") and [LLM adapted Beam search](https://arxiv.org/abs/2305.00633 "arXiv:[2305.00633] Self-Evaluation Guided Beam Search for Reasoning") improve on this idea further by letting the LLM explore multiple trains of thought and reducing commitments to specific tokens.
+
+### The token constraint
+Even with this freedom, an LLM still finds its thoughts heavily constrained.
+It must ultimately wrap up every thought into a single token that must be grammatically sound.
+This is likely a bottleneck to the internal thought patterns.
+
+To make a human analogy: consider Joe, Joe looses all short term memory every 8 seconds.
+He has to project all his thoughts onto some medium, like a notepad or a computer, following strict formatting rules, before he forgets.
+Incorporating the KV cache into the analogy: although Joe looses his train of thought periodically, he will recall encountered ideas when retreading previous thoughts.
+I think most people would find this constraint difficult, but this is the framework LLMs work within.
+I don't mean to imply that without these constraints, LLMs were more intelligent.
+The framework constrains their intelligence, but is also the means by which they are intelligent.
+
+[DeepMind's MuZero](https://deepmind.google/discover/blog/muzero-mastering-go-chess-shogi-and-atari-without-rules/ "DeepMind blog: MuZero: Mastering Go, chess, shogi and Atari without rules") sought to resolve an analogous problem.
+Its predecessor, [AlphaZero](https://deepmind.google/discover/blog/alphazero-shedding-new-light-on-chess-shogi-and-go/ "DeepMind blog: AlphaZero: Shedding new light on chess, shogi, and Go") generated a distribution over legal moves and a win percentage estimate for the current position.
+Similarly to an LLM condensing its thoughts into a token, AlphaZero had to condense all its thoughts into the legal move distribution. 
+If either gleamed insight that will be relevant a few steps into the future, they must rediscover it at the moment it can be cemented into a token or a certain move. The attention mechanism alleviates this problem to a degree
+MuZero solved this by replacing the board positions (resulting from the proposed moves) with a _hidden state_ that it can learn to encode arbitrary ideas within.
+
+It would be interesting to research applying the same idea to LLMs.
+A simple implementation could include passing the pre-logit embeddings back into the LLM, after the token embedding layer, and increasing the d_model size, while reserving some dimensions for the recurrence. 
+Removing the one-to-one constraint between tokens and forward passes is another prospect.
+[Let's Think Dot by Dot](https://arxiv.org/abs/2404.15758 "arXiv:[2404.15758] Let's Think Dot by Dot: Hidden Computation in Transformer Language Models") explores this idea.
+
+Ease of training has played a significant role in the success of the transformer architecture. 
+These ideas loose a lot of that due to their RNN inspired properties---as the chain of dots paper touches on. It might not be practical, but that hypothesis is worth falsifying.
+
+### It only goes so deep
+
+LLMs have a pre-specified depth. Meta Llama 3 8B can, for example never come up with an idea that requires 33 of its layers to synthesize, because it only has 32.
+Reconsidering our friend Joe with his 8-second transient global amnesia---this LLM layer depth could be thought of as the number of seconds between memory loss.
+During the 8-second period, Joe has to rediscover what he was doing, contemplate it, and format his thoughts into his medium of choice.
+Similarly, an LLM has to decode useful ideas from the relatively static tokens, contemplate the ideas, and encode them in the choice of next token.
+I can't help but wonder how much the decoding and encoding phases waste compute.
+
+ATH:
+Þarf að endurhugsa mikið af þessu. Mikið af hugsunum (kanski allar?) transformera eru geymdar í KV cacheinu.
+ATH:
+
+## TODO: Weird overfitting
+
+[](https://x.com/svpino/status/1790624957380342151 "We are still very far from real intelligence. pic.twitter.com/Q4CX9R9jaL")
+
+https://x.com/svpino/status/1790624957380342151
+
+<details><summary>The linked image is of a conversation with ChatGPT 4o which goes like this:</summary>
+<blockquote><h3>You:</h3>A man and a goat are in one side of a river. They want to cross it. They have a boat. What steps do they need to follow?
+Write a bullet list with the solution. Be as concise as possible.
+<h3>ChatGPT:</h3>
+<ol><li>Man takes the goat across the river.</li>
+<li>Man returns alone.</li>
+<li>Man takes another load (unspecified, e.g., hay) across the river.</li> 
+<li>Man returns with the goat.</li> 
+<li>Man takes remaining load across the river.</li> 
+<li>Man returns alone.</li> 
+<li>Man takes the goat across the river again.</li></ol></blockquote></details>
+
+https://x.com/svpino/status/1790747201783873954
+
+LLMs are limited in their capacity for contemplation. Their ideas must be
+squeezed through the tokenizer to be retreivable again in the next iteration of
+thought via methods like chain of thought reasoning. That internal dialogue is
+constrained by the grammatical correctness of language which likely limits the
+expressivity of the thoughts.
+
+Some people like to call them stochastic parrots
