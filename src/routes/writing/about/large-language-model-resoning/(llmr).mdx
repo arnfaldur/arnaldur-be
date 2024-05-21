@@ -48,9 +48,62 @@ I'll get to the particulars of this case later, but we start broadly.
 LLMs can reason but their architecture limits their capacity for contemplation.
 All the thoughts required to obtain an answer to a question must happen in one forward pass of the neural network.
 If the LLM isn't smart enough to think of the right answer in one go, it has committed to a token that contains, or leads to an incorrect answer.
+
 [Chain of thought (CoT)](https://arxiv.org/abs/2205.11916 "arXiv:[2205.11916] Large Language Models are Zero-Shot Reasoners") prompting mitigates this problem to a degree. 
-The intuition is that the CoT gives the LLM space to generate tokens that don't commit to a final answer, but can contain information than can steer the LLM towards the correct answer. 
-[Tree of thoughts](https://arxiv.org/abs/2305.10601 "arXiv:[2305.10601] Tree of Thoughts: Deliberate Problem Solving with Large Language Models") and [LLM adapted Beam search](https://arxiv.org/abs/2305.00633 "arXiv:[2305.00633] Self-Evaluation Guided Beam Search for Reasoning") improve on this idea further by letting the LLM explore multiple trains of thought and reducing commitments to specific tokens.
+The intuition is that CoT gives the LLM space to generate tokens that don't commit to a final answer, but can contain information than can steer the LLM towards the correct answer. 
+It also has the potential to increase the amount of useful ideas the critical tokens can attend to, via the attention mechanism.
+
+[Tree of thoughts](https://arxiv.org/abs/2305.10601 "arXiv:[2305.10601] Tree of Thoughts: Deliberate Problem Solving with Large Language Models") and [LLM adapted Beam search](https://arxiv.org/abs/2305.00633 "arXiv:[2305.00633] Self-Evaluation Guided Beam Search for Reasoning") improve on these ideas further, by letting the LLM explore multiple trains of thought and reducing commitments to specific tokens.
+
+### It only goes so deep
+LLMs have a pre-specified depth. There has been some research that suggests that [Not all Layers of LLMs are Necessary during Inference](https://arxiv.org/abs/2403.02181 "arXiv:[2403.02181] Not all Layers of LLMs are Necessary during Inference").
+Easier tasks are often solved in the first layers, while harder ones use the entire depth of the model.
+[ConsistentEE](https://ojs.aaai.org/index.php/AAAI/article/view/29922 "ConsistentEE: A Consistent and Hardness-Guided Early Exiting Method for Accelerating Language Models Inference") explores the idea of training a model with early exiting logic built in, reducing inference cost.
+
+|query|response|
+|-|-|
+|1 =|1|
+|1+1 =|2|
+|$1+1+1$ =|3|
+|1\{+1\}^3 =|4|
+|1\{+1\}^4 =|5|
+|1\{+1\}^5 =|6|
+|1\{+1\}^6 =|7|
+|1\{+1\}^7 =|8|
+|1\{+1\}^8 =|9|
+|1\{+1\}^9 =|10|
+|1\{+1\}^10 =|11|
+|1\{+1\}^11 =|12|
+|1\{+1\}^12 =|13|
+|1\{+1\}^13 =|14|
+|1\{+1\}^14 =|15|
+|1\{+1\}^15 =|16|
+|1\{+1\}^16 =|16|
+|1\{+1\}^17 =|21|
+|1\{+1\}^18 =|20|
+|1\{+1\}^19 =|21|
+|1\{+1\}^20 =|21|
+|1\{+1\}^21 =|21|
+|1\{+1\}^22 =|21|
+|1\{+1\}^23 =|21|
+|1\{+1\}^24 =|21|
+|1\{+1\}^25 =|31|
+|1\{+1\}^26 =|31|
+|1\{+1\}^27 =|31|
+|1\{+1\}^28 =|31|
+|1\{+1\}^29 =|31|
+|1\{+1\}^30 =|31|
+|1\{+1\}^31 =|31|
+|1\{+1\}^32 =|31|
+|1\{+1\}^33 =|31|
+|1\{+1\}^34 =|31|
+|1\{+1\}^35 =|31|
+|1\{+1\}^36 =|30|
+|1\{+1\}^37 =|31|
+|1\{+1\}^38 =|31|
+|1\{+1\}^39 =|31|
+
+
 
 ### The token constraint
 Even with this freedom, an LLM still finds its thoughts heavily constrained.
@@ -71,20 +124,13 @@ If either gleamed insight that will be relevant a few steps into the future, the
 MuZero solved this by replacing the board positions (resulting from the proposed moves) with a _hidden state_ that it can learn to encode arbitrary ideas within.
 
 It would be interesting to research applying the same idea to LLMs.
-A simple implementation could include passing the pre-logit embeddings back into the LLM, after the token embedding layer, and increasing the d_model size, while reserving some dimensions for the recurrence. 
+A simple implementation could include passing the pre-logit embeddings back into the LLM, after the token embedding layer, and increasing the d_model size, while reserving some of the added dimensions for the recurrence. 
 Removing the one-to-one constraint between tokens and forward passes is another prospect.
 [Let's Think Dot by Dot](https://arxiv.org/abs/2404.15758 "arXiv:[2404.15758] Let's Think Dot by Dot: Hidden Computation in Transformer Language Models") explores this idea.
 
 Ease of training has played a significant role in the success of the transformer architecture. 
 These ideas loose a lot of that due to their RNN inspired properties---as the chain of dots paper touches on. It might not be practical, but that hypothesis is worth falsifying.
 
-### It only goes so deep
-
-LLMs have a pre-specified depth. Meta Llama 3 8B can, for example never come up with an idea that requires 33 of its layers to synthesize, because it only has 32.
-Reconsidering our friend Joe with his 8-second transient global amnesia---this LLM layer depth could be thought of as the number of seconds between memory loss.
-During the 8-second period, Joe has to rediscover what he was doing, contemplate it, and format his thoughts into his medium of choice.
-Similarly, an LLM has to decode useful ideas from the relatively static tokens, contemplate the ideas, and encode them in the choice of next token.
-I can't help but wonder how much the decoding and encoding phases waste compute.
 
 ATH:
 Þarf að endurhugsa mikið af þessu. Mikið af hugsunum (kanski allar?) transformera eru geymdar í KV cacheinu.
