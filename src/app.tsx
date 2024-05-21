@@ -5,7 +5,7 @@ import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 
 import "./app.css";
-// import "katex/dist/katex.min.css";
+import "katex/dist/katex.min.css";
 
 export default function App() {
   return (

@@ -16,44 +16,50 @@ import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
 // TODO: consider remark-smartypants
+const remarkPlugins = [
+  remarkFrontmatter,
+  remarkMdxFrontmatter,
+  [remarkSmartypants, { dashes: "oldschool" }],
+  [
+    remarkEmbedder.default,
+    {
+      embedderCache,
+      transformers: [
+        oEmbedTransformer.default,
+        // { params: { theme: "dark", dnt: true } },
+      ],
+    },
+  ],
+  remarkGfm,
+  remarkMath,
+];
+const rehypePlugins = [
+  rehypeMdxImportMedia,
+  rehypeSlug,
+  [
+    rehypeAutolinkHeadings,
+    { properties: { class: "autolink-heading" }, behavior: "wrap" },
+  ],
+  rehypeKatex,
+];
+
+const server = {
+  preset: "aws-amplify",
+  prerender: {
+    routes: ["/", "/writing", "/laughing"],
+    crawlLinks: true,
+  },
+};
 
 export default defineConfig({
-  extensions: ["tsx", "mdx", "md"],
-  server: {
-    preset: "aws-amplify",
-  },
+  extensions: ["mdx", "md"],
+  server,
   vite: {
     plugins: [
       mdx.default.withImports({})({
-        jsx: true,
-        jsxImportSource: "solid-js",
-        providerImportSource: "solid-mdx",
-        remarkPlugins: [
-          [remarkSmartypants, { dashes: "oldschool" }],
-          [
-            remarkEmbedder.default,
-            {
-              embedderCache,
-              transformers: [
-                oEmbedTransformer.default,
-                // { params: { theme: "dark", dnt: true } },
-              ],
-            },
-          ],
-          remarkGfm,
-          remarkFrontmatter,
-          remarkMdxFrontmatter,
-          remarkMath,
-        ],
-        rehypePlugins: [
-          rehypeMdxImportMedia,
-          rehypeKatex,
-          rehypeSlug,
-          [
-            rehypeAutolinkHeadings,
-            { properties: { class: "autolink-heading" }, behavior: "wrap" },
-          ],
-        ],
+        jsxImportSource: "solid-jsx",
+        remarkPlugins,
+        rehypePlugins,
         stylePropertyNameCase: "css",
         elementAttributeNameCase: "html",
         enforce: "pre",

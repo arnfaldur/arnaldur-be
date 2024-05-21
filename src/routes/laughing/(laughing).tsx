@@ -26,8 +26,6 @@ const entries: {
   ),
 );
 
-console.log("entries", entries);
-
 export default function Writing() {
   const postList = Object.entries(entries).sort(
     (a, b) => b[1].date.valueOf() - a[1].date.valueOf(),
