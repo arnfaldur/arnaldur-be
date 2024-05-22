@@ -13,6 +13,14 @@ text of higher quality than an average person. As is common---when the magic
 wears off and the initial hype dies down---a counter culture forms around the
 best ideas of cynics, skeptics, and those who were never impressed. 
 
+In this article, I use the words LLM and model interchangeably.
+I am specifically referring to modern (in mid 2024) transformer based large language models,
+models inheriting from OpenAI's GPT models. These include Llama, Qwen, Phi, and others.
+They do not include newer recurrent neural network inspired models like Mamba, whom have yet to prove themselves.
+
+LLMs tokenize text into tokens which get turned into embeddings. 
+They processes the embeddings through their layers, and finally turn the embeddings back into tokens, and the tokens into text. Embeddings can be considered to be the thoughts of an LLM.
+
 ## _Just_ a next-token predictor
 
 [Search for "token predictor" on X for context](https://x.com/search?q=token%20predictor).
@@ -45,20 +53,60 @@ This was a part of a discussion about ChatGPT being unable to identify the numbe
 It was off by one most of the time---calling heptagons octagons, or hexagons---and couldn't reliably correct itself.
 I'll get to the particulars of this case later, but we start broadly.
 
+### It only goes so deep
 LLMs can reason but their architecture limits their capacity for contemplation.
-All the thoughts required to obtain an answer to a question must happen in one forward pass of the neural network.
-If the LLM isn't smart enough to think of the right answer in one go, it has committed to a token that contains, or leads to an incorrect answer.
+All the thoughts required to obtain the next token must happen in one forward pass of the neural network.
 
+LLMs have a pre-specified depth. There has been some research that suggests that [Not all Layers of LLMs are Necessary during Inference](https://arxiv.org/abs/2403.02181 "arXiv:[2403.02181] Not all Layers of LLMs are Necessary during Inference").
+Easier tasks are often solved in the first layers, while harder ones use the entire depth of the model.
+[ConsistentEE](https://ojs.aaai.org/index.php/AAAI/article/view/29922 "ConsistentEE: A Consistent and Hardness-Guided Early Exiting Method for Accelerating Language Models Inference") explores the idea of training a model with early exiting logic built in, reducing inference cost. A corollary to this research is: there must be tasks, harder than those that use the entire depth, that are unsolvable by the LLM. 
+
+When predicting a token, an LLM has access to all the previous tokens in its context window, through the attention mechanism.
+Simplifying a [little](https://en.wikipedia.org/wiki/Transformer_%28deep_learning_architecture%29#Multi-head_attention "I'm using \"embeddings\" to refer to embeddings, keys, queries, and/or values. This looses little relevant meaning and is much less verbose."); at each layer, it has access to the embeddings it produced in the previous layer for all the tokens.
+That is layer $$L_n$$ can attend to all the embeddings produced by layer $$L_{n-1}$$.
+This means that data can only flow in the same two orthogonal directions: from older embeddings to newer ones, and from shallower layers to deeper layers.
+If a model solves a difficult problem in layer $$L_n$$, it only has access to the solution in layers $$L_m$$ where $$m \gt n$$.
+Hard problems take many layers to solve, so the LLM will only ever be able to think about this solution in its last layers, which might limit the insights it can gleam from it.
+
+If the LLM isn't smart enough to think of the right answer in one go, it has committed to a token that contains, or could lead to, an incorrect answer.
 [Chain of thought (CoT)](https://arxiv.org/abs/2205.11916 "arXiv:[2205.11916] Large Language Models are Zero-Shot Reasoners") prompting mitigates this problem to a degree. 
-The intuition is that CoT gives the LLM space to generate tokens that don't commit to a final answer, but can contain information than can steer the LLM towards the correct answer. 
-It also has the potential to increase the amount of useful ideas the critical tokens can attend to, via the attention mechanism.
+It gives the LLM space to generate tokens that don't commit to a final answer, but contain information, and produce thoughts, that can steer the LLM towards the correct answer. 
 
 [Tree of thoughts](https://arxiv.org/abs/2305.10601 "arXiv:[2305.10601] Tree of Thoughts: Deliberate Problem Solving with Large Language Models") and [LLM adapted Beam search](https://arxiv.org/abs/2305.00633 "arXiv:[2305.00633] Self-Evaluation Guided Beam Search for Reasoning") improve on these ideas further, by letting the LLM explore multiple trains of thought and reducing commitments to specific tokens.
 
-### It only goes so deep
-LLMs have a pre-specified depth. There has been some research that suggests that [Not all Layers of LLMs are Necessary during Inference](https://arxiv.org/abs/2403.02181 "arXiv:[2403.02181] Not all Layers of LLMs are Necessary during Inference").
-Easier tasks are often solved in the first layers, while harder ones use the entire depth of the model.
-[ConsistentEE](https://ojs.aaai.org/index.php/AAAI/article/view/29922 "ConsistentEE: A Consistent and Hardness-Guided Early Exiting Method for Accelerating Language Models Inference") explores the idea of training a model with early exiting logic built in, reducing inference cost.
+
+
+### The token constraint
+Even with this freedom, an LLM still finds its thoughts heavily constrained.
+CoT and ToT allow the model to pass information from the later layers, back to the earlier layers, by spelling out its insights and solutions. 
+But it must ultimately condense every thought into a single token that must be grammatically sound, limiting the recurrent information flow.
+
+To make a human analogy: consider Joe, Joe looses all short term memory every 20 seconds.
+He has to project all his thoughts onto some medium, like a notepad or a computer, bowing to its constraints, before he forgets.
+Every second he will remember something relevant to whatever he's thinking about; stretching the analogy to accommodate the attention mechanism.
+I think most people would find this constraint difficult, but this is the framework LLMs work within.
+I don't mean to imply that without these constraints, LLMs were more intelligent.
+The framework constrains their intelligence, but is also the means by which they are intelligent.
+
+[DeepMind's MuZero](https://deepmind.google/discover/blog/muzero-mastering-go-chess-shogi-and-atari-without-rules/ "DeepMind blog: MuZero: Mastering Go, chess, shogi and Atari without rules") sought to resolve an analogous problem.
+Its predecessor, [AlphaZero](https://deepmind.google/discover/blog/alphazero-shedding-new-light-on-chess-shogi-and-go/ "DeepMind blog: AlphaZero: Shedding new light on chess, shogi, and Go") generated a distribution over legal moves and a win percentage estimate for the current position.
+Similarly to an LLM condensing its thoughts into a token, AlphaZero had to condense all its thoughts into the legal move distribution. 
+It had no way of relaying insight from one inference step to another.
+LLMs aren't as limited. They have the attention mechanism, which allows , and the , but the same limitation holds when 
+If either gleamed insight that will be relevant a few steps into the future, they must rediscover it at the moment it can be cemented into a token or a certain move. The attention mechanism alleviates this problem to a degree
+MuZero solved this by replacing the board positions (resulting from the proposed moves) with a _hidden state_ that it can learn to encode arbitrary ideas within.
+
+It would be interesting to research applying the same idea to LLMs.
+A simple implementation could include passing the pre-logit embeddings back into the LLM, after the token embedding layer, and increasing the d_model size, while reserving some of the added dimensions for the recurrence. 
+Removing the one-to-one constraint between tokens and forward passes is another prospect.
+[Let's Think Dot by Dot](https://arxiv.org/abs/2404.15758 "arXiv:[2404.15758] Let's Think Dot by Dot: Hidden Computation in Transformer Language Models") explores this idea.
+
+Ease of training has played a significant role in the success of the transformer architecture. 
+These ideas loose a lot of that due to their RNN inspired properties---as the chain of dots paper touches on. It might not be practical, but that hypothesis is worth falsifying.
+
+
+
+
 
 |query|response|
 |-|-|
@@ -103,38 +151,6 @@ Easier tasks are often solved in the first layers, while harder ones use the ent
 |1\{+1\}^38 =|31|
 |1\{+1\}^39 =|31|
 
-
-
-### The token constraint
-Even with this freedom, an LLM still finds its thoughts heavily constrained.
-It must ultimately wrap up every thought into a single token that must be grammatically sound.
-This is likely a bottleneck to the internal thought patterns.
-
-To make a human analogy: consider Joe, Joe looses all short term memory every 8 seconds.
-He has to project all his thoughts onto some medium, like a notepad or a computer, following strict formatting rules, before he forgets.
-Incorporating the KV cache into the analogy: although Joe looses his train of thought periodically, he will recall encountered ideas when retreading previous thoughts.
-I think most people would find this constraint difficult, but this is the framework LLMs work within.
-I don't mean to imply that without these constraints, LLMs were more intelligent.
-The framework constrains their intelligence, but is also the means by which they are intelligent.
-
-[DeepMind's MuZero](https://deepmind.google/discover/blog/muzero-mastering-go-chess-shogi-and-atari-without-rules/ "DeepMind blog: MuZero: Mastering Go, chess, shogi and Atari without rules") sought to resolve an analogous problem.
-Its predecessor, [AlphaZero](https://deepmind.google/discover/blog/alphazero-shedding-new-light-on-chess-shogi-and-go/ "DeepMind blog: AlphaZero: Shedding new light on chess, shogi, and Go") generated a distribution over legal moves and a win percentage estimate for the current position.
-Similarly to an LLM condensing its thoughts into a token, AlphaZero had to condense all its thoughts into the legal move distribution. 
-If either gleamed insight that will be relevant a few steps into the future, they must rediscover it at the moment it can be cemented into a token or a certain move. The attention mechanism alleviates this problem to a degree
-MuZero solved this by replacing the board positions (resulting from the proposed moves) with a _hidden state_ that it can learn to encode arbitrary ideas within.
-
-It would be interesting to research applying the same idea to LLMs.
-A simple implementation could include passing the pre-logit embeddings back into the LLM, after the token embedding layer, and increasing the d_model size, while reserving some of the added dimensions for the recurrence. 
-Removing the one-to-one constraint between tokens and forward passes is another prospect.
-[Let's Think Dot by Dot](https://arxiv.org/abs/2404.15758 "arXiv:[2404.15758] Let's Think Dot by Dot: Hidden Computation in Transformer Language Models") explores this idea.
-
-Ease of training has played a significant role in the success of the transformer architecture. 
-These ideas loose a lot of that due to their RNN inspired properties---as the chain of dots paper touches on. It might not be practical, but that hypothesis is worth falsifying.
-
-
-ATH:
-Þarf að endurhugsa mikið af þessu. Mikið af hugsunum (kanski allar?) transformera eru geymdar í KV cacheinu.
-ATH:
 
 ## TODO: Weird overfitting
 
