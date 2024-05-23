@@ -78,13 +78,21 @@ header {
 }
 
 #breadcrumb {
-  min-width: 40rem;
+  min-width: 0;
+  max-width: 100%;
   width: fit-content;
   font-size: 1.5rem;
 }
 
+@media (min-width: 40rem) {
+  #breadcrumb {
+    min-width: 40rem;
+  }
+}
+
 img {
   max-width: 40rem;
+  width: 100%
 }
 
 a {
@@ -128,7 +136,7 @@ h1 {
 
 h3 {
   font-weight: 600;
-  margin: 0.8em 0;
+  margin: 0.8rem 0;
 }
 
 del {

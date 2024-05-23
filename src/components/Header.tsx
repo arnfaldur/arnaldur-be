@@ -27,10 +27,10 @@ export default function Header(props: { children?: JSX.ArrayElement }) {
           <A href="/explaining-the-url">be</A>
           <For each={partUrls()}>
             {(part) => (
-              <span style="white-space: nowrap;">
+              <>
                 <span style={{ opacity: "0.75" }}>/</span>
                 <A href={part.url}>{part.part}</A>
-              </span>
+              </>
             )}
           </For>
         </h1>
