@@ -57,6 +57,9 @@ I'll get to the particulars of this case later, but we start broadly.
 LLMs can reason but their architecture limits their capacity for contemplation.
 All the thoughts required to obtain the next token must happen in one forward pass of the neural network.
 
+
+![](./diagram/autoregressive-decoder.svg)
+
 LLMs have a pre-specified depth. There has been some research that suggests that [Not all Layers of LLMs are Necessary during Inference](https://arxiv.org/abs/2403.02181 "arXiv:[2403.02181] Not all Layers of LLMs are Necessary during Inference").
 Easier tasks are often solved in the first layers, while harder ones use the entire depth of the model.
 [ConsistentEE](https://ojs.aaai.org/index.php/AAAI/article/view/29922 "ConsistentEE: A Consistent and Hardness-Guided Early Exiting Method for Accelerating Language Models Inference") explores the idea of training a model with early exiting logic built in, reducing inference cost. A corollary to this research is: there must be tasks, harder than those that use the entire depth, that are unsolvable by the LLM. 
