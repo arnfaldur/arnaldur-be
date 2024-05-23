@@ -24,3 +24,12 @@ gitignore
 # System Files
 .DS_Store
 Thumbs.db
+
+# latex intermetiates
+*.dvi
+*.log
+*.fls
+*.pdf
+*.fdb_latexmk
+*.aux
+**/.auctex-auto/
