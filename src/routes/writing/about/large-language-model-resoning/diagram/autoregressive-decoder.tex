@@ -6,13 +6,21 @@
 \pagecolor{black}
 \pagestyle{empty}
 \color{white}
-\begin{tikzpicture}[node distance=30pt and 20pt, >=Stealth, thick,
+\definecolor{green}{HTML}{52753d}
+\definecolor{red}{HTML}{873839}
+\definecolor{purple}{HTML}{644475}
+\definecolor{gray}{HTML}{595959}
+\definecolor{blue}{HTML}{42538b}
+\definecolor{cyan}{HTML}{328486}
+\definecolor{orange}{HTML}{e09166}
+
+\begin{tikzpicture}[node distance=30pt and 20pt, >=Stealth,
     every node/.style={draw=black, minimum width=50pt, minimum height=20pt, align=center, rounded corners=5pt, text=white},
-    input/.style={fill=green!40, text=black},
-    output/.style={fill=red!40, text=black},
-    hidden/.style={fill=gray!40, text=black},
-    attention/.style={->, draw=white!70, thick, bend left},
-    recurrence/.style={->, draw=blue!70, thick, rounded corners},
+    input/.style={fill=green},
+    output/.style={fill=red},
+    hidden/.style={fill=blue},
+    attention/.style={->, draw=white, bend left},
+    recurrence/.style={->, draw=orange, thick, rounded corners},
     phantom/.style={->, draw=white, thick, dashed},
     ]
 
@@ -90,10 +98,10 @@
 \draw[phantom] (x4) -- (l1h4);
 
 % attention connections from L1 to L2
-\draw[attention] (l1h1) to[out=00, in=180] (l2h1);
-\draw[attention] (l1h2) to[out=00, in=180] (l2h2);
-\draw[attention] (l1h3) to[out=00, in=180] (l2h3);
-\draw[attention] (l1h4) to[out=00, in=180] (l2h4);
+\draw[attention] (l1h1) to[out=13, in=193] (l2h1);
+\draw[attention] (l1h2) to[out=13, in=193] (l2h2);
+\draw[attention] (l1h3) to[out=13, in=193] (l2h3);
+\draw[attention] (l1h4) to[out=13, in=193] (l2h4);
 \draw[attention] (l1h1) to[out=13, in=193] (l2h2);
 \draw[attention] (l1h1) to[out=13, in=193] (l2h3);
 \draw[attention] (l1h1) to[out=13, in=193] (l2h4);
@@ -102,10 +110,10 @@
 \draw[attention] (l1h3) to[out=13, in=193] (l2h4);
 
 % attention connections from L2 to L3
-\draw[attention] (l2h1) to[out=00, in=180] (l3h1);
-\draw[attention] (l2h2) to[out=00, in=180] (l3h2);
-\draw[attention] (l2h3) to[out=00, in=180] (l3h3);
-\draw[attention] (l2h4) to[out=00, in=180] (l3h4);
+\draw[attention] (l2h1) to[out=13, in=193] (l3h1);
+\draw[attention] (l2h2) to[out=13, in=193] (l3h2);
+\draw[attention] (l2h3) to[out=13, in=193] (l3h3);
+\draw[attention] (l2h4) to[out=13, in=193] (l3h4);
 \draw[attention] (l2h1) to[out=13, in=193] (l3h2);
 \draw[attention] (l2h1) to[out=13, in=193] (l3h3);
 \draw[attention] (l2h1) to[out=13, in=193] (l3h4);
@@ -114,10 +122,10 @@
 \draw[attention] (l2h3) to[out=13, in=193] (l3h4);
 
 % attention connections from L3 to L4
-\draw[attention] (l3h1) to[out=00, in=180] (l4h1);
-\draw[attention] (l3h2) to[out=00, in=180] (l4h2);
-\draw[attention] (l3h3) to[out=00, in=180] (l4h3);
-\draw[attention] (l3h4) to[out=00, in=180] (l4h4);
+\draw[attention] (l3h1) to[out=13, in=193] (l4h1);
+\draw[attention] (l3h2) to[out=13, in=193] (l4h2);
+\draw[attention] (l3h3) to[out=13, in=193] (l4h3);
+\draw[attention] (l3h4) to[out=13, in=193] (l4h4);
 \draw[attention] (l3h1) to[out=13, in=193] (l4h2);
 \draw[attention] (l3h1) to[out=13, in=193] (l4h3);
 \draw[attention] (l3h1) to[out=13, in=193] (l4h4);
