@@ -4,8 +4,12 @@ import { MetaProvider } from "@solidjs/meta";
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 
-import "./app.css";
 import "katex/dist/katex.min.css";
+import "./fonts.css";
+import "./matcha.css";
+import "./adjustments.css";
+// import "./columns.css";
+// import "./app.css";
 
 export default function App() {
   return (

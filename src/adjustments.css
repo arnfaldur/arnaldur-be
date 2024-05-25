@@ -1,0 +1,93 @@
+:root {
+    --ct-width: 40rem;
+    --ft: "Open Sans", sans-serif;
+    --accent: oklch(80% 0.2 270);
+}
+
+body {
+    max-width: inherit;
+    padding: inherit;
+}
+
+main {
+    max-width: 35em;
+    margin: auto;
+}
+
+body > header:first-child {
+    width: fit-content;
+    margin: auto;
+    margin-top: 1em;
+}
+
+#breadcrumb {
+    min-width: 0;
+    max-width: 100%;
+    width: fit-content;
+    font-size: 1.5em;
+    border: none;
+}
+@media (min-width: 40rem) {
+    #breadcrumb {
+        min-width: 40rem;
+    }
+}
+
+#breadcrumb > a {
+    border-bottom: 1px solid transparent;
+    border-color: var(--bd-muted);
+}
+#breadcrumb > a:hover {
+    border-color: currentColor;
+}
+#breadcrumb > span {
+    color: var(--muted);
+}
+
+:is(h1, h2, h3, h4, h5, h6)[id] > a:hover::before {
+    color: oklch(80% 0.2 0);
+}
+
+/* disable hash hovers on breadcrumb */
+:is(h1, h2, h3, h4, h5, h6)#breadcrumb > a:hover::before {
+    content: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: "varela-round", sans-serif;
+}
+
+a {
+    color: oklch(80% 0.2 270);
+}
+
+a:visited {
+    color: oklch(80% 0.2 310);
+}
+
+q::before {
+    content: "“";
+}
+q::after {
+    content: "”";
+}
+
+/* formatting the big LLM output table */
+table.numbers th {
+    writing-mode: vertical-rl;
+    width: 2rem;
+}
+table.numbers td {
+    text-align: right;
+}
+table.numbers td.greater {
+    background-color: color-mix(in oklch, var(--danger) 15%, black 00%);
+}
+table.numbers td.lesser {
+    background-color: color-mix(in oklch, var(--accent) 15%, black 00%);
+}

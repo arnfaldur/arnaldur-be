@@ -28,7 +28,7 @@ export default function Header(props: { children?: JSX.ArrayElement }) {
           <For each={partUrls()}>
             {(part) => (
               <>
-                <span style={{ opacity: "0.75" }}>/</span>
+                <span>/</span>
                 <A href={part.url}>{part.part}</A>
               </>
             )}
