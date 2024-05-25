@@ -19,6 +19,7 @@
     input/.style={fill=green},
     output/.style={fill=red},
     hidden/.style={fill=blue},
+    tokens/.style={fill=cyan},
     attention/.style={->, draw=white, bend left},
     recurrence/.style={->, draw=orange, thick, rounded corners},
     phantom/.style={->, draw=white, thick, dashed},
@@ -45,7 +46,7 @@
 
 % Nodes for hidden layer L1
 \begin{scope}[local bounding box=l1 box]
-    \node[hidden, above=of x1] (l1h1) {$L_{1}p_1$};
+    \node[hidden, above=of x1  ] (l1h1) {$L_{1}p_1$};
     \node[hidden, right=of l1h1] (l1h2) {$L_{1}p_2$};
     \node[hidden, right=of l1h2] (l1h3) {$L_{1}p_3$};
     \node[hidden, right=of l1h3] (l1h4) {$L_{1}p_4$};
