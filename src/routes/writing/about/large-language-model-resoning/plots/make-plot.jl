@@ -63,7 +63,7 @@ html_table = replace(
 html_table =
     "export default function Table() {\n\treturn (\n\t" *
     html_table[1:6] *
-    " class=\"numbers\"" *
+    " class=\"llmr-numbers\"" *
     html_table[7:end] *
     "\n)}"
 open("Table.tsx", "w") do io
