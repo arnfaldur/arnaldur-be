@@ -1,6 +1,6 @@
 export default function Table() {
 	return (
-	<table class="numbers">
+	<table class="llmr-numbers">
   <thead>
     <tr>
       <th>Query</th>

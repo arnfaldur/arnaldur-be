@@ -25,7 +25,7 @@ back into tokens, and the tokens into text. Embeddings can be considered to be
 the thoughts of an LLM. **Attention** is a mechanism that allows the LLM to
 _attend_ to the embeddings processed in previous forward passes. For a more
 thurough overview of the architecture, see its
-[wikipedia page](https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)#Architecture)
+[wikipedia page](<https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)#Architecture>)
 
 ## _Just_ a next-token predictor
 
@@ -85,9 +85,12 @@ explores the idea of training a model with early exiting logic built in,
 reducing inference cost. A corollary to this research is: there must be tasks,
 harder than those that use the entire depth, that are unsolvable by the LLM.
 
+<figure>
+    <figcaption>
 ### A simplified diagram of an LLM
-
+    </figcaption>
 ![A diagram of an LLM](./diagram/autoregressive-decoder.svg)
+</figure>
 
 This diagram shows how data flows through an LLM. Each column, differentiated by
 $$p_n$$ is a separate forward pass. The green nodes at the bottom are the input
@@ -98,9 +101,7 @@ from the output, back into the model. The white curvy lines are potential
 dataflow through attention.
 
 Simplifying a
-[little](https://en.wikipedia.org/wiki/Transformer_%28deep_learning_architecture%29#Multi-head_attention
-"I'm using "embeddings" to refer to embeddings, keys, queries, and/or values.
-This looses little relevant meaning and is much less verbose."); at each layer,
+[little](<https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)#Multi-head_attention> (I'm using "embeddings" to refer to embeddings, keys, queries, and/or values. This looses little relevant meaning and is much less verbose.)); at each layer,
 it has access to the embeddings it produced in the previous layer for all the
 tokens, shown as curvy connections in the diagram. That is layer $$L_n$$ can
 attend to all the embeddings previously produced by layer $$L_{n-1}$$. This
@@ -130,8 +131,8 @@ thought and reducing commitments to specific tokens.
 
 Even with this freedom, an LLM still finds its thoughts heavily constrained. CoT
 and ToT allow the model to pass information from the later layers, back to the
-earlier layers, via
-[the orange connection in the diagram](#a-simplified-diagram-of-an-llm "This links to the diagram"),
+earlier layers, via the orange connection in
+[the diagram](#a-simplified-diagram-of-an-llm "This links to the diagram") above,
 by spelling out its insights and solutions. But it must ultimately condense
 every thought into a single token that must be grammatically sound, limiting the
 information flow.
@@ -172,65 +173,244 @@ architecture. These ideas loose a lot of that due to their RNN inspired
 properties---as the chain of dots paper touches on. It might not be practical,
 but that hypothesis is worth falsifying.
 
-## TODO: A good title relating to them being dumb/limited
+### There are no heptagons here
 
-To test these limitations I devised a simple test. I queried six open
+Returning to the problem of GPT-4o being unable to reliably distinguish between regular polygons.
+OpenAI hasn't disclosed the specifics of any GPT-4 class model, so we don't know exactly how they achieve multimodality.
+[LLaVA-1.5](https://arxiv.org/abs/2310.03744) recently achieved <abbr data-title="State of The Art">SOTA</abbr> performance on visual instruction following tasks,
+which include polygon recognition.
+LLaVA encodes an image to be considered as embeddings that are inserted into a standard LLM, in place of regular text derived embedded tokens.
+The LLM perceives the image as a sentence, or paragraph, just like other text.
+It can contemplate this _description_, but it can't discover anything about the image that wasn't in the description, without guessing or extrapolating.
+
+When a human tries to identify the number of corners on a polygon, they can look at all the corners and count, re-counting to be sure.
+This introduces the image, and subsections of it, to the brain for processing.
+
+<abbr data-title="Visual Large Language Models">VLLMs</abbr> only receive the description once, 
+and typically have no way of re-introducing it, they are _physically_ incapable of counting the number of sides.
+For a human it would be akin to seeing the polygon flash for tens of milliseconds, and having [aphantasia](https://en.wikipedia.org/wiki/Aphantasia "Wikipedia: The inability to visualize."). 
+Phantasing humans could potentially count the corners in their head by visualizing the memory.
+
+To replicate that, a VLLM would need to be able to apply something like 
+[visual chain of thought reasoning](https://arxiv.org/pdf/2305.02317 
+"I saw that it existed so I linked it. It works reasonably well for some tasks, according to the paper."),
+which requires the model to be able to produce imagery---or at least embeddings---corresponding to something visual.
+The aforementioned recurrent hidden state approach has the potential of facilitating that.
+
+## Exploring their limits
+
+To test the limitations of LLMs; I devised a simple test. I queried six quantized open
 chat/instruct models.
 
-| Model                                                                                                                                                   |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [Meta-Llama-3-8B-Instruct-Q6_K](https://huggingface.co/bartowski/Meta-Llama-3-8B-Instruct-GGUF/blob/main/Meta-Llama-3-8B-Instruct-Q6_K.gguf)            |
-| [Meta-Llama-3-70B-Instruct-IQ2_XS](https://huggingface.co/bartowski/Meta-Llama-3-70B-Instruct-old-GGUF/blob/main/Meta-Llama-3-70B-Instruct-IQ2_XS.gguf) |
-| [Qwen1.5-32B-Chat-IQ4_XS](https://huggingface.co/bartowski/Qwen1.5-32B-Chat-GGUF/blob/main/Qwen1.5-32B-Chat-IQ4_XS.gguf)                                |
-| [Yi-1.5-34B-Chat-IQ4_XS](https://huggingface.co/bartowski/Yi-1.5-34B-Chat-GGUF/blob/main/Yi-1.5-34B-Chat-IQ4_XS.gguf)                                   |
-| [Mistral-7B-Instruct-v0.3-Q6_K](https://huggingface.co/bartowski/Mistral-7B-Instruct-v0.3-GGUF/blob/main/Mistral-7B-Instruct-v0.3-Q6_K.gguf)            |
-| [ggml-c4ai-command-r-v01-iq4_xs](https://huggingface.co/dranger003/c4ai-command-r-v01-iMat.GGUF/blob/main/ggml-c4ai-command-r-v01-iq4_xs.gguf)          |
+| Model                                                                                                                                                   | Layers |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| [Meta-Llama-3-8B-Instruct-Q6_K](https://huggingface.co/bartowski/Meta-Llama-3-8B-Instruct-GGUF/blob/main/Meta-Llama-3-8B-Instruct-Q6_K.gguf)            | 32     |
+| [Meta-Llama-3-70B-Instruct-IQ2_XS](https://huggingface.co/bartowski/Meta-Llama-3-70B-Instruct-old-GGUF/blob/main/Meta-Llama-3-70B-Instruct-IQ2_XS.gguf) | 80     |
+| [Qwen1.5-32B-Chat-IQ4_XS](https://huggingface.co/bartowski/Qwen1.5-32B-Chat-GGUF/blob/main/Qwen1.5-32B-Chat-IQ4_XS.gguf)                                | 64     |
+| [Yi-1.5-34B-Chat-IQ4_XS](https://huggingface.co/bartowski/Yi-1.5-34B-Chat-GGUF/blob/main/Yi-1.5-34B-Chat-IQ4_XS.gguf)                                   | 60     |
+| [Mistral-7B-Instruct-v0.3-Q6_K](https://huggingface.co/bartowski/Mistral-7B-Instruct-v0.3-GGUF/blob/main/Mistral-7B-Instruct-v0.3-Q6_K.gguf)            | 32     |
+| [ggml-c4ai-command-r-v01-iq4_xs](https://huggingface.co/dranger003/c4ai-command-r-v01-iMat.GGUF/blob/main/ggml-c4ai-command-r-v01-iq4_xs.gguf) (35B)    | 40     |
 
-I prompt the models with math expressions like $$1=$$, $$1+1=$$, $$1+1+1=$$, and
-so on, using their respective preferred chat template. Each query had a
+I prompted the models with math expressions that add ones repeatedly, like these:
+
+- $$1=$$
+- $$1+1=$$
+- $$1+1+1=$$
+- etc.
+
+I used each model's preferred chat template. The queries had a
 temperature of zero. I adjusted the system prompt until the model only responded
-using a single integer. Some models required more convincing than others.
+using a single integer.
 
 All the models received the system prompt: <q>You are a calculator that returns a
-number. You must only print a single number.</q> Except Mistral which needed <q>You
+number. You must only print a single number.</q> Except the Mistral model which needed <q>You
 are a calculator that returns a number. You must only print a single number,
-nothing else.</q> to comply. Llama 8B and 70B received the system prompt: "You are
-a calculator that prints numbers." Qwen 1.5 32B, Yi 1.5 34B, and Mistral 7B v0.3
-needed a more firm "You are a calculator that prints number. You must only print
-a single number, don't write any text." The system prompt included a typo, but
-that doesn't have an important effect on the results, with respect to .
-Command-R required the most convincing and used: "You are a calculator that
-prints number. You must only print a single number, don't write any text or
-punctuation." The larger models were quantized down to less than 24GB using
-llama.cpp IQ quantizations.
+nothing else.</q> to comply.
 
 A value of $$n$$ on the **Query** axis corresponds to the prompt
 $$\underbrace{1+1+\dots+1}_{n\times}=$$. The **Response** axis represents the
 answer from the model. The red line is a the reference line of the correct
 score. The blue dots are the responses from the models.
 
-![Two plots showing the correlation between](./plots/plots.svg)
+![Six plots showing each models' answers to the query](./plots/plots.svg)
 
 import Table from "./plots/Table";
 
-<details><summary> Here is a table containing all 96 rows of the models' outputs. Red and blue cells indicate values that are too high and too low, respectively. </summary><Table /></details>
+{<details>
+<summary>Click here to show a table containing all 96 rows of the models' outputs.
+Red cells indicate values that are too high, while blue cells indicate values that are too low.</summary>
+<Table />
+</details>}
 
-They all have the same I find the way they differ in performance interesting.
+I find the way their outputs differ interesting.
+There is a strong tendency towards certain answers, e.g. Llama 8B always answers 32 after the 39th query.
+The larger models don't perform noticably better than the smaller ones.
+Yi is the only one whose results contain large overshoots, with 200 appearing twice, at the arbitrary inputs: 53 and 86.
+Previously, I ran the experiment using more varied prompts, some of which included a typo.
+Yi did not produce these outliers then, neither did it fail on the trivial query: $$1=$$, as it did now, returning $$2$$.
+Maybe it thought it was supposed to count.
 
-According to
-[this online Llama 3 tokenizer](https://belladoreai.github.io/llama3-tokenizer-js/example-demo/build/),
+According to [this online Llama 3 tokenizer](https://belladoreai.github.io/llama3-tokenizer-js/example-demo/build/),
 each `1` character and each `+` symbol gets its own token. Therefore the $$n$$th
-query contains $$2n-1$$ tokens of equation, excluding the equals symbol.
+query contains $$2n$$ tokens of equation, including the equals symbol.
+I expect the others to represent the expressions with a similar amount of tokens, considering that the Llama 3 tokenizer is considered large.
 
-## TODO: Weird overfitting
+To be able to determine the value of the expression correctly, the model has to incorporate information from every token in the sequence, in a single forward pass.
+An LLM can't reliably do that, due to each layer only being able to attend to a limited amount of tokens, effectively limiting the area of its receptive field.
+A specially trained model could solve this more reliably, but it would likely need to allocate more latent space to this capability, costing it performance in other domains.
+
+Considering the aforementioned limitations on the thinking of LLMs, we should expect them to fail at tasks like these.
+
+The intermediate computations of this type of problem can losslessly be represeted in text.
+This can in theory counteract the [token constraint](#the-token-constraint) described above.
+
+### Does thinking step-by-step help?
+
+I re-ran the experiment with the prompt <q>You are a calculator that evaluates math expressions. Write each step of the solution and finally write the answer as an integer like so: Answer: \<integer\></q>.
+The step by step reasoning produces a much greater amount of tokens, so it takes longer to run.
+Therefore, I only ran it up to $$n=48$$.
+
+![Six plots showing each models' answers to the query](./plots/cot-plots.svg)
+
+The points below the zero line were responses that didn't adhere to the requested format well enough to be parsed easily.
+
+Like before, every model diverges at, or before $$n=32$$. 
+Their performance is not noticably better than before, which means that they weren't constrained by a lack of space to think, as discussed.
+They are likely not smart enough or trained well enough on these types of problems to reliably use a good step by step approach.
+
+The approaches were varied; here are some highlights. 
+
+{<details>
+<summary>Command-R correctly solved the tenth query using this generalizable method.</summary>
+<blockquote>
+Step 1: We have 1+1+1+1+1+1+1+1+1+1                           
+<br/>Step 2: To add these                                          
+<br/>numbers together, we'll use the commutative property to group 
+<br/>them in a way that's easy to calculate. We'll add them in     
+<br/>pairs: 1+1 = 2, 1+1 = 2, 1+1 = 2, 1+1 = 2, and 1+1 = 2.       
+<br/>Step 3:                                                       
+<br/> Now, adding up the pairs, we get 2+2+2+2+2 = 10.             
+<br/>                                                              
+<br/>Answer: 10 
+</blockquote>
+</details>}
+
+It only used this method once. 
+The method would in theory be a good way for an LLM to work around its limitations.
+
+{<details>
+<summary>Qwen tried the same method with limited success.</summary>
+<blockquote>
+Step 1: We have a sequence of 13 ones being added together. 
+<br/>
+<br/>Step 2: We can add them in pairs: (1+1) + (1+1) + (1+1) + 
+<br/>(1+1) + (1+1) + (1+1) + (1+1) + 1 
+<br/>Step 3: Each pair equals 2: 2 
+<br/> + 2 + 2 + 2 + 2 + 2 + 2 + 1 
+<br/>Step 4: Continue adding the pairs: 
+<br/> 4 + 4 + 4 + 4 + 4 + 4 + 1 
+<br/>Step 5: Add the remaining numbers: 8 
+<br/> + 8 + 4 + 4 + 4 + 1 
+<br/>Step 6: Continue adding: 16 + 8 + 4 + 4 + 
+<br/>1 
+<br/>Step 7: Add more: 24 + 8 + 4 + 1 
+<br/>Step 8: Add the last few: 32 
+<br/>+ 4 + 1 
+<br/>Step 9: Add the last two: 36 + 1 
+<br/>Step 10: The final sum 
+<br/>is 37. 
+<br/> 
+<br/>Answer: 37 
+</blockquote>
+</details>}
+
+{<details>
+<summary>Llama 70B was fond of this approach, using it for all queries up to 38.</summary>
+<blockquote>
+Step 1: 1+1 = 2
+<br/>Step 2: 2+1 = 3 
+<br/>Step 3: 3+1 = 4 
+<br/>Step 4: 4+1 = 5 
+<br/>Step 5: 5+1 = 6 
+<br/>Step 6: 6+1 = 7 
+<br/>Step 7: 7+1 = 8 
+<br/>Step 8: 8+1 = 9 
+<br/>Step 9: 9+1 = 10 
+<br/>Step 10: 10+1 = 11 
+<br/>Step 11: 11+1 = 12 
+<br/>Step 12: 12+1 = 13 
+<br/>Step 13: 13+1 = 14 
+<br/>Step 14: 14+1 = 15 
+<br/>Step 15: 15+1 = 16 
+<br/>Step 16: 16+1 = 17 
+<br/>Step 17: 17+1 = 18 
+<br/>Step 18: 18+1 = 19 
+<br/>Step 19: 19+1 = 20 
+<br/>Step 20: 20+1 = 21 
+<br/>Step 21: 21+1 = 22 
+<br/>Step 22: 22+1 = 23 
+<br/>Step 23: 23+1 = 24 
+<br/>Step 24: 24+1 = 25 
+<br/>Step 25: 25+1 = 26 
+<br/>Step 26: 26+1 = 27 
+<br/>
+<br/>Answer: 27
+</blockquote>
+</details>}
+
+The correct answer was 36.
+
+
+{<details>
+<summary>Yi had trouble with the first query.</summary>
+<blockquote>
+The expression you've provided, "1 =", is incomplete and seems
+<br/> to be a single number followed by an equals sign. To         
+<br/>interpret this as a math expression that we can solve, we'll  
+<br/>need to assume it's part of an equation where "1" is the      
+<br/>solution to be found rather than an input to be processed     
+<br/>further. However, as it stands, it's not a standard math      
+<br/>expression to be solved.                                      
+<br/>                                                              
+<br/>Given the format you're asking for,                           
+<br/>and interpreting your request as looking for a simple math    
+<br/>expression that equals 1, we can create a straightforward     
+<br/>expression that evaluates to 1 and solve it step by step. For 
+<br/>example, let's use the expression \(x = 1\), where we're      
+<br/>solving for \(x\).                                            
+<br/>                                                              
+<br/>Step 1: We are given that \(x = 1\).                          
+<br/>                                                              
+<br/>Step 2:                                                       
+<br/>There are no operations to perform; we are directly given the 
+<br/>value of \(x\).                                               
+<br/>                                                              
+<br/>Step 3: Therefore, \(x\) remains unchanged.                   
+<br/>                                                              
+<br/>                                                              
+<br/>Answer: 1                                                     
+<br/>                                                              
+<br/>This is a simple case, as typically, you'd expect an          
+<br/>expression that involves operations such as addition,         
+<br/>subtraction, multiplication, or division. Since the original  
+<br/>input was unclear, this response assumes you're looking for a 
+<br/>demonstration of how to handle an expression that simplifies  
+<br/>to 1. If you had a specific expression in mind or a different 
+<br/>type of problem, please provide more details!
+</blockquote>
+</details>}
+
+Although it didn't help in this case, step-by-step reasoning improves results in many domains, as the paper found.
+
+## Recognizability traps
 
 [](https://x.com/svpino/status/1790624957380342151 "We are still very far from real intelligence. pic.twitter.com/Q4CX9R9jaL")
 
 https://x.com/svpino/status/1790624957380342151
 
-<details><summary>The linked image is of a conversation with ChatGPT 4o which goes like this:</summary>
-<blockquote><h3>You:</h3>A man and a goat are in one side of a river. They want to cross it. They have a boat. What steps do they need to follow?
-Write a bullet list with the solution. Be as concise as possible.
+<details><summary>The linked image is of a conversation with ChatGPT 4o, replicated here.</summary>
+<blockquote><h3>You:</h3><p>A man and a goat are in one side of a river. They want to cross it. They have a boat. What steps do they need to follow?
+Write a bullet list with the solution. Be as concise as possible.</p>
 <h3>ChatGPT:</h3>
 <ol><li>Man takes the goat across the river.</li>
 <li>Man returns alone.</li>
@@ -242,10 +422,36 @@ Write a bullet list with the solution. Be as concise as possible.
 
 https://x.com/svpino/status/1790747201783873954
 
-LLMs are limited in their capacity for contemplation. Their ideas must be
-squeezed through the tokenizer to be retreivable again in the next iteration of
-thought via methods like chain of thought reasoning. That internal dialogue is
-constrained by the grammatical correctness of language which likely limits the
-expressivity of the thoughts.
+This lapse of reason is hilarious, and there are more like it.
+Prompt formats can have a significant effect on the output---for example, by preventing or causing step-by-step reasoning.
+I rephrased the question 19 times to see how reliably it would fail the _puzzle_.
 
-Some people like to call them stochastic parrots
+
+import RiverCrossing from "./RiverCrossing";
+
+<RiverCrossing />
+
+I avoided adding hints in the query. It only answered 3 out of 19 questions correctly.
+I asked the model further about its **6**th response.
+It realized its error at the slightest hint of disagreement, but just elaborating didn't help.
+It was reliably incorrect. These methods didn't improve the answer.
+* Chain of thought reasoning, queries **3**, **6**, and other to a lesser degree.
+* Suggesting its answer would likely be wrong, like in query **9**.
+* Adding an orthogonal challenge (talking like a pirate) in query **10**.
+* Asking for an incorrect answer, before the correct one, query **11** and **12**.
+
+Telling GPT that the boat was large, like in queries **13** and **14** was the only hint that gave the correct answer.
+Answer **18** was correct but the semantic similarity among queries **16** to **19** make me think it was a fluke.
+
+GPT-4o falls for a similar trap when asked about the health of an already dead Schrödinger's cat.
+
+import Schrodinger from "./Schrodinger";
+
+<Schrodinger />
+
+It took less to get it to see through the trick, in this case.
+
+It is not surprising, in retrospect, that these biases would exist 
+
+The recognition of a known scenario that 
+
