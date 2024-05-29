@@ -12,31 +12,30 @@ body {
 main {
     max-width: 35em;
     margin: auto;
-}
-
-body > header:first-child, body > footer:last-of-type {
-    width: fit-content;
-    margin: auto;
-    margin-top: 2em;
-    padding-bottom: 2rem;
+    padding: 0 1rem;
 }
 
 #breadcrumb {
-    min-width: 0;
-    max-width: 100%;
     width: fit-content;
+    margin: auto;
+    padding: 1rem;
+    min-width: calc(100% - 2rem);
+    max-width: 100%;
     font-size: 1.5em;
+    font-weight: 600;
     border: none;
 }
 @media (min-width: 40rem) {
     #breadcrumb {
-        min-width: 40rem;
+        min-width: 38rem;
     }
 }
 
 #breadcrumb > a {
     border-bottom: 1px solid transparent;
     border-color: var(--bd-muted);
+    text-decoration: none;
+    color: var(--color);
 }
 #breadcrumb > a:hover {
     border-color: currentColor;
@@ -54,7 +53,7 @@ body > header:first-child, body > footer:last-of-type {
     content: none;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1, h2, h3, h4, h5, h6, #breadcrumb {
     font-family: "varela-round", sans-serif;
 }
 
