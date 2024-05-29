@@ -1,6 +1,6 @@
 
 import Title from "~/components/Title";
-import Breadcrumb from "~/components/Header";
+import Breadcrumb from "~/components/Breadcrumb";
 
 export default function WritingLayout(props) {
   return (

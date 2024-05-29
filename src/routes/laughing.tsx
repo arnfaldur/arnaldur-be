@@ -1,12 +1,12 @@
 
 import Title from "~/components/Title";
-import Header from "~/components/Header";
+import Breadcrumb from "~/components/Breadcrumb";
 
 export default function LaughingLayout(props) {
   return (
     <>
       <Title />
-      <Header />
+      <Breadcrumb />
       <main>{props.children}</main>
     </>
   );

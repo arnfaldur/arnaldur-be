@@ -22,7 +22,7 @@ export default function Breadcrumb(props: { children?: JSX.ArrayElement }) {
     <>
       <h1 id="breadcrumb">
         <A href="/">Arnaldur</A>
-        <span style={{ opacity: "0.75" }}>.</span>
+        <span>.</span>
         <A href="/explaining-the-url">be</A>
         <For each={partUrls()}>
           {(part) => (
