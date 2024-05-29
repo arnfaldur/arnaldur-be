@@ -42,9 +42,6 @@ export default function Writing() {
               dateStyle: "medium",
             })}
           </small>
-          <Show when={i() + 1 < postList.length}>
-            <hr style="margin: 1em 0;" />
-          </Show>
         </article>
       )}
     </For>
