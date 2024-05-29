@@ -1,13 +1,18 @@
 
 import Title from "~/components/Title";
-import Header from "~/components/Header";
+import Breadcrumb from "~/components/Header";
 
 export default function WritingLayout(props) {
   return (
     <>
       <Title />
-      <Header />
+      <header>
+        <Breadcrumb />
+      </header>
       <main>{props.children}</main>
+      <footer>
+        <Breadcrumb />
+      </footer>
     </>
   );
 }

@@ -1,7 +1,7 @@
 import { createMemo, For, JSX } from "solid-js";
 import { A, useLocation } from "@solidjs/router";
 
-export default function Header(props: { children?: JSX.ArrayElement }) {
+export default function Breadcrumb(props: { children?: JSX.ArrayElement }) {
   const location = useLocation();
 
   // construct each url of the breadcrumb and it's least significant slug
@@ -20,22 +20,20 @@ export default function Header(props: { children?: JSX.ArrayElement }) {
   );
   return (
     <>
-      <header>
-        <h1 id="breadcrumb">
-          <A href="/">Arnaldur</A>
-          <span style={{ opacity: "0.75" }}>.</span>
-          <A href="/explaining-the-url">be</A>
-          <For each={partUrls()}>
-            {(part) => (
-              <>
-                <span>/</span>
-                <A href={part.url}>{part.part}</A>
-              </>
-            )}
-          </For>
-        </h1>
-        {props.children}
-      </header>
+      <h1 id="breadcrumb">
+        <A href="/">Arnaldur</A>
+        <span style={{ opacity: "0.75" }}>.</span>
+        <A href="/explaining-the-url">be</A>
+        <For each={partUrls()}>
+          {(part) => (
+            <>
+              <span>/</span>
+              <A href={part.url}>{part.part}</A>
+            </>
+          )}
+        </For>
+      </h1>
+      {props.children}
     </>
   );
 }

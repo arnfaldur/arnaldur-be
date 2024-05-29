@@ -14,10 +14,11 @@ main {
     margin: auto;
 }
 
-body > header:first-child {
+body > header:first-child, body > footer:last-of-type {
     width: fit-content;
     margin: auto;
-    margin-top: 1em;
+    margin-top: 2em;
+    padding-bottom: 2rem;
 }
 
 #breadcrumb {
