@@ -45,10 +45,10 @@ const rehypePlugins = [
 
 const server = {
   preset: "aws-amplify",
-  prerender: {
-    routes: ["/", "/writing", "/laughing"],
-    crawlLinks: true,
-  },
+  // prerender: {
+  //   routes: ["/", "/writing", "/laughing"],
+  //   crawlLinks: true,
+  // },
 };
 
 export default defineConfig({
