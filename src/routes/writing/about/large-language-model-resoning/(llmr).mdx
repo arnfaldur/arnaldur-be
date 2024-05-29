@@ -24,8 +24,8 @@ processes the embeddings through their layers, and finally turn the embeddings
 back into tokens, and the tokens into text. Embeddings can be considered to be
 the thoughts of an LLM. **Attention** is a mechanism that allows the LLM to
 _attend_ to the embeddings processed in previous forward passes. For a more
-thurough overview of the architecture, see its
-[wikipedia page](<https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)#Architecture>)
+thorough overview of the architecture, see its
+[wikipedia page](<https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)#Architecture>).
 
 ## _Just_ a next-token predictor
 
@@ -56,7 +56,7 @@ the API. Therefore, the intelligence implication falls apart, as something being
 a next-token predictor doesn't preclude it from possessing real intelligence.
 
 There are
-[pitfalls with next-token prediction](https://arxiv.org/abs/2403.06963), but
+[pitfalls with next-token prediction](https://arxiv.org/abs/2403.06963 "arXiv:2403.06963 The pitfalls of next-token prediction"), but
 they are issues with the interface to the intelligence, not the nature of it.
 
 ## Incapable of reasoning or thought
@@ -77,7 +77,7 @@ All the thoughts required to obtain the next token must happen in one forward
 pass of the neural network.
 
 LLMs have a pre-specified depth. There has been some research that suggests that
-[Not all Layers of LLMs are Necessary during Inference](https://arxiv.org/abs/2403.02181 "arXiv:[2403.02181] Not all Layers of LLMs are Necessary during Inference").
+[Not all Layers of LLMs are Necessary during Inference](https://arxiv.org/abs/2403.02181 "arXiv:2403.02181 Not all Layers of LLMs are Necessary during Inference").
 Easier tasks are often solved in the first layers, while harder ones use the
 entire depth of the model.
 [ConsistentEE](https://ojs.aaai.org/index.php/AAAI/article/view/29922 "ConsistentEE: A Consistent and Hardness-Guided Early Exiting Method for Accelerating Language Models Inference")
@@ -116,14 +116,14 @@ depends on this solution.
 
 If the LLM isn't smart enough to think of the right answer in one go, it has
 committed to a token that contains, or could lead to, an incorrect answer.
-[Chain of thought (CoT)](https://arxiv.org/abs/2205.11916 "arXiv:[2205.11916] Large Language Models are Zero-Shot Reasoners")
+[Chain of thought (CoT)](https://arxiv.org/abs/2205.11916 "arXiv:2205.11916 Large Language Models are Zero-Shot Reasoners")
 prompting mitigates this problem to a degree. It gives the LLM space to generate
 tokens that don't commit to a final answer, but contain information, and produce
 thoughts, that can steer the LLM towards the correct answer.
 
-[Tree of thoughts](https://arxiv.org/abs/2305.10601 "arXiv:[2305.10601] Tree of Thoughts: Deliberate Problem Solving with Large Language Models")
+[Tree of thoughts](https://arxiv.org/abs/2305.10601 "arXiv:2305.10601 Tree of Thoughts: Deliberate Problem Solving with Large Language Models")
 and
-[LLM adapted Beam search](https://arxiv.org/abs/2305.00633 "arXiv:[2305.00633] Self-Evaluation Guided Beam Search for Reasoning")
+[LLM adapted Beam search](https://arxiv.org/abs/2305.00633 "arXiv:2305.00633 Self-Evaluation Guided Beam Search for Reasoning")
 improve on these ideas further, by letting the LLM explore multiple trains of
 thought and reducing commitments to specific tokens.
 
@@ -165,7 +165,7 @@ implementation could include passing the pre-logit embeddings back into the LLM,
 after the token embedding layer; and increasing the d_model size, while
 reserving some of the added dimensions for the recurrence. Removing the
 one-to-one constraint between tokens and forward passes is another prospect.
-[Let's Think Dot by Dot](https://arxiv.org/abs/2404.15758 "arXiv:[2404.15758] Let's Think Dot by Dot: Hidden Computation in Transformer Language Models")
+[Let's Think Dot by Dot](https://arxiv.org/abs/2404.15758 "arXiv:2404.15758 Let's Think Dot by Dot: Hidden Computation in Transformer Language Models")
 explores this idea.
 
 Ease of training has played a significant role in the success of the transformer
@@ -177,7 +177,7 @@ but that hypothesis is worth falsifying.
 
 Returning to the problem of GPT-4o being unable to reliably distinguish between regular polygons.
 OpenAI hasn't disclosed the specifics of any GPT-4 class model, so we don't know exactly how they achieve multimodality.
-[LLaVA-1.5](https://arxiv.org/abs/2310.03744) recently achieved <abbr data-title="State of The Art">SOTA</abbr> performance on visual instruction following tasks,
+[LLaVA-1.5](https://arxiv.org/abs/2310.03744 "arXiv:2310.03744 Improved Baselines with Visual Instruction Tuning") recently achieved <abbr data-title="State of The Art">SOTA</abbr> performance on visual instruction following tasks,
 which include polygon recognition.
 LLaVA encodes an image to be considered as embeddings that are inserted into a standard LLM, in place of regular text derived embedded tokens.
 The LLM perceives the image as a sentence, or paragraph, just like other text.
@@ -192,8 +192,8 @@ For a human it would be akin to seeing the polygon flash for tens of millisecond
 Phantasing humans could potentially count the corners in their head by visualizing the memory.
 
 To replicate that, a VLLM would need to be able to apply something like 
-[visual chain of thought reasoning](https://arxiv.org/pdf/2305.02317 
-"I saw that it existed so I linked it. It works reasonably well for some tasks, according to the paper."),
+[visual chain of thought reasoning](https://arxiv.org/abs/2305.02317 
+"arXiv:2305.02317 Visual Chain of Thought: Bridging Logical Gaps with Multimodal Infillings. I saw that it existed so I linked it. It works reasonably well for some tasks, according to the paper."),
 which requires the model to be able to produce imagery---or at least embeddings---corresponding to something visual.
 The aforementioned recurrent hidden state approach has the potential of facilitating that.
 
@@ -433,8 +433,8 @@ import RiverCrossing from "./RiverCrossing";
 
 I avoided adding hints in the query. It only answered 3 out of 19 questions correctly.
 I asked the model further about its **6**th response.
-It realized its error at the slightest hint of disagreement, but just elaborating didn't help.
-It was reliably incorrect. These methods didn't improve the answer.
+It realized its error at the slightest hint of disagreement, but just elaborating didn't help; it was reliably incorrect. 
+These methods didn't improve the answer:
 * Chain of thought reasoning, queries **3**, **6**, and other to a lesser degree.
 * Suggesting its answer would likely be wrong, like in query **9**.
 * Adding an orthogonal challenge (talking like a pirate) in query **10**.
@@ -451,7 +451,228 @@ import Schrodinger from "./Schrodinger";
 
 It took less to get it to see through the trick, in this case.
 
-It is not surprising, in retrospect, that these biases would exist 
+It is not surprising, in retrospect, that these biases would exist.
+Stories about goats, boats, and rivers almost always follow the same pattern, so the model just repeats it.
+The easiest way to reliably answer the question correctly in the training data, minimizing the loss, was to memorize it.
+If the internet were full of different riddles of a similar nature,
+the answers would likely be better, as it would have learned a more general understanding of the situation.
 
-The recognition of a known scenario that 
+## Our reasoning does not occur in a vacuum
 
+The fundamental building blocks of our thinking are the qualia we've accumulated, and their composition in our minds.
+We start with sensing, advance to object permanence, and then to theory of mind, algebra, and other abstract concepts.
+These abstractions are increasingly difficult for people to reason about; 
+so the prevalence of mistakes increases correspondingly.
+
+A logical puzzle that is resolved by realizing that the people in the puzzle have functioning senses, is bound to be trivial.
+I couldn't come up with a remotely challenging puzzle with this premise. 
+I employed ChatGPT 4o to the task, and all the puzzles it made required using higher abstractions like theory of mind.
+
+import SensePuzzle from "./SensePuzzle";
+
+<SensePuzzle />
+
+Matthew Berman, an AI focused commentator, commonly uses a set of questions to test LLMs.
+Of those, one requires understanding simple physical properties of everyday objects:
+
+https://x.com/MatthewBerman/status/1736901802568851825
+
+another, object permanence, and theory of mind:
+
+https://x.com/MatthewBerman/status/1736901804238209038
+
+LLMs find these difficult while humans do not, especially the former question.
+
+### They don't reason like us
+
+The primitive sensory-like qualia of an LLM is something like an idea with a position, although it's a little hard to analogize.
+The next step in the hierarchy of abstractions is spelling, word structure and frequency.
+These are the most elementary ideas to an LLM, and are learned before they know how to speak.
+Next up are grammatical structures.
+Finally, when all these have been mastered, the LLM can start to think about what it means to see or hear.
+
+It is thus no wonder that such abstract, theoretical musings are elusive to the best of models.
+Scenarios, such as one, where a ball is placed in a cup, which is then turned upside down,
+and all the logical ramifications of this complex sequence of transformations of abstract phenomena.
+
+They have of course never seen, or interacted with any of these objects.
+
+Research---that I'll fail to cite---has shown that playing with objects, physically, has advantages to cognitive development in children,
+when compared to watching TV shows.
+My guess is that manipulating your body and interacting with the world is harder, and thus more stimulating;
+when compared to passively perceiving something, and only intellectually engaging with it to the degree that the child is capable of.
+
+An LLM can't even do any of this.
+
+### They do reason like us
+
+We attach lots of meaning to the idea of reasoning.
+When we see something so blatantly incorrect, it's easy to jump to conclusions.
+It's also easy to move goalposts and forget how bad at reasoning humans tend to be.
+
+I showed some friends [the examples shown above](#recognizability-traps), and some (including myself) didn't notice that the cat was dead before entering the box.
+There are undoubtedly people who would recognize the boat puzzle at a glance, 
+and quickly regurgitate the answer to a version of the puzzle they remember solving.
+That group is admittedly smaller.
+
+We wouldn't say they're unable to reason; they're just being hasty.
+As with a GPT, proper nudging would lead them to the correct answer.
+And as with a GPT, further, more intensive, nudging can have them proclaiming an incorrect answer;
+to appease those whose appeasement is desired.
+
+I find it unlikely that the summation problem explored above is well represented in the training data---in particular, for the larger sums.
+All the models perform reasonably well until around $$n=15$$, which is $$1+1+1+1+1+1+1+1+1+1+1+1+1+1+1$$.
+I'd be surprised if no generalization was involved in those answers, and that they were well represented in the data.
+It's possible though. The popular datasets like RedPajama, and CommonCrawl, are very large.
+If they aren't memorizing it. They are using reasoning to generate the correct answers.
+
+### They reason like themselves
+
+[A paper](https://arxiv.org/abs/2405.17399 "arXiv:2405.17399 Transformers Can Do Arithmetic with the Right Embeddings")
+published the day before this was written, found that popular positional embeddings limited the arithmetic capabilities of transformers.
+Using a more suitable positional embedding, they trained a model to add 20 digit long numbers.
+The model generalized the ability to 100 digit long numbers.
+This requires logical inference, and reasoning.
+
+I designed the [diagram of an LLM](#a-simplified-diagram-of-an-llm) shown above, using the Ti_k_Z syntax of the TeX package `pgf`.
+ChatGPT helped me generate it, but I refined it's output.
+At one point I had a similar diagram but it only had three rows and three columns of hidden layer nodes.
+I wanted one more layer in both directions so I made a query with the TeX code, and these instructions:
+> You have been very helpful. I'm quite happy with the style and layout as it is.
+> Here is the current state:
+> 
+> \```tex<br/>
+> <del>Lots of TeX code.</del><br/>
+> \```
+> 
+> I would however like to rename the hidden layer nodes from $$h_n$$ to $$L_mp_n$$. 
+And I would like there to be an extra fourth hidden layer $$L_4$$, and for the whole thing to be one node wider. 
+I would also like there to be a spece with vertical ellipsis above the last hidden layer, below the Output Tokens layer.
+can you make those adjustments?
+
+<details>
+    <summary>The redacted TeX code, for the curious.</summary>
+```tex
+\documentclass{article}
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta, fit, backgrounds}
+
+
+
+\begin{document}
+\begin{tikzpicture}[node distance=1cm and 1cm, >=Stealth, thick,
+    every node/.style={draw, minimum width=1.5cm, minimum height=1cm, align=center, rounded corners=5pt},
+    input/.style={fill=green!20},
+    output/.style={fill=red!20},
+    hidden/.style={fill=gray!20},
+    attention/.style={->, draw=black!70, thick, densely dashed},
+    recurrence/.style={->, draw=blue!70, thick, rounded corners}]
+
+
+% Nodes for input layer
+\begin{scope}[local bounding box=input box]
+    \node[input] (x1) {\tt{<start>}};
+    \node[input, right=of x1] (x2) {\tt{lorem}};
+    \node[input, right=of x2] (x3) {\tt{ipsum}};
+\end{scope}
+\node[fit=(input box), draw, label=left:Input Tokens, inner sep=10pt] {};
+
+% Nodes for hidden layer L1
+\begin{scope}[local bounding box=l1 box]
+    \node[hidden, above=of   x1] (l1h1) {$L_{1}p_1$}; %this one is marked
+    \node[hidden, right=of l1h1] (l1h2) {$h_2$};
+    \node[hidden, right=of l1h2] (l1h3) {$h_3$};
+\end{scope}
+\node[fit=(l1 box), draw, label=left:$L_1$, inner sep=10pt] {};
+
+% Nodes for hidden layer L2
+\begin{scope}[local bounding box=l2 box]
+    \node[hidden, above=of l1h1] (l2h1) {$h_1$};
+    \node[hidden, right=of l2h1] (l2h2) {$h_2$};
+    \node[hidden, right=of l2h2] (l2h3) {$h_3$};
+\end{scope}
+\node[fit=(l2 box), draw, label=left:$L_2$, inner sep=10pt] {};
+
+% Nodes for hidden layer L3
+\begin{scope}[local bounding box=l3 box]
+    \node[hidden, above=of l2h1] (l3h1) {$h_1$};
+    \node[hidden, right=of l3h1] (l3h2) {$h_2$};
+    \node[hidden, right=of l3h2] (l3h3) {$h_3$};
+\end{scope}
+\node[fit=(l3 box), draw, label=left:$L_3$, inner sep=10pt] {};
+
+% Nodes for output layer
+\begin{scope}[local bounding box=output box]
+    \node[output, above=of l3h1] (y1) {\tt{lorem}};
+    \node[output, right=of y1] (y2) {\tt{ipsum}};
+    \node[output, right=of y2] (y3) {\tt{dolor}};
+\end{scope}
+\node[fit=(output box), draw, label=left:Output Tokens, inner sep=10pt] {};
+
+% input tokens to L1
+\draw[->] (x1) -- (l1h1);
+\draw[->] (x2) -- (l1h2);
+\draw[->] (x3) -- (l1h3);
+
+% attention connections from L1 to L2
+\draw[attention] (l1h1) -- (l2h1);
+\draw[attention] (l1h1) -- (l2h2);
+\draw[attention] (l1h1) -- (l2h3);
+\draw[attention] (l1h2) -- (l2h2);
+\draw[attention] (l1h2) -- (l2h3);
+\draw[attention] (l1h3) -- (l2h3);
+
+% attention connections from L2 to L3
+\draw[attention] (l2h1) -- (l3h1);
+\draw[attention] (l2h1) -- (l3h2);
+\draw[attention] (l2h1) -- (l3h3);
+\draw[attention] (l2h2) -- (l3h2);
+\draw[attention] (l2h2) -- (l3h3);
+\draw[attention] (l2h3) -- (l3h3);
+
+% final hidden layer to output tokens
+\draw[->] (l3h1) -- (y1);
+\draw[->] (l3h2) -- (y2);
+\draw[->] (l3h3) -- (y3);
+
+% autoregressive recurrence
+
+% Draw the recurrence connections with waypoints
+\node[coordinate, above right=0.75cm and 0.5cm of y1] (p1o) {};
+\node[coordinate, below right=0.75cm and 0.5cm of x1] (p1i) {};
+\draw[recurrence] (y1.north) |- (p1o) -- (p1i) -| (x2.south);
+
+\node[coordinate, above right=0.75cm and 0.5cm of y2] (p2o) {};
+\node[coordinate, below right=0.75cm and 0.5cm of x2] (p2i) {};
+\draw[recurrence] (y2.north) |- (p2o) -- (p2i) -| (x3.south);
+
+\end{tikzpicture}
+\end{document}
+```
+</details>
+
+import LatexDiagramCode from "./LatexDiagramCode";
+
+<details>
+    <summary>The response from ChatGPT.</summary>
+    <LatexDiagramCode />
+</details>
+
+The response contained the updated code, perfectly reflecting the demands of the request.
+There was one error. It defined an extra style variable, which referenced itself, creating an infinite loop in the rendering logic.
+After finding, and fixing it, $$\LaTeX$$ generated the diagram successfully.
+
+The ellipsis didn't look good, so I removed them.
+To achieve this, the model had to change the three groups of three nodes to four groups of four, extrapolating the variable names.
+It had to transform these extrapolated variable names from $$h_n$$ to $$L_mp_n$$.
+It had to make the orange recurrent connection, and the dashed ones.
+Finally it had to see the pattern that $$L_mp_n$$ had connections to all $$\forall L_xp_y$$ where $$m = x+1$$ and $$n \geq y$$.
+In other words, $$L_np_1$$ has one incoming connection from a lower layer, $$L_np_2$$ has two, and so on.
+
+Understanding this description---written with symbols---is, to most, not easy.
+It serves as an illustrative example of thinking in foreign abstractions.
+
+In fairness, the text-native manipulation that the instructions entail are not foreign to an LLM.
+And the less abstract, structured text the code presented to the LLM, made it easier to see patterns to extrapolate.
+
+Quantifying reasoning is hard, but it seems absurd to think of this task as requiring no reasoning.
