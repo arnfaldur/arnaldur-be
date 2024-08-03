@@ -6,12 +6,29 @@ topic:
 ---
 # An n-ball between n-balls
 
-Let's 
+There is a geometric thought experiment that is often used to demonstrate the counterintuitive shape of high-dimensional phenomena. This article is an interactive visual journey into the construction in the thought experiment, and the mathematics behind it.
 
-# Square with Four Circles
+## A square with Four Circles
 
-import Diagram2D from "./2d";
+We start with a $$4 \times 4$$ square. For each of the four corners, there is a unit circle (colored blue) that is both fully contained within the box, and positioned at the point closest to the corner.
+
+At the center of the box is the largest circle (colored red) that doesn't intersect with any of the corner circles.
+The red circle touches all the corner circles.
+
+import Diagram2D from "./diagrams/2d";
 
 <Diagram2D />
+
+Drag the slider to add a third dimension to the construction.
+
+import Diagram3D from "./diagrams/3d";
+
+<Diagram3D />
+
+
+
+import Diagram3D2 from "./diagrams/3d-2";
+
+<Diagram3D2 />
 
 [asdf](https://www.youtube.com/watch?v=uU_Q2a0S0zI&t=1716s)
