@@ -81,11 +81,9 @@ export default function Diagram3D2() {
 
     createEffect(() => {
       centerBall.position.z = 1 - transitionValue();
-      centerBall.scale.setScalar(Math.SQRT2/Math.cos(Math.atan(transitionValue() / Math.SQRT2)) - 1);
-      // centerBall.scale.setScalar(
-      //   (Math.sqrt(2) - 1) * (1 - transitionValue()) +
-      //     (Math.sqrt(3) - 1) * transitionValue(),
-      // );
+      centerBall.scale.setScalar(
+        Math.SQRT2 / Math.cos(Math.atan(transitionValue() / Math.SQRT2)) - 1,
+      );
     });
     setTransitionValue(inputRef?.value);
   });

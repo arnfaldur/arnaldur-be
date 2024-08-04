@@ -10,24 +10,28 @@ There is a geometric thought experiment that is often used to demonstrate the co
 
 ## A square with Four Circles
 
-We start with a $$4 \times 4$$ square. For each of the four corners, there is a unit circle (colored blue) that is both fully contained within the box, and positioned at the point closest to the corner.
+We start with a $$4 \times 4$$ square. There are four blue circles, with a radius of one, packed into the box. One in each corner.
+At the center of the box is a red circle. The red circle is as large as it can be, without overlapping the blue circles.
 
-At the center of the box is the largest circle (colored red) that doesn't intersect with any of the corner circles.
-The red circle touches all the corner circles.
+import { Diagram3D1 } from "./diagrams/3d";
 
-import Diagram2D from "./diagrams/2d";
+<Diagram3D1 />
 
-<Diagram2D />
+Drag the slider to add a third dimension.
+On this and all other 3D diagrams, you can drag the image to rotate it, and scroll to zoom.
 
-Drag the slider to add a third dimension to the construction.
+When extending the construction to 3D, many things happen.
+All the circles are now spheres, the red sphere is larger while the blue spheres aren't,
+and there are eight spheres while there were only four circles.
 
-import Diagram3D from "./diagrams/3d";
+There are more than one way to extend the construction into higher dimensions, so to make it more rigorous, we will define it like so:
+An $$n$$-dimensional version of the construction consists of an $$n$$-cube with a side length of $$4$$.
+On the midpoint between each vertex and the center of the $$n$$-cube, there is an $$n$$-ball with a radius of one.
+In the center of the $$n$$-cube there is the largest $$n$$-ball that does not intersect any other $$n$$-ball.
 
-<Diagram3D />
+With that out of the way, we can break the dimension extension into smaller pieces.
 
-
-
-import Diagram3D2 from "./diagrams/3d-2";
+import { Diagram3D2 } from "./diagrams/3d";
 
 <Diagram3D2 />
 

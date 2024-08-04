@@ -1,4 +1,4 @@
-import { createEffect, createSignal, onMount } from "solid-js";
+import { Setter, createEffect, createSignal, onMount } from "solid-js";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
@@ -22,213 +22,294 @@ const brightYellow = "d9b55e";
 
 const sphereDetail = 10;
 
-export default function Diagram3D() {
-  const diagramSize = 400;
-  let canvas: HTMLCanvasElement;
-  let inputRef: HTMLInputElement;
-  const [transitionValue, setTransitionValue] = createSignal(1 / 1000000);
+export function Diagram3D1() {
+  const [transitionValue, setTransitionValue] = createSignal(0);
 
-  // Wait for the DOM to be fully loaded before drawing on the canvas
-  onMount(() => {
-    if (!canvas.getContext) {
-      return;
-    }
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      alpha: true,
-      antialias: true,
-      powerPreference: "low-power",
-    });
+  const initCanvas = (canvas) => {
+    canvas.setAttribute("width", getComputedStyle(canvas.parentNode).width);
+    diag3d1(canvas, transitionValue);
+  };
 
-    const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(-2, 2, 2, -2, 0.1, 1000);
-    camera.position.z = 10;
-    const controls = new OrbitControls(camera, canvas);
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 0;
+  return (
+    <>
+      <canvas ref={initCanvas} height="400" />
+      <fieldset>
+        <legend>Add 3rd dimension</legend>
+        <Slider setValue={setTransitionValue} />
+      </fieldset>
+    </>
+  );
+}
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
-    scene.add(ambientLight);
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 3);
-    directionalLight.position.set(0, 0, 1);
-    scene.add(directionalLight);
+export function Diagram3D2() {
+  const [transitionValue, setTransitionValue] = createSignal(0);
 
+  const initCanvas = (canvas) => {
+    canvas.setAttribute("width", getComputedStyle(canvas.parentNode).width);
+    diag3d2(canvas, transitionValue);
+  };
+
+  return (
+    <>
+      <canvas ref={initCanvas} height="400" />
+      <fieldset>
+        <legend>Add 3rd dimension</legend>
+        <Slider setValue={setTransitionValue} />
+      </fieldset>
+    </>
+  );
+}
+
+const Slider = (props) => {
+  return (
+    <input
+      ref={(el) => props.setValue(el.value)}
+      type="range"
+      value={0}
+      max={1}
+      step="any"
+      onInput={(e) => props.setValue(e.target.value)}
+      style={{
+        scale: "1.5",
+        width: "66%",
+        margin: "0 auto 0.75rem auto",
+      }}
+    />
+  );
+};
+
+const diag3d1 = (canvas: HTMLCanvasElement, transitionValue: Function) => {
+  const { scene, directionalLight } = setupScene(canvas);
+  {
     const group = new THREE.Group();
 
     // Draw containing box
-    {
-      const points = [
-        new THREE.Vector3(-2, 2, 0),
-        new THREE.Vector3(2, 2, 0),
-        new THREE.Vector3(2, -2, 0),
-        new THREE.Vector3(-2, -2, 0),
-      ];
-      const geometry = new THREE.BufferGeometry().setFromPoints(points);
-      const material = new THREE.LineBasicMaterial({ color: 0x52753d });
-      const line = new THREE.LineLoop(geometry, material);
-      scene.add(line);
-    }
+    const box = createBox();
+    // box.scale.z = 0;
+    group.add(box);
 
     // Draw the four circles
     [-1, 1].forEach((y) => {
       [-1, 1].forEach((x) => {
-        const geometry = new THREE.IcosahedronGeometry(1, sphereDetail);
-        const material = new THREE.MeshStandardMaterial({ color: 0x42538b });
-        const sphere = new THREE.Mesh(geometry, material);
-        sphere.position.set(y, x, 0);
-        group.add(sphere);
+        [-1, 1].forEach((z) => {
+          const geometry = new THREE.IcosahedronGeometry(1, sphereDetail);
+          const material = new THREE.MeshStandardMaterial({ color: 0x42538b });
+          const outerBall = new THREE.Mesh(geometry, material);
+          outerBall.position.set(y, x, z);
+          group.add(outerBall);
+        });
       });
     });
 
     // Draw the center circle
-    const geometry = new THREE.IcosahedronGeometry(
-      Math.sqrt(2) - 1,
-      sphereDetail,
-    );
+    const geometry = new THREE.IcosahedronGeometry(1, sphereDetail);
     const material = new THREE.MeshStandardMaterial({ color: 0x873839 });
-    const sphere = new THREE.Mesh(geometry, material);
-    group.add(sphere);
+    const centerBall = new THREE.Mesh(geometry, material);
+    centerBall.scale.setScalar(Math.SQRT2 - 1);
+    group.add(centerBall);
 
     scene.add(group);
 
-    function animate() {
-      controls.update();
-      renderer.render(scene, camera);
-    }
-    renderer.setAnimationLoop(animate);
-
     createEffect(() => {
-      group.scale.set(1, 1, Math.max(1 / 1000000, transitionValue()));
+      group.scale.set(1, 1, Math.max(1 / 10000, transitionValue()));
       directionalLight.position.set(
         Math.pow(transitionValue(), 2),
         Math.pow(transitionValue(), 2),
         1,
       );
+      centerBall.scale.setScalar(
+        (Math.SQRT2 - 1) * (1 - transitionValue()) +
+          (Math.sqrt(3) - 1) * transitionValue(),
+      );
+      // centerBall.scale.setScalar(
+      //   Math.SQRT2 / Math.cos(Math.atan(transitionValue() / Math.SQRT2)) - 1,
+      // );
     });
-    // // Read the radio button to trigger the above effect
-    setTransitionValue(inputRef?.value);
-  });
-  return (
-    <div>
-      <fieldset
-        style={{
-          width: "min-content",
-          "grid-gap": "1em",
-          "grid-template-columns": "1fr 1fr",
-          "grid-template-rows": "auto",
-        }}
-      >
-        <legend>3D packing</legend>
-        <canvas
-          ref={canvas}
-          id="myCanvas"
-          width={diagramSize}
-          height={diagramSize}
-          style={{ "grid-column": "1 / -1", "justify-self": "center" }}
-        />
+  }
+};
 
-        <fieldset
-          class="accent"
-          style={{ display: "flex", "justify-content": "space-around" }}
-        >
-          <legend>Add 3rd dimension</legend>
-          <label
-            style={{
-              "justify-self": "center",
-              "margin-bottom": "0.5em",
-              scale: "1.5",
-              "user-select": "none",
-            }}
-          >
-            <input
-              ref={inputRef}
-              type="range"
-              value={0}
-              min={0}
-              max={1}
-              step={1 / 1024}
-              onInput={(e) => setTransitionValue(e.target.value)}
-            />
-          </label>
-        </fieldset>
-      </fieldset>
-    </div>
-  );
-}
+const diag3d2 = (canvas: HTMLCanvasElement, transitionValue: Function) => {
+  const { scene } = setupScene(canvas);
 
-function drawWithoutIntersections(ctx: CanvasRenderingContext2D) {
-  ctx.reset();
-  const squareSize = ctx.canvas.height;
-  const quart = squareSize / 4;
+  const firstBallGroup = new THREE.Group();
 
-  // Draw the square
-  ctx.strokeStyle = `#${green}`;
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(0, 0, squareSize, squareSize);
+  // Add containing box
+  const box = createBox();
+  scene.add(box);
 
-  // Set the radius for the circles
-  const radius = quart;
-
-  ctx.fillStyle = `#${blue}`;
-  // ctx.fillStyle = `${getComputedStyle(ctx.canvas).getPropertyValue("--accent")}`;
-
-  // Draw the four circles
-  [1, 3].forEach((y) => {
-    [1, 3].forEach((x) => {
-      ctx.beginPath();
-      ctx.arc(quart * x, quart * y, radius, 0, Math.PI * 2);
-      ctx.fill();
+  // Add the outer spheres
+  [-1, 1].forEach((y) => {
+    [-1, 1].forEach((x) => {
+      const geometry = new THREE.IcosahedronGeometry(1, sphereDetail);
+      const material = new THREE.MeshStandardMaterial({ color: 0x42538b });
+      const outerBall = new THREE.Mesh(geometry, material);
+      outerBall.position.set(y, x, 0);
+      firstBallGroup.add(outerBall);
     });
   });
+  scene.add(firstBallGroup);
 
-  // Draw the inner circle
-  ctx.fillStyle = `#${red}`;
-  // ctx.fillStyle = `${getComputedStyle(ctx.canvas).getPropertyValue("--danger")}`;
-  ctx.beginPath();
-  ctx.arc(quart * 2, quart * 2, (Math.sqrt(2) - 1) * radius, 0, Math.PI * 2);
-  ctx.fill();
+  const secondBallGroup = new THREE.Group();
+  [-1, 1].forEach((y) => {
+    [-1, 1].forEach((x) => {
+      const geometry = new THREE.IcosahedronGeometry(1, sphereDetail);
+      const material = new THREE.MeshStandardMaterial({ color: 0x42538b });
+      const outerBall = new THREE.Mesh(geometry, material);
+      outerBall.position.set(y, x, 0);
+      secondBallGroup.add(outerBall);
+    });
+  });
+  secondBallGroup.position.z = -1;
+  scene.add(secondBallGroup);
+
+  // Draw the center circle
+  const centerBallGroup = new THREE.Group();
+  const geometry = new THREE.IcosahedronGeometry(1, sphereDetail);
+  const material = new THREE.MeshStandardMaterial({ color: 0x873839 });
+  const centerBall = new THREE.Mesh(geometry, material);
+  centerBall.scale.setScalar(Math.SQRT2 - 1);
+  centerBallGroup.add(centerBall);
+
+  scene.add(centerBallGroup);
+
+  // Draw contact points
+
+  const contactPointGroup = new THREE.Group();
+  [-1, 1].forEach((y) => {
+    [-1, 1].forEach((x) => {
+      const contactPoint = createContactPoint();
+      contactPoint.position.set(y, x, -2);
+      contactPointGroup.add(contactPoint);
+    });
+  });
+  scene.add(contactPointGroup);
+
+  createEffect(() => {
+    const animA = easeInOutQuad(
+      THREE.MathUtils.clamp(transitionValue() * 3 - 0, 0, 1),
+    );
+    const animB = easeInOutQuad(
+      THREE.MathUtils.clamp(transitionValue() * 3 - 1, 0, 1),
+    );
+    const animC = easeInOutQuad(
+      THREE.MathUtils.clamp(transitionValue() * 3 - 2, 0, 1),
+    );
+    box.position.z = -animA + animB;
+    box.scale.z = animA;
+    centerBallGroup.scale.z = Math.max(1 / 10000, animA);
+    firstBallGroup.scale.z = Math.max(1 / 10000, animA);
+    firstBallGroup.position.z = animB;
+    centerBall.scale.setScalar(
+      Math.SQRT2 / Math.cos(Math.atan(animB / Math.SQRT2)) - 1,
+    );
+    secondBallGroup.children.map((sphere) => {
+      sphere.scale.setScalar(animC);
+    });
+  });
+};
+
+function setupScene(canvas: HTMLCanvasElement) {
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    alpha: true,
+    antialias: true,
+    powerPreference: "low-power",
+  });
+  renderer.setSize(canvas.width, canvas.height);
+  let aspectRatio = canvas.width / canvas.height;
+
+  const scene = new THREE.Scene();
+  const cH = 2.5; // camera height
+  let cW = cH * aspectRatio; // camera width
+  const camera = new THREE.OrthographicCamera(-cW, cW, cH, -cH, 0.1, 1000);
+
+  window.addEventListener("resize", () => {
+    canvas.setAttribute("width", getComputedStyle(canvas.parentNode).width);
+    renderer.setSize(canvas.width, canvas.height);
+    aspectRatio = canvas.width / canvas.height;
+    cW = cH * aspectRatio;
+    camera.left = -cW;
+    camera.right = cW;
+    camera.updateProjectionMatrix();
+  });
+
+  camera.position.z = 10;
+  const controls = new OrbitControls(camera, canvas);
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0;
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+  scene.add(ambientLight);
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 3);
+  directionalLight.position.set(0, 0, 1);
+  scene.add(directionalLight);
+
+  function animate() {
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  renderer.setAnimationLoop(animate);
+
+  return { scene, controls, renderer, camera, directionalLight };
 }
 
-function drawWithIntersections(ctx: CanvasRenderingContext2D) {
-  const squareSize = ctx.canvas.height;
-  const quart = squareSize / 4;
-  ctx.reset();
-  drawWithoutIntersections(ctx);
-  drawCross(quart, quart * 2, 5, ctx);
-  drawCross(quart * 3, quart * 2, 5, ctx);
-  drawCross(quart * 2, quart, 5, ctx);
-  drawCross(quart * 2, quart * 3, 5, ctx);
+function createBox() {
+  const points = [
+    new THREE.Vector3(-2, -2, -2),
+    new THREE.Vector3(-2, -2, 2),
+    new THREE.Vector3(-2, -2, -2),
+    new THREE.Vector3(-2, 2, -2),
+    new THREE.Vector3(-2, -2, -2),
+    new THREE.Vector3(2, -2, -2),
 
-  const innerRadius = ((Math.sqrt(2) - 1) * quart) / Math.sqrt(2);
+    new THREE.Vector3(-2, 2, 2),
+    new THREE.Vector3(2, 2, 2),
+    new THREE.Vector3(-2, 2, 2),
+    new THREE.Vector3(-2, -2, 2),
+    new THREE.Vector3(-2, 2, 2),
+    new THREE.Vector3(-2, 2, -2),
 
-  drawPlus(quart * 2 + innerRadius, quart * 2 + innerRadius, 5, ctx);
-  drawPlus(quart * 2 + innerRadius, quart * 2 - innerRadius, 5, ctx);
-  drawPlus(quart * 2 - innerRadius, quart * 2 + innerRadius, 5, ctx);
-  drawPlus(quart * 2 - innerRadius, quart * 2 - innerRadius, 5, ctx);
+    new THREE.Vector3(2, -2, 2),
+    new THREE.Vector3(-2, -2, 2),
+    new THREE.Vector3(2, -2, 2),
+    new THREE.Vector3(2, 2, 2),
+    new THREE.Vector3(2, -2, 2),
+    new THREE.Vector3(2, -2, -2),
+
+    new THREE.Vector3(2, 2, -2),
+    new THREE.Vector3(-2, 2, -2),
+    new THREE.Vector3(2, 2, -2),
+    new THREE.Vector3(2, -2, -2),
+    new THREE.Vector3(2, 2, -2),
+    new THREE.Vector3(2, 2, 2),
+  ];
+  const geometry = new THREE.BufferGeometry().setFromPoints(points);
+  const material = new THREE.LineBasicMaterial({ color: 0x52753d });
+  const box = new THREE.LineSegments(geometry, material);
+  return box;
 }
 
-function drawCross(x, y, size, ctx: CanvasRenderingContext2D) {
-  size = size / Math.sqrt(2);
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = `#${brightYellow}`;
-  ctx.beginPath();
-  ctx.moveTo(x - size, y - size);
-  ctx.lineTo(x + size, y + size);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(x - size, y + size);
-  ctx.lineTo(x + size, y - size);
-  ctx.stroke();
+function createContactPoint() {
+  const r = 0.05;
+  const points = [
+    new THREE.Vector3(-r, 0, 0),
+    new THREE.Vector3(r, 0, 0),
+    new THREE.Vector3(0, -r, 0),
+    new THREE.Vector3(0, r, 0),
+    new THREE.Vector3(0, 0, -r),
+    new THREE.Vector3(0, 0, r),
+  ];
+  const geometry = new THREE.BufferGeometry().setFromPoints(points);
+  const material = new THREE.LineBasicMaterial({ color: 0xd9b55e });
+  material.depthTest = false;
+  const contactPoint = new THREE.LineSegments(geometry, material);
+  contactPoint.renderOrder = 999;
+  return contactPoint;
 }
-function drawPlus(x, y, size, ctx: CanvasRenderingContext2D) {
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = `#${brightYellow}`;
-  ctx.beginPath();
-  ctx.moveTo(x - size, y);
-  ctx.lineTo(x + size, y);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(x, y - size);
-  ctx.lineTo(x, y + size);
-  ctx.stroke();
+
+function easeInOutQuad(x: number): number {
+  return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+}
+function easeInOutSine(x: number): number {
+  return -(Math.cos(Math.PI * x) - 1) / 2;
 }
