@@ -1,5 +1,53 @@
 import * as THREE from "three";
-import { sphereDetail } from "./3d";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+
+export const sphereDetail = 10;
+
+export function setupScene(canvas: HTMLCanvasElement) {
+  const renderer = new THREE.WebGLRenderer({
+    canvas,
+    alpha: true,
+    antialias: true,
+    powerPreference: "low-power",
+  });
+  renderer.setSize(canvas.width, canvas.height);
+  let aspectRatio = canvas.width / canvas.height;
+
+  const scene = new THREE.Scene();
+  const cH = 2.5; // camera height
+  let cW = cH * aspectRatio; // camera width
+  const camera = new THREE.OrthographicCamera(-cW, cW, cH, -cH, 0.1, 1000);
+
+  window.addEventListener("resize", () => {
+    if (canvas.parentElement === null) return;
+    canvas.setAttribute("width", getComputedStyle(canvas.parentElement).width);
+    renderer.setSize(canvas.width, canvas.height);
+    aspectRatio = canvas.width / canvas.height;
+    cW = cH * aspectRatio;
+    camera.left = -cW;
+    camera.right = cW;
+    camera.updateProjectionMatrix();
+  });
+
+  camera.position.z = 10;
+  const controls = new OrbitControls(camera, canvas);
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0;
+
+  const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+  scene.add(ambientLight);
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 3);
+  directionalLight.position.set(0, 0, 1);
+  scene.add(directionalLight);
+
+  function animate() {
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  renderer.setAnimationLoop(animate);
+
+  return { scene, controls, renderer, camera, directionalLight };
+}
 
 export function createBall(
   materialParameters: THREE.MeshStandardMaterialParameters | undefined,

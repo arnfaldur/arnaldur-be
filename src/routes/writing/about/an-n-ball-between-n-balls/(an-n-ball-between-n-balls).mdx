@@ -15,9 +15,9 @@ At the center of the box is a red circle. The red circle is as large as it can b
 Drag the slider to add a third dimension.
 On this and all other 3D diagrams, you can drag the image to rotate it, and scroll to zoom.
 
-import { Diagram3D2 } from "./diagrams/3d";
+import { Diagram1 } from "./diagrams/Diagram1";
 
-<Diagram3D2 />
+<Diagram1 />
 
 When extending the construction to 3D, many things happen.
 All the circles are now spheres, the red sphere is larger while the blue spheres aren't,
@@ -35,9 +35,15 @@ Finally, four new spheres appear, completing the 3D version of the construction.
 
 We want to extend it into any amount of dimensions but before that, we'll build some intuitions.
 
-import { Diagram3D3 } from "./diagrams/3d";
+import { Diagram2 } from "./diagrams/Diagram2";
 
-<Diagram3D3 />
+<Diagram2 />
+
+In the default configuration, the intersecting plane is the same as the construction in 2D.
+We see that when we rotate the plane along the center of the left balls, the balls on the right, vanish and are replaced---within the plane---by the two balls, diagonally across.
+There are a few important behaviors to note from this interactable. 
+1. When the red ball migrates from the 2D center to the 3D center, it shrinks and vanishes from the 2D plane.
+2. As seen in the isolate plane perspective, the left 
 
 
 [asdf](https://www.youtube.com/watch?v=uU_Q2a0S0zI&t=1716s)
