@@ -75,6 +75,7 @@ export const Diagram3D3 = Diagram3D3inner;
 function Diagram3D3inner() {
   const [centerSphere, setCenterSphere] = createSignal(0);
   const [diagonalization, setDiagonalization] = createSignal(0);
+  const [linkSliders, setLinkSliders] = createSignal(false);
 
   const initCanvas = (canvas: HTMLCanvasElement) => {
     if (canvas.parentElement === null) return;
@@ -82,13 +83,31 @@ function Diagram3D3inner() {
     diag3d3(canvas, centerSphere, diagonalization);
   };
 
+  let a: HTMLInputElement;
+  let b: HTMLInputElement;
+  createEffect(() => {
+    if (linkSliders()) {
+      const transformed = Math.tan((diagonalization() * Math.PI) / 4);
+      // const transformed = diagonalization();
+      setCenterSphere(transformed);
+      a.value = transformed;
+    }
+  });
+  // createEffect(() => {
+  //   if (linkSliders()) {
+  //     const transformed = Math.atan(centerSphere());
+  //     setDiagonalization(transformed);
+  //     b.value = transformed.toString();
+  //   }
+  // });
   return (
     <>
       <canvas ref={initCanvas} height="400" />
       <fieldset>
         <legend>Add 3rd dimension</legend>
-        <Slider setValue={setCenterSphere} />
-        <Slider setValue={setDiagonalization} />
+        <Slider ref={a} setValue={setCenterSphere} />
+        <Slider ref={b} setValue={setDiagonalization} />
+        <Checkbox setValue={setLinkSliders}>Link sliders</Checkbox>
       </fieldset>
     </>
   );
@@ -113,7 +132,12 @@ const Checkbox = (props) => (
 
 const Slider = (props) => (
   <input
-    ref={(el) => props.setValue(el.value)}
+    ref={(el) => {
+      props.setValue(el.value);
+      if (props.ref) {
+        props.ref(el);
+      }
+    }}
     type="range"
     value={0}
     max={1}
@@ -307,7 +331,7 @@ const diag3d2 = (
 
 const diag3d3 = (
   canvas: HTMLCanvasElement,
-  centerSphere: Function,
+  centerTransition: Function,
   diagonalization: Function,
 ) => {
   const { scene, directionalLight, camera, renderer } = setupScene(canvas);
@@ -378,6 +402,7 @@ const diag3d3 = (
   const geometry = new THREE.CircleGeometry(1, sphereDetail * 6);
   const material = new THREE.MeshStandardMaterial({
     color: 0x873839,
+    side: THREE.DoubleSide,
   });
   const centerCircle = new THREE.Mesh(geometry, material);
   centerCircle.position.z = 1;
@@ -387,15 +412,15 @@ const diag3d3 = (
   scene.add(centerCircleGroup);
 
   createEffect(() => {
-    const diag = easeInOutQuad(diagonalization());
-    const rads1 = (diag * Math.PI) / 4;
-    const secant1 = 1 / Math.cos(rads1);
+    const animDiag = diagonalization();
+    const rads1 = (animDiag * Math.PI) / 4;
 
     // pivot rotating circles
     firstCircleGroup.children.forEach((circle) => {
       circle.rotation.y = rads1;
     });
     // orthogonal disappearing circles
+    const secant1 = 1 / Math.cos(rads1);
     const secTrigScale1 = 2 / secant1;
     secondCircleGroup.children.forEach((circle) => {
       circle.rotation.y = rads1;
@@ -407,17 +432,13 @@ const diag3d3 = (
     });
 
     // diagonal appearing circles
-    const rads2 = ((1 - diag) * Math.PI) / 4;
+    const rads2 = ((1 - animDiag) * Math.PI) / 4;
     const secant2 = 1 / Math.cos(rads2);
     const secTrigScale2 = (2 * Math.SQRT2) / secant2;
     thirdCircleGroup.children.forEach((circle) => {
       circle.rotation.y = rads1;
-      circle.position.z =
-        1 - ((Math.cos(rads2) - Math.sin(rads2)) / Math.SQRT2) * secTrigScale2;
-      circle.position.x =
-        ((Math.cos(rads2) + Math.sin(rads2)) / Math.SQRT2) * secTrigScale2 - 1;
-
-      // circle.scale.setScalar(1);
+      circle.position.z = 1 - Math.sin(rads1) * secTrigScale2;
+      circle.position.x = Math.cos(rads1) * secTrigScale2 - 1;
       circle.scale.setScalar(
         Math.cos(Math.asin(Math.tan(rads2) * secTrigScale2)),
       );
@@ -425,24 +446,22 @@ const diag3d3 = (
 
     // center circle
     centerCircle.rotation.y = rads1;
-  });
-
-  createEffect(() => {
-    // animation controllers
-    const animA = easeInOutQuad(
-      THREE.MathUtils.clamp(centerSphere() * 3 - 0, 0, 1),
-    );
-    const animB = easeInOutQuad(
-      THREE.MathUtils.clamp(centerSphere() * 3 - 1, 0, 1),
-    );
-    const animC = easeInOutQuad(
-      THREE.MathUtils.clamp(centerSphere() * 3 - 2, 0, 1),
+    const animCenter = centerTransition();
+    const rads3 = (animDiag * Math.PI) / 4 - Math.atan(animCenter);
+    const secant3 = 1 / Math.cos(rads3);
+    const secTrigScale3 = Math.sqrt(1 + Math.pow(animCenter, 2)) / secant3;
+    centerCircle.position.z = 1 - Math.sin(rads1) * secTrigScale3;
+    centerCircle.position.x = Math.cos(rads1) * secTrigScale3 - 1;
+    const centerBallScale = Math.sqrt(animCenter * animCenter + 2) - 1;
+    centerCircle.scale.setScalar(
+      Math.cos(Math.asin((Math.tan(rads3) * secTrigScale3) / centerBallScale)) *
+        centerBallScale,
     );
 
-    // Math.SQRT2 / Math.cos(Math.atan(animB / Math.SQRT2)) - 1 simplifies to:
-    const centerBallScale = Math.sqrt(animB * animB + 2) - 1;
+    // center ball
     centerBall.scale.setScalar(centerBallScale);
-    centerBall.position.z = 1 - animB;
+    centerBall.position.z = 1 - animCenter;
+    console.log("diff", centerBall.position.clone().sub(centerCircle.position));
   });
 };
 
