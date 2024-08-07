@@ -1,15 +1,14 @@
-import { Setter, createEffect, createSignal, onMount } from "solid-js";
+import { clientOnly } from "@solidjs/start";
+import { createEffect, createSignal } from "solid-js";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-// \definecolor{green}{HTML}{52753d}
-// \definecolor{red}{HTML}{873839}
-// \definecolor{purple}{HTML}{644475}
-// \definecolor{gray}{HTML}{595959}
-// \definecolor{blue}{HTML}{42538b}
-// \definecolor{cyan}{HTML}{328486}
-// \definecolor{orange}{HTML}{e09166}
-//
+import {
+  createBox,
+  createBall,
+  createContactPoint,
+  easeInOutQuad,
+} from "./utilities";
 
 const green = "52753d";
 const red = "873839";
@@ -20,13 +19,14 @@ const cyan = "328486";
 const orange = "e09166";
 const brightYellow = "d9b55e";
 
-const sphereDetail = 10;
+export const sphereDetail = 10;
 
 export function Diagram3D1() {
   const [transitionValue, setTransitionValue] = createSignal(0);
 
-  const initCanvas = (canvas) => {
-    canvas.setAttribute("width", getComputedStyle(canvas.parentNode).width);
+  const initCanvas = (canvas: HTMLCanvasElement) => {
+    if (canvas.parentElement === null) return;
+    canvas.setAttribute("width", getComputedStyle(canvas.parentElement).width);
     diag3d1(canvas, transitionValue);
   };
 
@@ -41,12 +41,20 @@ export function Diagram3D1() {
   );
 }
 
-export function Diagram3D2() {
-  const [transitionValue, setTransitionValue] = createSignal(0);
+// export const Diagram3D2 = clientOnly(() =>
+//   Promise.resolve({ default: Diagram3D2inner }),
+// );
+export const Diagram3D2 = Diagram3D2inner;
 
-  const initCanvas = (canvas) => {
-    canvas.setAttribute("width", getComputedStyle(canvas.parentNode).width);
-    diag3d2(canvas, transitionValue);
+function Diagram3D2inner() {
+  const [transitionValue, setTransitionValue] = createSignal(0);
+  const [contacts, setContacts] = createSignal(false);
+  const [disect, setDisect] = createSignal(false);
+
+  const initCanvas = (canvas: HTMLCanvasElement) => {
+    if (canvas.parentElement === null) return;
+    canvas.setAttribute("width", getComputedStyle(canvas.parentElement).width);
+    diag3d2(canvas, transitionValue, contacts, disect);
   };
 
   return (
@@ -55,28 +63,69 @@ export function Diagram3D2() {
       <fieldset>
         <legend>Add 3rd dimension</legend>
         <Slider setValue={setTransitionValue} />
+        <Checkbox setValue={setContacts}>Show contact points</Checkbox>
+        <Checkbox setValue={setDisect}>Disect balls</Checkbox>
       </fieldset>
     </>
   );
 }
 
-const Slider = (props) => {
+export const Diagram3D3 = Diagram3D3inner;
+
+function Diagram3D3inner() {
+  const [centerSphere, setCenterSphere] = createSignal(0);
+  const [diagonalization, setDiagonalization] = createSignal(0);
+
+  const initCanvas = (canvas: HTMLCanvasElement) => {
+    if (canvas.parentElement === null) return;
+    canvas.setAttribute("width", getComputedStyle(canvas.parentElement).width);
+    diag3d3(canvas, centerSphere, diagonalization);
+  };
+
   return (
-    <input
-      ref={(el) => props.setValue(el.value)}
-      type="range"
-      value={0}
-      max={1}
-      step="any"
-      onInput={(e) => props.setValue(e.target.value)}
-      style={{
-        scale: "1.5",
-        width: "66%",
-        margin: "0 auto 0.75rem auto",
-      }}
-    />
+    <>
+      <canvas ref={initCanvas} height="400" />
+      <fieldset>
+        <legend>Add 3rd dimension</legend>
+        <Slider setValue={setCenterSphere} />
+        <Slider setValue={setDiagonalization} />
+      </fieldset>
+    </>
   );
-};
+}
+
+const Checkbox = (props) => (
+  <label
+    style={{
+      scale: "1.25",
+      width: "calc(100% / 1.25)",
+      margin: "0 auto 0.75rem auto",
+    }}
+  >
+    <input
+      ref={(el) => props.setValue(el.checked)}
+      type="checkbox"
+      onInput={(e) => props.setValue(e.target.checked)}
+    />
+    {props.children}
+  </label>
+);
+
+const Slider = (props) => (
+  <input
+    ref={(el) => props.setValue(el.value)}
+    type="range"
+    value={0}
+    max={1}
+    step="any"
+    onInput={(e) => props.setValue(e.target.value)}
+    style={{
+      scale: "1.5",
+      width: "calc(100% / 1.5)",
+      margin: "0 auto 0.75rem auto",
+    }}
+  />
+);
 
 const diag3d1 = (canvas: HTMLCanvasElement, transitionValue: Function) => {
   const { scene, directionalLight } = setupScene(canvas);
@@ -121,52 +170,50 @@ const diag3d1 = (canvas: HTMLCanvasElement, transitionValue: Function) => {
         (Math.SQRT2 - 1) * (1 - transitionValue()) +
           (Math.sqrt(3) - 1) * transitionValue(),
       );
-      // centerBall.scale.setScalar(
-      //   Math.SQRT2 / Math.cos(Math.atan(transitionValue() / Math.SQRT2)) - 1,
-      // );
     });
   }
 };
 
-const diag3d2 = (canvas: HTMLCanvasElement, transitionValue: Function) => {
-  const { scene } = setupScene(canvas);
+const diag3d2 = (
+  canvas: HTMLCanvasElement,
+  transitionValue: Function,
+  contacts: Function,
+  disect: Function,
+) => {
+  const { scene, directionalLight, camera, renderer } = setupScene(canvas);
+  let cameraShiftMemory = 0;
 
-  const firstBallGroup = new THREE.Group();
+  const clippingPlane = new THREE.Plane(new THREE.Vector3(1, -1, 0), 0);
 
   // Add containing box
   const box = createBox();
   scene.add(box);
 
+  const firstBallGroup = new THREE.Group();
+
   // Add the outer spheres
   [-1, 1].forEach((y) => {
     [-1, 1].forEach((x) => {
-      const geometry = new THREE.IcosahedronGeometry(1, sphereDetail);
-      const material = new THREE.MeshStandardMaterial({ color: 0x42538b });
-      const outerBall = new THREE.Mesh(geometry, material);
+      const outerBall = createBall({
+        color: 0x42538b,
+        clippingPlanes: [clippingPlane],
+      });
       outerBall.position.set(y, x, 0);
       firstBallGroup.add(outerBall);
     });
   });
   scene.add(firstBallGroup);
 
-  const secondBallGroup = new THREE.Group();
-  [-1, 1].forEach((y) => {
-    [-1, 1].forEach((x) => {
-      const geometry = new THREE.IcosahedronGeometry(1, sphereDetail);
-      const material = new THREE.MeshStandardMaterial({ color: 0x42538b });
-      const outerBall = new THREE.Mesh(geometry, material);
-      outerBall.position.set(y, x, 0);
-      secondBallGroup.add(outerBall);
-    });
-  });
+  const secondBallGroup = firstBallGroup.clone();
   secondBallGroup.position.z = -1;
   scene.add(secondBallGroup);
 
   // Draw the center circle
   const centerBallGroup = new THREE.Group();
-  const geometry = new THREE.IcosahedronGeometry(1, sphereDetail);
-  const material = new THREE.MeshStandardMaterial({ color: 0x873839 });
-  const centerBall = new THREE.Mesh(geometry, material);
+  const centerBall = createBall({
+    color: 0x873839,
+    clippingPlanes: [clippingPlane],
+  });
   centerBall.scale.setScalar(Math.SQRT2 - 1);
   centerBallGroup.add(centerBall);
 
@@ -174,17 +221,37 @@ const diag3d2 = (canvas: HTMLCanvasElement, transitionValue: Function) => {
 
   // Draw contact points
 
-  const contactPointGroup = new THREE.Group();
+  const firstContactPointGroup = new THREE.Group();
   [-1, 1].forEach((y) => {
     [-1, 1].forEach((x) => {
       const contactPoint = createContactPoint();
-      contactPoint.position.set(y, x, -2);
-      contactPointGroup.add(contactPoint);
+      contactPoint.position.set(
+        y * (1 - Math.SQRT2 / 2),
+        x * (1 - Math.SQRT2 / 2),
+        0,
+      );
+      firstContactPointGroup.add(contactPoint);
     });
   });
-  scene.add(contactPointGroup);
+  scene.add(firstContactPointGroup);
+  const secondContactPointGroup = new THREE.Group();
+  [-1, 1].forEach((y) => {
+    [-1, 1].forEach((x) => {
+      const contactPoint = createContactPoint();
+      const lateralScale = 1 - Math.sqrt(3) / 3;
+      contactPoint.position.set(
+        y * lateralScale,
+        x * lateralScale,
+        Math.sqrt(3) / 3 - 1,
+      );
+      secondContactPointGroup.add(contactPoint);
+    });
+  });
+  secondContactPointGroup.visible = false;
+  scene.add(secondContactPointGroup);
 
   createEffect(() => {
+    // animation controllers
     const animA = easeInOutQuad(
       THREE.MathUtils.clamp(transitionValue() * 3 - 0, 0, 1),
     );
@@ -194,17 +261,188 @@ const diag3d2 = (canvas: HTMLCanvasElement, transitionValue: Function) => {
     const animC = easeInOutQuad(
       THREE.MathUtils.clamp(transitionValue() * 3 - 2, 0, 1),
     );
+    const cameraShift = Math.max(0, animA - cameraShiftMemory);
+    cameraShiftMemory = Math.max(cameraShiftMemory, animA);
+    // First phase
     box.position.z = -animA + animB;
     box.scale.z = animA;
     centerBallGroup.scale.z = Math.max(1 / 10000, animA);
     firstBallGroup.scale.z = Math.max(1 / 10000, animA);
+    directionalLight.position.set(Math.pow(animA, 2), Math.pow(animA, 2), 1);
+    camera.position.x -= cameraShift * 6;
+    camera.position.y += cameraShift * 4;
+    // Second phase
     firstBallGroup.position.z = animB;
-    centerBall.scale.setScalar(
-      Math.SQRT2 / Math.cos(Math.atan(animB / Math.SQRT2)) - 1,
-    );
+    // Math.SQRT2 / Math.cos(Math.atan(animB / Math.SQRT2)) - 1 simplifies to:
+    const centerBallScale = Math.sqrt(animB * animB + 2) - 1;
+    centerBall.scale.setScalar(centerBallScale);
+    // Third phase
     secondBallGroup.children.map((sphere) => {
       sphere.scale.setScalar(animC);
     });
+    // Contact points
+    const sphereAngle = Math.atan(animB / Math.SQRT2);
+    firstContactPointGroup.children.map((contactPoint, i) => {
+      const y = [-1, -1, 1, 1][i];
+      const x = [-1, 1, -1, 1][i];
+      const lateralScale =
+        ((Math.cos(sphereAngle) * Math.SQRT2) / 2) * centerBallScale;
+      contactPoint.position.set(
+        y * lateralScale,
+        x * lateralScale,
+        Math.sin(sphereAngle) * centerBallScale,
+      );
+    });
+  });
+  createEffect(() => {
+    firstContactPointGroup.visible = contacts();
+  });
+  createEffect(() => {
+    secondContactPointGroup.visible = transitionValue() >= 1 && contacts();
+  });
+  createEffect(() => {
+    renderer.localClippingEnabled = disect();
+  });
+};
+
+const diag3d3 = (
+  canvas: HTMLCanvasElement,
+  centerSphere: Function,
+  diagonalization: Function,
+) => {
+  const { scene, directionalLight, camera, renderer } = setupScene(canvas);
+  directionalLight.position.set(1, 1, 1);
+
+  // Add containing box
+  const box = createBox();
+  scene.add(box);
+
+  const outerBallGroup = new THREE.Group();
+
+  // Add the outer spheres
+  [-1, 1].forEach((z) => {
+    [-1, 1].forEach((y) => {
+      [-1, 1].forEach((x) => {
+        const outerBall = createBall({
+          color: 0x42538b,
+          transparent: true,
+          opacity: 0.25,
+        });
+        outerBall.position.set(y, x, z);
+        outerBallGroup.add(outerBall);
+      });
+    });
+  });
+  scene.add(outerBallGroup);
+
+  // Draw the center ball
+  const centerBallGroup = new THREE.Group();
+  const centerBall = createBall({
+    color: 0x873839,
+    transparent: true,
+    opacity: 0.25,
+  });
+  centerBall.scale.setScalar(Math.sqrt(3) - 1);
+  centerBallGroup.add(centerBall);
+
+  scene.add(centerBallGroup);
+
+  const firstCircleGroup = new THREE.Group();
+  [-1, 1].forEach((y) => {
+    const geometry = new THREE.CircleGeometry(1, sphereDetail * 6);
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x42538b,
+      side: THREE.DoubleSide,
+    });
+    const outerCircle = new THREE.Mesh(geometry, material);
+    outerCircle.position.set(-1, y, 1);
+    firstCircleGroup.add(outerCircle);
+  });
+  scene.add(firstCircleGroup);
+
+  const secondCircleGroup = firstCircleGroup.clone();
+  secondCircleGroup.children.forEach((outerCircle) => {
+    outerCircle.position.x = 1;
+  });
+  scene.add(secondCircleGroup);
+
+  const thirdCircleGroup = firstCircleGroup.clone();
+  thirdCircleGroup.children.forEach((outerCircle) => {
+    outerCircle.position.x = 1;
+    outerCircle.scale.setScalar(0);
+  });
+  scene.add(thirdCircleGroup);
+
+  // Draw the center circle
+  const centerCircleGroup = new THREE.Group();
+  const geometry = new THREE.CircleGeometry(1, sphereDetail * 6);
+  const material = new THREE.MeshStandardMaterial({
+    color: 0x873839,
+  });
+  const centerCircle = new THREE.Mesh(geometry, material);
+  centerCircle.position.z = 1;
+  centerCircle.scale.setScalar(Math.sqrt(2) - 1);
+  centerCircleGroup.add(centerCircle);
+
+  scene.add(centerCircleGroup);
+
+  createEffect(() => {
+    const diag = easeInOutQuad(diagonalization());
+    const rads1 = (diag * Math.PI) / 4;
+    const secant1 = 1 / Math.cos(rads1);
+
+    // pivot rotating circles
+    firstCircleGroup.children.forEach((circle) => {
+      circle.rotation.y = rads1;
+    });
+    // orthogonal disappearing circles
+    const secTrigScale1 = 2 / secant1;
+    secondCircleGroup.children.forEach((circle) => {
+      circle.rotation.y = rads1;
+      circle.position.z = 1 - Math.sin(rads1) * secTrigScale1;
+      circle.position.x = Math.cos(rads1) * secTrigScale1 - 1;
+      circle.scale.setScalar(
+        Math.cos(Math.asin(Math.tan(rads1) * secTrigScale1)),
+      );
+    });
+
+    // diagonal appearing circles
+    const rads2 = ((1 - diag) * Math.PI) / 4;
+    const secant2 = 1 / Math.cos(rads2);
+    const secTrigScale2 = (2 * Math.SQRT2) / secant2;
+    thirdCircleGroup.children.forEach((circle) => {
+      circle.rotation.y = rads1;
+      circle.position.z =
+        1 - ((Math.cos(rads2) - Math.sin(rads2)) / Math.SQRT2) * secTrigScale2;
+      circle.position.x =
+        ((Math.cos(rads2) + Math.sin(rads2)) / Math.SQRT2) * secTrigScale2 - 1;
+
+      // circle.scale.setScalar(1);
+      circle.scale.setScalar(
+        Math.cos(Math.asin(Math.tan(rads2) * secTrigScale2)),
+      );
+    });
+
+    // center circle
+    centerCircle.rotation.y = rads1;
+  });
+
+  createEffect(() => {
+    // animation controllers
+    const animA = easeInOutQuad(
+      THREE.MathUtils.clamp(centerSphere() * 3 - 0, 0, 1),
+    );
+    const animB = easeInOutQuad(
+      THREE.MathUtils.clamp(centerSphere() * 3 - 1, 0, 1),
+    );
+    const animC = easeInOutQuad(
+      THREE.MathUtils.clamp(centerSphere() * 3 - 2, 0, 1),
+    );
+
+    // Math.SQRT2 / Math.cos(Math.atan(animB / Math.SQRT2)) - 1 simplifies to:
+    const centerBallScale = Math.sqrt(animB * animB + 2) - 1;
+    centerBall.scale.setScalar(centerBallScale);
+    centerBall.position.z = 1 - animB;
   });
 };
 
@@ -224,7 +462,8 @@ function setupScene(canvas: HTMLCanvasElement) {
   const camera = new THREE.OrthographicCamera(-cW, cW, cH, -cH, 0.1, 1000);
 
   window.addEventListener("resize", () => {
-    canvas.setAttribute("width", getComputedStyle(canvas.parentNode).width);
+    if (canvas.parentElement === null) return;
+    canvas.setAttribute("width", getComputedStyle(canvas.parentElement).width);
     renderer.setSize(canvas.width, canvas.height);
     aspectRatio = canvas.width / canvas.height;
     cW = cH * aspectRatio;
@@ -251,65 +490,4 @@ function setupScene(canvas: HTMLCanvasElement) {
   renderer.setAnimationLoop(animate);
 
   return { scene, controls, renderer, camera, directionalLight };
-}
-
-function createBox() {
-  const points = [
-    new THREE.Vector3(-2, -2, -2),
-    new THREE.Vector3(-2, -2, 2),
-    new THREE.Vector3(-2, -2, -2),
-    new THREE.Vector3(-2, 2, -2),
-    new THREE.Vector3(-2, -2, -2),
-    new THREE.Vector3(2, -2, -2),
-
-    new THREE.Vector3(-2, 2, 2),
-    new THREE.Vector3(2, 2, 2),
-    new THREE.Vector3(-2, 2, 2),
-    new THREE.Vector3(-2, -2, 2),
-    new THREE.Vector3(-2, 2, 2),
-    new THREE.Vector3(-2, 2, -2),
-
-    new THREE.Vector3(2, -2, 2),
-    new THREE.Vector3(-2, -2, 2),
-    new THREE.Vector3(2, -2, 2),
-    new THREE.Vector3(2, 2, 2),
-    new THREE.Vector3(2, -2, 2),
-    new THREE.Vector3(2, -2, -2),
-
-    new THREE.Vector3(2, 2, -2),
-    new THREE.Vector3(-2, 2, -2),
-    new THREE.Vector3(2, 2, -2),
-    new THREE.Vector3(2, -2, -2),
-    new THREE.Vector3(2, 2, -2),
-    new THREE.Vector3(2, 2, 2),
-  ];
-  const geometry = new THREE.BufferGeometry().setFromPoints(points);
-  const material = new THREE.LineBasicMaterial({ color: 0x52753d });
-  const box = new THREE.LineSegments(geometry, material);
-  return box;
-}
-
-function createContactPoint() {
-  const r = 0.05;
-  const points = [
-    new THREE.Vector3(-r, 0, 0),
-    new THREE.Vector3(r, 0, 0),
-    new THREE.Vector3(0, -r, 0),
-    new THREE.Vector3(0, r, 0),
-    new THREE.Vector3(0, 0, -r),
-    new THREE.Vector3(0, 0, r),
-  ];
-  const geometry = new THREE.BufferGeometry().setFromPoints(points);
-  const material = new THREE.LineBasicMaterial({ color: 0xd9b55e });
-  material.depthTest = false;
-  const contactPoint = new THREE.LineSegments(geometry, material);
-  contactPoint.renderOrder = 999;
-  return contactPoint;
-}
-
-function easeInOutQuad(x: number): number {
-  return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
-}
-function easeInOutSine(x: number): number {
-  return -(Math.cos(Math.PI * x) - 1) / 2;
 }
