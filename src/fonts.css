@@ -1,62 +1,62 @@
 @font-face {
-  font-family: "varela-round";
-  src: url("/resources/fonts/VarelaRound-Regular.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
+    font-family: "varela-round";
+    src: url("/resources/fonts/VarelaRound-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
 }
 
 @font-face {
-  font-family: "Open Sans";
-  src: url("/resources/fonts/OpenSans-Regular.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
+    font-family: "Open Sans";
+    src: url("/resources/fonts/OpenSans-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
 }
 
 @font-face {
-  font-family: "Open Sans";
-  src: url("/resources/fonts/OpenSans-Italic.ttf") format("truetype");
-  font-weight: normal;
-  font-style: italic;
+    font-family: "Open Sans";
+    src: url("/resources/fonts/OpenSans-Italic.ttf") format("truetype");
+    font-weight: normal;
+    font-style: italic;
 }
 
 @font-face {
-  font-family: "Open Sans";
-  src: url("/resources/fonts/OpenSans-Bold.ttf") format("truetype");
-  font-weight: bold;
-  font-style: normal;
+    font-family: "Open Sans";
+    src: url("/resources/fonts/OpenSans-Bold.ttf") format("truetype");
+    font-weight: bold;
+    font-style: normal;
 }
 
 @font-face {
-  font-family: "Open Sans";
-  src: url("/resources/fonts/OpenSans-BoldItalic.ttf") format("truetype");
-  font-weight: bold;
-  font-style: italic;
+    font-family: "Open Sans";
+    src: url("/resources/fonts/OpenSans-BoldItalic.ttf") format("truetype");
+    font-weight: bold;
+    font-style: italic;
 }
 
 @font-face {
-  font-family: "rubik";
-  src: url("/resources/fonts/Rubik-Regular.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
+    font-family: "rubik";
+    src: url("/resources/fonts/Rubik-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
 }
 
 @font-face {
-  font-family: "rubik";
-  src: url("/resources/fonts/Rubik-Italic.ttf") format("truetype");
-  font-weight: normal;
-  font-style: italic;
+    font-family: "rubik";
+    src: url("/resources/fonts/Rubik-Italic.ttf") format("truetype");
+    font-weight: normal;
+    font-style: italic;
 }
 
 @font-face {
-  font-family: "rubik";
-  src: url("/resources/fonts/Rubik-Bold.ttf") format("truetype");
-  font-weight: bold;
-  font-style: normal;
+    font-family: "rubik";
+    src: url("/resources/fonts/Rubik-Bold.ttf") format("truetype");
+    font-weight: bold;
+    font-style: normal;
 }
 
 @font-face {
-  font-family: "rubik";
-  src: url("/resources/fonts/Rubik-BoldItalic.ttf") format("truetype");
-  font-weight: bold;
-  font-style: italic;
+    font-family: "rubik";
+    src: url("/resources/fonts/Rubik-BoldItalic.ttf") format("truetype");
+    font-weight: bold;
+    font-style: italic;
 }

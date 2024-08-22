@@ -4,11 +4,12 @@ This is my personal website.
 
 ## Setup
 
-To set the project up, run: 
+To set the project up, run:
 
 ```bash
 pnpm i
 ```
+
 ## Developing
 
 To develop the site, run:
@@ -26,7 +27,9 @@ pnpm build
 ```
 
 Then you can run:
+
 ```bash
 pnpm start
 ```
+
 to try out the build.

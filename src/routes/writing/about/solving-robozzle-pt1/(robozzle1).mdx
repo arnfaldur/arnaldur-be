@@ -2,7 +2,7 @@
 title: "Solving Robozzle (Part 1)"
 date: "2019-11-23T18:29:41.338"
 topic:
-  - "programming"
+    - "programming"
 ---
 
 # Solving Robozzle Part 1
@@ -76,7 +76,7 @@ I suspect that GA is not a good fit for this problem as there is little correlat
 It's easy to imagine a solution that would stop working if any one symbol were changed, giving it a low score.
 This method could only find such a solution by randomly guessing it from scratch or through a lucky crossover and mutation, which is likely not much better than a brute force solver.
 
-The solver could solve the first eight puzzles and, given plenty of time, the ninth. 
+The solver could solve the first eight puzzles and, given plenty of time, the ninth.
 It could also solve many of the simpler puzzles I found on the official Robozzle website but it got lost when attempting most medium to hard difficulty challenges.
 
 [^1]: I simply ran multiple instances of the solver manually and monitored the output of each. The solver randomly sampled the solution space, so conflicts and repeated work were unlikely.

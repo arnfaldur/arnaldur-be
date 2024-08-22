@@ -1,67 +1,66 @@
 body {
-  background-color: oklch(15% 0.05 240);
-  color: oklch(85% 0 0);
-  font-family: "Open Sans", sans-serif;
+    background-color: oklch(15% 0.05 240);
+    color: oklch(85% 0 0);
+    font-family: "Open Sans", sans-serif;
 }
 
 main {
-  max-width: 64rem;
-  margin: auto;
+    max-width: 64rem;
+    margin: auto;
 
-  column-count: 3;
-  column-width: 20em;
-  gap: 1rem;
+    column-count: 3;
+    column-width: 20em;
+    gap: 1rem;
 }
 
 header {
-  width: fit-content;
-  margin: auto;
+    width: fit-content;
+    margin: auto;
 }
 
 #breadcrumb {
-  min-width: 0;
-  max-width: 100%;
-  width: fit-content;
-  font-size: 1.5rem;
+    min-width: 0;
+    max-width: 100%;
+    width: fit-content;
+    font-size: 1.5rem;
 }
 
 @media (min-width: 40rem) {
-  #breadcrumb {
-    min-width: 40rem;
-  }
+    #breadcrumb {
+        min-width: 40rem;
+    }
 }
 
 img {
-  max-width: 40rem;
-  width: 100%;
+    max-width: 40rem;
+    width: 100%;
 
-
-  column-span: all;
+    column-span: all;
 }
 
 a {
-  text-decoration: none;
-  color: oklch(80% 0.2 270);
+    text-decoration: none;
+    color: oklch(80% 0.2 270);
 }
 
 a:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 a:visited {
-  color: oklch(80% 0.2 310);
+    color: oklch(80% 0.2 310);
 }
 
 a.autolink-heading {
-  position: relative;
-  color: white;
+    position: relative;
+    color: white;
 }
 
 a.autolink-heading:hover::before {
-  content: "#";
-  position: absolute;
-  right: 100%;
-  color: oklch(80% 0.2 0);
+    content: "#";
+    position: absolute;
+    right: 100%;
+    color: oklch(80% 0.2 0);
 }
 
 h1,
@@ -70,32 +69,32 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: "varela-round", sans-serif;
-  color: white;
+    font-family: "varela-round", sans-serif;
+    color: white;
 
-  column-span: all;
+    column-span: all;
 }
 
 h1 {
-  font-weight: 400;
+    font-weight: 400;
 }
 
 h3 {
-  font-weight: 600;
-  margin: 0.8rem 0;
+    font-weight: 600;
+    margin: 0.8rem 0;
 }
 
 del {
-  text-decoration-color: oklch(100% 0 0 / 0.5);
-  background-color: oklch(50% 0.2 30 / 0.3333);
+    text-decoration-color: oklch(100% 0 0 / 0.5);
+    background-color: oklch(50% 0.2 30 / 0.3333);
 }
 ins {
-  text-decoration-color: oklch(100% 0 0 / 0.5);
-  background-color: oklch(50% 0.2 140 / 0.3333);
+    text-decoration-color: oklch(100% 0 0 / 0.5);
+    background-color: oklch(50% 0.2 140 / 0.3333);
 }
 
 blockquote {
-  padding: 0 1rem;
-  margin: 0 0 1rem 0;
-  border-left: .20rem solid oklch(1 0 0 / 0.3);
+    padding: 0 1rem;
+    margin: 0 0 1rem 0;
+    border-left: 0.2rem solid oklch(1 0 0 / 0.3);
 }

@@ -17,53 +17,53 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
 // TODO: consider remark-smartypants
 const remarkPlugins = [
-  remarkFrontmatter,
-  remarkMdxFrontmatter,
-  [remarkSmartypants, { dashes: "oldschool" }],
-  [
-    remarkEmbedder.default,
-    {
-      embedderCache,
-      transformers: [
-        oEmbedTransformer.default,
-        // { params: { theme: "dark", dnt: true } },
-      ],
-    },
-  ],
-  remarkGfm,
-  remarkMath,
+    remarkFrontmatter,
+    remarkMdxFrontmatter,
+    [remarkSmartypants, { dashes: "oldschool" }],
+    [
+        remarkEmbedder.default,
+        {
+            embedderCache,
+            transformers: [
+                oEmbedTransformer.default,
+                // { params: { theme: "dark", dnt: true } },
+            ],
+        },
+    ],
+    remarkGfm,
+    remarkMath,
 ];
 const rehypePlugins = [
-  rehypeMdxImportMedia,
-  rehypeSlug,
-  [
-    rehypeAutolinkHeadings,
-    { properties: { class: "autolink-heading" }, behavior: "wrap" },
-  ],
-  rehypeKatex,
+    rehypeMdxImportMedia,
+    rehypeSlug,
+    [
+        rehypeAutolinkHeadings,
+        { properties: { class: "autolink-heading" }, behavior: "wrap" },
+    ],
+    rehypeKatex,
 ];
 
 const server = {
-  preset: "aws-amplify",
-  // prerender: {
-  //   routes: ["/", "/writing", "/laughing"],
-  //   crawlLinks: true,
-  // },
+    preset: "aws-amplify",
+    // prerender: {
+    //   routes: ["/", "/writing", "/laughing"],
+    //   crawlLinks: true,
+    // },
 };
 
 export default defineConfig({
-  extensions: ["mdx", "md"],
-  server,
-  vite: {
-    plugins: [
-      mdx.default.withImports({})({
-        jsxImportSource: "solid-jsx",
-        remarkPlugins,
-        rehypePlugins,
-        stylePropertyNameCase: "css",
-        elementAttributeNameCase: "html",
-        enforce: "pre",
-      }),
-    ],
-  },
+    extensions: ["mdx", "md"],
+    server,
+    vite: {
+        plugins: [
+            mdx.default.withImports({})({
+                jsxImportSource: "solid-jsx",
+                remarkPlugins,
+                rehypePlugins,
+                stylePropertyNameCase: "css",
+                elementAttributeNameCase: "html",
+                enforce: "pre",
+            }),
+        ],
+    },
 });

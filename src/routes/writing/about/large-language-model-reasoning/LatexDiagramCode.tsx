@@ -1,10 +1,15 @@
 export default function LatexDiagramCode() {
-  return (
-    <>
-      <p>Certainly! Here's the adjusted code with the renamed hidden layer nodes,
-        an additional fourth hidden layer (<code>L_4</code>), an additional node in each layer,
-        and a space with vertical ellipsis between the last hidden layer and the Output Tokens layer:</p>
-      <pre>{`\\documentclass{article}
+    return (
+        <>
+            <p>
+                Certainly! Here's the adjusted code with the renamed hidden
+                layer nodes, an additional fourth hidden layer (<code>L_4</code>
+                ), an additional node in each layer, and a space with vertical
+                ellipsis between the last hidden layer and the Output Tokens
+                layer:
+            </p>
+            <pre>
+                {`\\documentclass{article}
 \\usepackage{tikz}
 \\usetikzlibrary{positioning, arrows.meta, fit, backgrounds}
 
@@ -141,15 +146,35 @@ coordinate/.style={coordinate}]
 \\end{tikzpicture}
 \\end{document}
   `}
-      </pre>
-      <h3>Key Adjustments:</h3>
-      <ol>
-        <li><strong>Renamed Hidden Layer Nodes</strong>: Updated the labels for the hidden layer nodes to use <code>L_mp_n</code>.</li>
-        <li><strong>Added Fourth Hidden Layer (<code>L_4</code>)</strong>: Added nodes for the fourth hidden layer and updated connections.</li>
-        <li><strong>Added an Extra Node to Each Layer</strong>: Increased the number of nodes per layer to four.</li>
-        <li><strong>Added Vertical Ellipsis</strong>: Inserted a <code>\vdots</code> node between the last hidden layer and the Output Tokens layer.</li>
-      </ol>
-      <p>These adjustments ensure the diagram includes all the requested changes.</p>
-    </>
-  );
+            </pre>
+            <h3>Key Adjustments:</h3>
+            <ol>
+                <li>
+                    <strong>Renamed Hidden Layer Nodes</strong>: Updated the
+                    labels for the hidden layer nodes to use <code>L_mp_n</code>
+                    .
+                </li>
+                <li>
+                    <strong>
+                        Added Fourth Hidden Layer (<code>L_4</code>)
+                    </strong>
+                    : Added nodes for the fourth hidden layer and updated
+                    connections.
+                </li>
+                <li>
+                    <strong>Added an Extra Node to Each Layer</strong>:
+                    Increased the number of nodes per layer to four.
+                </li>
+                <li>
+                    <strong>Added Vertical Ellipsis</strong>: Inserted a{" "}
+                    <code>\vdots</code> node between the last hidden layer and
+                    the Output Tokens layer.
+                </li>
+            </ol>
+            <p>
+                These adjustments ensure the diagram includes all the requested
+                changes.
+            </p>
+        </>
+    );
 }

@@ -12,15 +12,15 @@ import "./adjustments.css";
 // import "./app.css";
 
 export default function App() {
-  return (
-    <Router
-      root={(props) => (
-        <MetaProvider>
-          <Suspense>{props.children}</Suspense>
-        </MetaProvider>
-      )}
-    >
-      <FileRoutes />
-    </Router>
-  );
+    return (
+        <Router
+            root={(props) => (
+                <MetaProvider>
+                    <Suspense>{props.children}</Suspense>
+                </MetaProvider>
+            )}
+        >
+            <FileRoutes />
+        </Router>
+    );
 }

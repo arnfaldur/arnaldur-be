@@ -2,7 +2,6 @@
 geometry: margin=2cm
 ---
 
-
 # Large Language Model Reasoning
 
 There is an idea floating around, which has some traction, that LLM intelligence
