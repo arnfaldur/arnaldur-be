@@ -169,8 +169,7 @@ export const diagram3D2 = (
         const rads1 = (animDiag * Math.PI) / 4;
 
         square.rotation.y = rads1;
-        square.position.z = 1 - animDiag;
-        // square.scale.x = Math.sqrt(1 + Math.pow(animDiag, 2));
+        square.position.z = 1 - Math.tan(rads1);
         square.scale.x = 1 / Math.cos(rads1);
 
         // pivot rotating circles
