@@ -1,8 +1,3 @@
-import { clientOnly } from "@solidjs/start";
-import { createSignal, batch } from "solid-js";
-
-import { diagram3D2 } from "./diagram3D2";
-
 // const green = "52753d";
 // const red = "873839";
 // const purple = "644475";
@@ -21,7 +16,12 @@ export const Checkbox = (props) => (
         }}
     >
         <input
-            ref={(el) => props.setValue(el.checked)}
+            ref={(el) => {
+                props.setValue(el.checked);
+                if (props.ref) {
+                    props.ref(el);
+                }
+            }}
             type="checkbox"
             onInput={(e) => props.setValue(e.target.checked)}
         />

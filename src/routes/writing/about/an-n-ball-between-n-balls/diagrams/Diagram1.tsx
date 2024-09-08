@@ -37,7 +37,7 @@ function Diagram1inner() {
                 <Slider setValue={setTransitionValue} />
             </fieldset>
             <Checkbox setValue={setContacts}>Show contact points</Checkbox>
-            <Checkbox setValue={setDisect}>Disect construction</Checkbox>
+            <Checkbox setValue={setDisect}>Disect construct</Checkbox>
         </>
     );
 }

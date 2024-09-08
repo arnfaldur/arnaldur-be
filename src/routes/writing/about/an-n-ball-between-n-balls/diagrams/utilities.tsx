@@ -113,6 +113,18 @@ export function createSquare() {
     const square = new THREE.LineLoop(geometry, material);
     return square;
 }
+export function createLine(color) {
+    const points = [
+        new THREE.Vector3(-1, 0, 0),
+        new THREE.Vector3(1, 0, 0),
+    ];
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({
+        color,
+    });
+    const line = new THREE.Line(geometry, material);
+    return line;
+}
 export function createContactPoint() {
     const r = 0.05;
     const points = [

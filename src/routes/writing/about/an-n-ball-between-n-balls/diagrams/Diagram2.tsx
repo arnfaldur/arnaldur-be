@@ -12,41 +12,77 @@ import { Slider, Checkbox } from "./components";
 
 export const Diagram2 = Diagram2inner;
 
-function Diagram2inner() {
-    const [centerSphere, setCenterSphere] = createSignal(0);
-    const [diagonalization, setDiagonalization] = createSignal(0);
-    const [linkSliders, setLinkSliders] = createSignal(false);
-    const [isolateIntersection, setIsolateIntersection] = createSignal(false);
+const [centerSphere, setCenterSphere] = createSignal(0);
+const [diagonalization, setDiagonalization] = createSignal(0);
+const [linkSliders, setLinkSliders] = createSignal(false);
+const [isolatePlane, setIsolatePlane] = createSignal(false);
 
+let centerSphereSlider: HTMLInputElement;
+let diagonalizationSlider: HTMLInputElement;
+let linkSlidersCheckbox: HTMLInputElement;
+let isolatePlaneCheckbox: HTMLInputElement;
+const updateCenterSphere = (value: number) =>
+    batch(() => {
+        setCenterSphere(value);
+        if (linkSliders()) {
+            const transformed = Math.atan(value) / Math.atan(1);
+            setDiagonalization(transformed);
+            diagonalizationSlider.value = transformed.toString();
+        }
+    });
+const updateDiagonalization = (value: number) =>
+    batch(() => {
+        setDiagonalization(value);
+        if (linkSliders()) {
+            const transformed = Math.tan(value * Math.atan(1));
+            setCenterSphere(transformed);
+            centerSphereSlider.value = transformed.toString();
+        }
+    });
+
+function setFormer() {
+    batch(() => {
+        setCenterSphere(0);
+        centerSphereSlider.value = "0";
+        setDiagonalization(0);
+        diagonalizationSlider.value = "0";
+        setLinkSliders(true);
+        linkSlidersCheckbox.checked = true;
+        setIsolatePlane(true);
+        isolatePlaneCheckbox.checked = true;
+    });
+}
+function setLatter() {
+    batch(() => {
+        setCenterSphere(1);
+        centerSphereSlider.value = "1";
+        setDiagonalization(1);
+        diagonalizationSlider.value = "1";
+        setLinkSliders(true);
+        linkSlidersCheckbox.checked = true;
+        setIsolatePlane(true);
+        isolatePlaneCheckbox.checked = true;
+    });
+}
+
+export function Former() {
+    return <button onClick={setFormer}>former</button>;
+}
+
+export function Latter() {
+    return <button onClick={setLatter}>latter</button>;
+}
+
+function Diagram2inner() {
     const initCanvas = (canvas: HTMLCanvasElement) => {
         if (canvas.parentElement === null) return;
         canvas.setAttribute(
             "width",
             getComputedStyle(canvas.parentElement).width
         );
-        diagram3D2(canvas, centerSphere, diagonalization, isolateIntersection);
+        diagram3D2(canvas, centerSphere, diagonalization, isolatePlane);
     };
 
-    let centerSphereSlider: HTMLInputElement;
-    let diagonalizationSlider: HTMLInputElement;
-    const updateCenterSphere = (value: number) =>
-        batch(() => {
-            setCenterSphere(value);
-            if (linkSliders()) {
-                const transformed = (Math.atan(value) * 4) / Math.PI;
-                setDiagonalization(transformed);
-                diagonalizationSlider.value = transformed.toString();
-            }
-        });
-    const updateDiagonalization = (value: number) =>
-        batch(() => {
-            setDiagonalization(value);
-            if (linkSliders()) {
-                const transformed = Math.tan((value * Math.PI) / 4);
-                setCenterSphere(transformed);
-                centerSphereSlider.value = transformed.toString();
-            }
-        });
     return (
         <>
             <canvas ref={initCanvas} height="400" />
@@ -64,17 +100,21 @@ function Diagram2inner() {
                     setValue={updateDiagonalization}
                 />
             </fieldset>
-            <Checkbox setValue={setLinkSliders}>Link sliders</Checkbox>
-            <Checkbox setValue={setIsolateIntersection}>Isolate plane</Checkbox>
+            <Checkbox ref={linkSlidersCheckbox} setValue={setLinkSliders}>
+                Link sliders
+            </Checkbox>
+            <Checkbox ref={isolatePlaneCheckbox} setValue={setIsolatePlane}>
+                Isolate plane
+            </Checkbox>
         </>
     );
 }
 
-export const diagram3D2 = (
+const diagram3D2 = (
     canvas: HTMLCanvasElement,
     centerTransition: Function,
     diagonalization: Function,
-    isolateIntersection: Function
+    isolatePlane: Function
 ) => {
     const { scene, directionalLight, camera, controls, renderer } =
         setupScene(canvas);
@@ -188,17 +228,18 @@ export const diagram3D2 = (
         });
 
         // diagonal appearing circles
-        const rads2 = ((1 - animDiag) * Math.PI) / 4;
-        const secTrigScale2 = 2 * Math.SQRT2 * Math.cos(rads2);
+        const rads1Inv = ((1 - animDiag) * Math.PI) / 4;
+        const secTrigScale2 = 2 * Math.SQRT2 * Math.cos(rads1Inv);
         thirdCircleGroup.children.forEach((circle) => {
             circle.rotation.y = rads1;
             circle.position.z = 1 - Math.sin(rads1) * secTrigScale2;
             circle.position.x = Math.cos(rads1) * secTrigScale2 - 1;
             circle.scale.setScalar(
-                Math.cos(Math.asin(Math.tan(rads2) * secTrigScale2))
+                Math.cos(Math.asin(Math.tan(rads1Inv) * secTrigScale2))
             );
         });
     });
+    // Center ball transforms
     createEffect(() => {
         const animCenter = centerTransition();
         // center ball
@@ -206,6 +247,7 @@ export const diagram3D2 = (
         centerBall.scale.setScalar(centerBallScale);
         centerBall.position.z = 1 - animCenter;
     });
+    // Center circle transforms
     createEffect(() => {
         const animDiag = diagonalization();
         const animCenter = centerTransition();
@@ -225,22 +267,24 @@ export const diagram3D2 = (
             ) * centerBallScale
         );
     });
+    // isolate plane perspective
     createEffect(() => {
         const animDiag = diagonalization();
         const rads1 = (animDiag * Math.PI) / 4;
 
-        if (isolateIntersection()) {
+        if (isolatePlane()) {
             camera.position.set(Math.tan(rads1) * 10, 0, 10);
             controls.update();
             directionalLight.position.set(Math.tan(rads1), 0, 1);
             intersectingPlane.position.z = animDiag - 1;
         }
     });
+    // isolate plane disabled
     createEffect(() => {
-        box.visible = !isolateIntersection();
-        outerBallGroup.visible = !isolateIntersection();
-        centerBallGroup.visible = !isolateIntersection();
-        if (!isolateIntersection()) {
+        box.visible = !isolatePlane();
+        outerBallGroup.visible = !isolatePlane();
+        centerBallGroup.visible = !isolatePlane();
+        if (!isolatePlane()) {
             camera.position.set(6, 6, 10);
             controls.update();
             directionalLight.position.set(1, 1, 1);
