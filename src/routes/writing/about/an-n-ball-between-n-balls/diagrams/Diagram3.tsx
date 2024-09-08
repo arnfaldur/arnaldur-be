@@ -91,24 +91,22 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
     // outerLineFirst.scale.setScalar(4);
     scene.add(outerLineFirst);
 
-    if (false) {
-        // Near lower right
-        const outerLineSecond = createLine(outerBallColor);
-        outerLineSecond.position.set(1, -1, 1);
-        scene.add(outerLineSecond);
+    // Near lower right
+    const outerLineSecond = createLine(outerBallColor);
+    outerLineSecond.position.set(1, -1, 1);
+    scene.add(outerLineSecond);
 
-        // Near upper right
-        const outerLineThird = createLine(outerBallColor);
-        outerLineThird.position.set(1, -1, 1);
-        outerLineThird.scale.setScalar(0);
-        scene.add(outerLineThird);
+    // Near upper right
+    const outerLineThird = createLine(outerBallColor);
+    outerLineThird.position.set(1, -1, 1);
+    outerLineThird.scale.setScalar(0);
+    scene.add(outerLineThird);
 
-        // Far upper right
-        const outerLineFourth = createLine(outerBallColor);
-        outerLineFourth.position.set(1, -1, 1);
-        outerLineFourth.scale.setScalar(0);
-        scene.add(outerLineFourth);
-    }
+    // Far upper right
+    const outerLineFourth = createLine(outerBallColor);
+    outerLineFourth.position.set(1, -1, 1);
+    outerLineFourth.scale.setScalar(0);
+    scene.add(outerLineFourth);
 
     createEffect(() => {
         // animation controllers
@@ -122,68 +120,27 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
             THREE.MathUtils.clamp(diagonalization() * 2 - 1, 0, 1)
         );
         const rads2t3 = anim2t3 * Math.atan(1);
-        const rads2t3d = anim2t3 * Math.atan(1 / Math.SQRT2); // diagonal angle
-        // const rads2t3d = ((anim2t3 * Math.PI) / 4) * (1 / Math.SQRT2); // diagonal angle
         // 1D to 2D
-        // console.log({ rads1t2, rads2t3 });
-        // outerLineFirst.scale.setScalar(2 * secant(rads1t2) * secant(rads2t3d));
-        // outerLineFirst.scale.setScalar(secant(rads1t2) * secant(rads2t3d));
-        // outerLineFirst.scale.setScalar(secant(rads1t2) * secant(rads2t3));
-        outerLineFirst.scale.setScalar(
-            secant(anim1t2 * Math.atan(cosine(rads2t3))) * secant(rads2t3)
-        );
-        // outerLineFirst.scale.setScalar(
-        //     secant(rads1t2 + anim2t3 * (Math.atan(2) - Math.atan(1)))
-        // );
-
-        // outerLineFirst.setRotationFromEuler(new THREE.Euler(0, 0, rads1t2));
-        // outerLineFirst.rotateOnWorldAxis(
-        //     new THREE.Vector3(-1, 1, 0).normalize(),
-        //     rads2t3d
-        // );
-
-        // outerLineFirst.rotation.setFromQuaternion(
-        //     new THREE.Quaternion( rads2t3,0,0, rads1t2)
-        // );
-
-        outerLineFirst.rotation.z = rads1t2;
-        // outerLineFirst.rotation.y = rads2t3;
-
-        // outerLineFirst.rotation.z =
-        //     rads1t2 + anim2t3 * (Math.atan(1 / Math.SQRT2) - Math.atan(1));
-        // outerLineFirst.rotation.z = rads1t2 +
-        //     sine(rads2t3) * (Math.atan(1 / Math.SQRT2) - Math.atan(1));
         outerLineFirst.rotation.z = anim1t2 * Math.atan(cosine(rads2t3));
         outerLineFirst.rotation.y = rads2t3;
 
-        // outerLineFirst.rotation.z =
-        //     rads1t2 * (1 - anim2t3) + anim2t3 * Math.atan(1 / Math.SQRT2);
-        // outerLineFirst.rotation.y = rads2t3;
+        const secTrigScale1t2 = 2 * Math.cos(rads1t2);
+        outerLineSecond.rotation.z = rads1t2;
+        outerLineSecond.position.y = -1 + Math.sin(rads1t2) * secTrigScale1t2;
+        outerLineSecond.position.x = Math.cos(rads1t2) * secTrigScale1t2 - 1;
+        outerLineSecond.scale.setScalar(
+            Math.cos(Math.asin(Math.tan(rads1t2) * secTrigScale1t2))
+        );
 
-        // outerLineFirst.rotation.z = rads1t2 - (Math.sin(rads2t3*rads2t3) * 2);
-        // outerLineFirst.rotation.y = rads2t3 * 2;
+        const rads1t2Inv = ((1 - anim1t2) * Math.PI) / 4;
+        const secTrigScaleA2 = 2 * Math.SQRT2 * Math.cos(rads1t2Inv);
 
-        if (false) {
-            const secTrigScale1t2 = 2 * Math.cos(rads1t2);
-            outerLineSecond.rotation.z = rads1t2;
-            outerLineSecond.position.y =
-                -1 + Math.sin(rads1t2) * secTrigScale1t2;
-            outerLineSecond.position.x =
-                Math.cos(rads1t2) * secTrigScale1t2 - 1;
-            outerLineSecond.scale.setScalar(
-                Math.cos(Math.asin(Math.tan(rads1t2) * secTrigScale1t2))
-            );
-
-            const rads1t2Inv = ((1 - anim1t2) * Math.PI) / 4;
-            const secTrigScaleA2 = 2 * Math.SQRT2 * Math.cos(rads1t2Inv);
-
-            outerLineThird.rotation.z = rads1t2;
-            outerLineThird.position.y = -1 + Math.sin(rads1t2) * secTrigScaleA2;
-            outerLineThird.position.x = Math.cos(rads1t2) * secTrigScaleA2 - 1;
-            outerLineThird.scale.setScalar(
-                Math.cos(Math.asin(Math.tan(rads1t2Inv) * secTrigScaleA2))
-            );
-        }
+        outerLineThird.rotation.z = rads1t2;
+        outerLineThird.position.y = -1 + Math.sin(rads1t2) * secTrigScaleA2;
+        outerLineThird.position.x = Math.cos(rads1t2) * secTrigScaleA2 - 1;
+        outerLineThird.scale.setScalar(
+            Math.cos(Math.asin(Math.tan(rads1t2Inv) * secTrigScaleA2))
+        );
 
         // center ball
         const cen12 = Math.tan(rads1t2); // Center ball 1D to 2D progress
