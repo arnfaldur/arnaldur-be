@@ -199,7 +199,7 @@ const diagram3D2 = (
     });
     const centerCircle = new THREE.Mesh(geometry, material);
     centerCircle.position.z = 1;
-    centerCircle.scale.setScalar(Math.sqrt(2) - 1);
+    centerCircle.scale.setScalar(Math.SQRT2 - 1);
     centerCircleGroup.add(centerCircle);
 
     intersectingPlane.add(centerCircleGroup);

@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
-export const sphereDetail = 10;
+export const sphereDetail = 12;
 
 export function segmentSlider(segments: number, value: number) {
     return Array(segments)

@@ -22,9 +22,8 @@ const [diagonalization, setDiagonalization] = createSignal(0);
 let diagonalizationSlider: HTMLInputElement;
 let camera: THREE.OrthographicCamera | undefined;
 
-function setCamera(x, y, z, up) {
+function setCamera(x: number, y: number, z: number) {
     if (camera) {
-        camera.up = up ?? THREE.Object3D.DEFAULT_UP;
         camera.position.set(x, y, z);
     }
 }
@@ -50,19 +49,10 @@ export function Diagram3() {
             </fieldset>
             <fieldset>
                 <legend>Camera angle</legend>
-                <button onClick={() => setCamera(0, 0, 10, null)}>side</button>
-                <button onClick={() => setCamera(-10, 10, 0, null)}>
-                    diagonal
-                </button>
-                <button
-                    onClick={() =>
-                        /* setCamera(-0, 10, 0, new THREE.Vector3(1, 0, 0)) */
-                        setCamera(-0.0001, 10, 0, null)
-                    }
-                >
-                    top
-                </button>
-                <button onClick={() => setCamera(-6, 5, 10, null)}>
+                <button onClick={() => setCamera(0, 0, 10)}>side</button>
+                <button onClick={() => setCamera(-10, 10, 0)}>diagonal</button>
+                <button onClick={() => setCamera(-0.0001, 10, 0)}>top</button>
+                <button onClick={() => setCamera(-6, 5, 10)}>
                     perspective
                 </button>
             </fieldset>
@@ -103,6 +93,9 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
     });
     scene.add(outerBallGroup);
 
+    const lineGroup = new THREE.Group();
+    lineGroup.position.set(-1, -1, 1);
+
     // Add the center ball
     const centerBallGroup = new THREE.Group();
     const centerBall = createBall({
@@ -115,104 +108,67 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
     const centerLine = createLine(centerBallColor);
     centerBallGroup.add(centerLine);
 
-    scene.add(centerBallGroup);
+    lineGroup.add(centerBallGroup);
 
     // Near lower left
-    const outerLineFirst = createLine(outerBallColor);
-    outerLineFirst.position.set(-1, -1, 1);
-    // outerLineFirst.scale.setScalar(4);
-    scene.add(outerLineFirst);
+    const line1 = createLine(outerBallColor);
+    lineGroup.add(line1);
 
     // Near lower right
-    const outerLineSecond = createLine(outerBallColor);
-    outerLineSecond.position.set(1, -1, 1);
-    scene.add(outerLineSecond);
+    const line2 = createLine(outerBallColor);
+    line2.position.x = 2;
+    lineGroup.add(line2);
 
     // Near upper right
-    const outerLineThird = createLine(outerBallColor);
-    outerLineThird.position.set(1, -1, 1);
-    outerLineThird.scale.setScalar(0);
-    scene.add(outerLineThird);
+    const line3 = createLine(outerBallColor);
+    line3.position.x = 2;
+    line3.scale.setScalar(0);
+    lineGroup.add(line3);
 
     // Far upper right
-    const outerLineFourth = createLine(outerBallColor);
-    outerLineFourth.position.set(1, -1, 1);
-    outerLineFourth.scale.setScalar(0);
-    scene.add(outerLineFourth);
+    const line4 = createLine(outerBallColor);
+    line4.position.x = 2;
+    line4.scale.setScalar(0);
+    lineGroup.add(line4);
+
+    scene.add(lineGroup);
 
     createEffect(() => {
         // animation controllers
-        let [
+        const [
             anim1t2, // animation 1D to 2D progress
             anim2t3, // animation 2D to 3D progress
         ] = segmentSlider(2, Number.parseFloat(diagonalization()));
-        // anim2t3 *= 2;
+
         const rads1t2 = anim1t2 * Math.atan(1);
-        const rads2t3 = anim2t3 * Math.atan(1);
         const rads1t2i = (1 - anim1t2) * Math.atan(1);
-        const rads2t3i = (1 - anim2t3) * Math.atan(1);
-        const rads2t3d = anim2t3 * Math.atan(Math.SQRT1_2); // diagonal
+        const rads2t3 = anim2t3 * Math.atan(Math.SQRT1_2); // diagonal
+        const rads2t3i = (1 - anim2t3) * Math.atan(Math.SQRT1_2); // diagonal
 
-        outerLineFirst.rotation.z = anim1t2 * Math.atan(cos(rads2t3));
-        outerLineFirst.rotation.y = rads2t3;
+        lineGroup.rotation.set(0, 0, rads1t2);
+        lineGroup.rotateOnAxis(new THREE.Vector3(0, 1, 0), rads2t3);
 
-        centerLine.rotation.z = anim1t2 * Math.atan(cos(rads2t3));
-        centerLine.rotation.y = rads2t3;
+        line2.position.x = 2 / sec(rads1t2);
+        line2.scale.setScalar(cos(asin((2 * tan(rads1t2)) / sec(rads1t2))));
 
-        if (true) {
-            outerLineFourth.position.set(0, 0, 0);
-            outerLineFourth.position.add(outerLineFirst.position);
-            outerLineFourth.scale.setScalar(1);
-            outerLineFourth.rotation.set(0, 0, rads1t2);
-            outerLineFourth.rotateOnAxis(
-                new THREE.Vector3(0, 1, 0),
-                rads2t3d
-            );
-
-        }
-
-        outerLineSecond.rotation.y = rads2t3;
-        outerLineSecond.rotation.z = anim1t2 * atan(cos(rads2t3));
-        outerLineSecond.position.x = (2 * cos(rads1t2)) / sec(rads1t2) - 1;
-        outerLineSecond.position.y = (2 * sin(rads1t2)) / sec(rads1t2) - 1;
-        outerLineSecond.scale.setScalar(
-            cos(asin((2 * tan(rads1t2)) / sec(rads1t2)))
-        );
-
-        outerLineThird.rotation.y = rads2t3;
-        outerLineThird.rotation.z = anim1t2 * atan(cos(rads2t3));
-        outerLineThird.position.x =
-            (2 * Math.SQRT2 * cos(rads1t2)) / sec(rads1t2i) - 1;
-        outerLineThird.position.y =
-            (2 * Math.SQRT2 * sin(rads1t2)) / sec(rads1t2i) - 1;
-        // outerLineThird.position.z =
-        //     1 - 2 * Math.cos(rads2t3i) * Math.sin(rads2t3);
-        outerLineThird.position.z = 1 - 2 * sin(rads2t3);
-        outerLineThird.position.x += 2 * cos(rads2t3) - 2;
-        outerLineThird.position.y += 2 * cos(rads2t3) - 2;
-        outerLineThird.scale.setScalar(
+        line3.position.x = (2 * Math.SQRT2) / sec(rads1t2i) / sec(rads2t3);
+        line3.scale.setScalar(
             cos(asin((2 * Math.SQRT2 * tan(rads1t2i)) / sec(rads1t2i))) *
-                cos(asin((2 * Math.SQRT2 * tan(rads2t3d)) / sec(rads2t3d)))
+                cos(asin((2 * Math.SQRT2 * tan(rads2t3)) / sec(rads2t3)))
         );
 
-        if (false) {
-            outerLineFourth.rotation.y = rads2t3;
-            outerLineFourth.rotation.z = anim1t2 * atan(cos(rads2t3));
-            outerLineFourth.position.x =
-                (2 * Math.SQRT2 * cos(rads1t2)) / sec(rads1t2i) - 1;
-            outerLineFourth.position.y =
-                (2 * Math.SQRT2 * sin(rads1t2)) / sec(rads1t2i) - 1;
-            outerLineFourth.position.z = 1 - 2 * sin(rads2t3);
-        }
+        line4.position.x = (2 * Math.sqrt(3)) / sec(rads2t3i);
+        line4.scale.setScalar(
+            cos(asin((2 * Math.sqrt(3) * tan(rads2t3i)) / sec(rads2t3i)))
+        );
 
-        // center ball
-        const cen12 = Math.tan(rads1t2); // Center ball 1D to 2D
-        const cen23 = Math.tan(rads2t3); // Center ball 2D to 3D progress
+        centerBallGroup.position.x = sec(rads1t2) * sec(rads2t3);
+
+        const cen12 = tan(rads1t2); // Center ball 1D to 2D
+        const cen23 = Math.SQRT2 * tan(rads2t3); // Center ball 2D to 3D progress
         const centerBallScale =
             Math.sqrt(cen12 * cen12 + cen23 * cen23 + 1) - 1;
         centerBallGroup.scale.setScalar(centerBallScale);
-        // centerBallGroup.scale.setScalar(0.1);
-        centerBallGroup.position.y = -1 + cen12;
-        centerBallGroup.position.z = 1 - cen23;
+
     });
 };
