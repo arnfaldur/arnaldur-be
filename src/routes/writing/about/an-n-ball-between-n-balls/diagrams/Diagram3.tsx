@@ -10,6 +10,7 @@ import {
     createLine,
     easeInOutQuad,
     segmentSlider,
+    createPoint,
     outerBallColor,
     centerBallColor,
     boundingBoxColor,
@@ -137,6 +138,14 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
     line4.scale.setScalar(0);
     lineGroup.add(line4);
 
+    const boxPoint1 = createPoint({ color: boundingBoxColor });
+    boxPoint1.position.x = -1;
+    lineGroup.add(boxPoint1);
+
+    const boxPoint2 = createPoint({ color: boundingBoxColor });
+    boxPoint2.position.x = 3;
+    lineGroup.add(boxPoint2);
+
     scene.add(lineGroup);
 
     createEffect(() => {
@@ -153,6 +162,9 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
 
         lineGroup.rotation.set(0, 0, rads1t2);
         lineGroup.rotateOnAxis(new THREE.Vector3(0, 1, 0), rads2t3);
+
+        boxPoint1.position.x = -1 * sec(rads1t2) * sec(rads2t3);
+        boxPoint2.position.x = 3 * sec(rads1t2) * sec(rads2t3);
 
         line2.position.x = 2 / sec(rads1t2);
         line2.scale.setScalar(cos(asin((2 * tan(rads1t2)) / sec(rads1t2))));

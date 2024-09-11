@@ -132,6 +132,16 @@ export function createLine(color) {
     const line = new THREE.Line(geometry, material);
     return line;
 }
+export function createPoint(color) {
+    const points = [new THREE.Vector3(0, 0, 0)];
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.PointsMaterial({
+        color,
+    });
+    const point = new THREE.Points(geometry, material);
+    return point;
+}
+
 export function createContactPoint() {
     const r = 0.05;
     const points = [
