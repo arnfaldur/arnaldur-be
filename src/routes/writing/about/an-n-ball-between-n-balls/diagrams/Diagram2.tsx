@@ -7,6 +7,9 @@ import {
     createSquare,
     setupScene,
     sphereDetail,
+    outerBallColor,
+    centerBallColor,
+    boundingBoxColor,
 } from "./utilities";
 import { Slider, Checkbox } from "./components";
 import { asin, atan, cos, sec, sin, tan } from "./math";
@@ -122,7 +125,12 @@ const diagram3D2 = (
     directionalLight.position.set(1, 1, 1);
 
     // Add containing box
-    const box = createBox();
+    const box = createBox({
+        color: boundingBoxColor,
+        transparent: true,
+        opacity: 0.5,
+        depthWrite: false,
+    });
     scene.add(box);
 
     const outerBallGroup = new THREE.Group();
@@ -132,9 +140,10 @@ const diagram3D2 = (
         [-1, 1].forEach((y) => {
             [-1, 1].forEach((x) => {
                 const outerBall = createBall({
-                    color: 4346763,
+                    color: outerBallColor,
                     transparent: true,
                     opacity: 0.25,
+                    depthWrite: false,
                 });
                 outerBall.position.set(y, x, z);
                 outerBallGroup.add(outerBall);
@@ -146,7 +155,7 @@ const diagram3D2 = (
     // Draw the center ball
     const centerBallGroup = new THREE.Group();
     const centerBall = createBall({
-        color: 8861753,
+        color: centerBallColor,
         transparent: true,
         opacity: 0.25,
     });
@@ -167,7 +176,7 @@ const diagram3D2 = (
     [-1, 1].forEach((y) => {
         const geometry = new THREE.CircleGeometry(1, sphereDetail * 6);
         const material = new THREE.MeshStandardMaterial({
-            color: 4346763,
+            color: outerBallColor,
             side: THREE.DoubleSide,
         });
         const outerCircle = new THREE.Mesh(geometry, material);
@@ -194,7 +203,7 @@ const diagram3D2 = (
     const centerCircleGroup = new THREE.Group();
     const geometry = new THREE.CircleGeometry(1, sphereDetail * 6);
     const material = new THREE.MeshStandardMaterial({
-        color: 8861753,
+        color: centerBallColor,
         side: THREE.DoubleSide,
     });
     const centerCircle = new THREE.Mesh(geometry, material);

@@ -3,6 +3,10 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 export const sphereDetail = 12;
 
+export const boundingBoxColor = 5403965;
+export const outerBallColor = 4346763;
+export const centerBallColor = 8861753;
+
 export function segmentSlider(segments: number, value: number) {
     return Array(segments)
         .fill(0)
@@ -70,7 +74,7 @@ export function createBall(
     });
     return new THREE.Mesh(geometry, material);
 }
-export function createBox() {
+export function createBox(materialParameters?: THREE.LineBasicMaterialParameters) {
     const points = [
         new THREE.Vector3(-2, -2, -2),
         new THREE.Vector3(-2, -2, 2),
@@ -101,9 +105,7 @@ export function createBox() {
         new THREE.Vector3(2, 2, 2),
     ];
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const material = new THREE.LineBasicMaterial({
-        color: 5403965,
-    });
+    const material = new THREE.LineBasicMaterial(materialParameters);
     const box = new THREE.LineSegments(geometry, material);
     return box;
 }

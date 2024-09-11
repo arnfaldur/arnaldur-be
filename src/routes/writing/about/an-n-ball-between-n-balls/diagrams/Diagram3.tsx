@@ -10,12 +10,12 @@ import {
     createLine,
     easeInOutQuad,
     segmentSlider,
+    outerBallColor,
+    centerBallColor,
+    boundingBoxColor,
 } from "./utilities";
 import { Slider, Checkbox } from "./components";
 import { asin, atan, cos, sec, sin, tan } from "./math";
-
-const outerBallColor = 4346763;
-const centerBallColor = 8861753;
 
 const [diagonalization, setDiagonalization] = createSignal(0);
 
@@ -72,7 +72,12 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
     directionalLight.position.set(1, 1, 1);
 
     // Add containing box
-    const box = createBox();
+    const box = createBox({
+        color: boundingBoxColor,
+        transparent: true,
+        opacity: 0.5,
+        depthWrite: false,
+    });
     scene.add(box);
 
     const outerBallGroup = new THREE.Group();
@@ -85,6 +90,7 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
                     color: outerBallColor,
                     transparent: true,
                     opacity: 0.1,
+                    depthWrite: false,
                 });
                 outerBall.position.set(y, x, z);
                 outerBallGroup.add(outerBall);
@@ -169,6 +175,5 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
         const centerBallScale =
             Math.sqrt(cen12 * cen12 + cen23 * cen23 + 1) - 1;
         centerBallGroup.scale.setScalar(centerBallScale);
-
     });
 };
