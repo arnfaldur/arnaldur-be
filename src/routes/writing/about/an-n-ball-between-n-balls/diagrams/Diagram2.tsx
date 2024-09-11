@@ -9,6 +9,7 @@ import {
     sphereDetail,
 } from "./utilities";
 import { Slider, Checkbox } from "./components";
+import { asin, atan, cos, sec, sin, tan } from "./math";
 
 export const Diagram2 = Diagram2inner;
 
@@ -217,13 +218,12 @@ const diagram3D2 = (
             circle.rotation.y = rads1;
         });
         // orthogonal disappearing circles
-        const secTrigScale1 = 2 * Math.cos(rads1);
         secondCircleGroup.children.forEach((circle) => {
             circle.rotation.y = rads1;
-            circle.position.z = 1 - Math.sin(rads1) * secTrigScale1;
-            circle.position.x = Math.cos(rads1) * secTrigScale1 - 1;
+            circle.position.x = (2 * cos(rads1)) / sec(rads1) - 1;
+            circle.position.z = 1 - (2 * Math.sin(rads1)) / sec(rads1);
             circle.scale.setScalar(
-                Math.cos(Math.asin(Math.tan(rads1) * secTrigScale1))
+                Math.cos(Math.asin((2 * Math.tan(rads1)) / sec(rads1)))
             );
         });
 
@@ -232,10 +232,12 @@ const diagram3D2 = (
         const secTrigScale2 = 2 * Math.SQRT2 * Math.cos(rads1Inv);
         thirdCircleGroup.children.forEach((circle) => {
             circle.rotation.y = rads1;
-            circle.position.z = 1 - Math.sin(rads1) * secTrigScale2;
-            circle.position.x = Math.cos(rads1) * secTrigScale2 - 1;
+            circle.position.x =
+                (2 * Math.SQRT2 * cos(rads1)) / sec(rads1Inv) - 1;
+            circle.position.z =
+                1 - (2 * Math.SQRT2 * sin(rads1)) / sec(rads1Inv);
             circle.scale.setScalar(
-                Math.cos(Math.asin(Math.tan(rads1Inv) * secTrigScale2))
+                cos(asin((2 * Math.SQRT2 * tan(rads1Inv)) / sec(rads1Inv)))
             );
         });
     });

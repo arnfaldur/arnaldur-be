@@ -1,6 +1,14 @@
-export const sine = Math.sin;
-export const cosine = Math.cos;
-export const tangent = Math.tan;
-export const secant = (x: number) => 1 / cosine(x);
-export const cosecant = (x: number) => 1 / sine(x);
-export const cotangent = (x: number) => 1 / tangent(x);
+export const sin = Math.sin;
+export const cos = Math.cos;
+export const tan = Math.tan;
+export const sec = (x: number) => 1 / cos(x);
+export const csc = (x: number) => 1 / sin(x);
+export const cot = (x: number) => 1 / tan(x);
+
+
+export const asin = Math.asin;
+export const acos = Math.acos;
+export const atan = Math.atan;
+export const asec = (x: number) => 1 / acos(x);
+export const acsc = (x: number) => 1 / asin(x);
+export const acot = (x: number) => 1 / atan(x);

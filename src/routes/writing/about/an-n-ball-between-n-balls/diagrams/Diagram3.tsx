@@ -9,20 +9,27 @@ import {
     sphereDetail,
     createLine,
     easeInOutQuad,
+    segmentSlider,
 } from "./utilities";
 import { Slider, Checkbox } from "./components";
-import { cosine, secant, sine, tangent } from "./math";
+import { asin, atan, cos, sec, sin, tan } from "./math";
 
 const outerBallColor = 4346763;
 const centerBallColor = 8861753;
 
-export const Diagram3 = Diagram3inner;
-
 const [diagonalization, setDiagonalization] = createSignal(0);
 
 let diagonalizationSlider: HTMLInputElement;
+let camera: THREE.OrthographicCamera | undefined;
 
-function Diagram3inner() {
+function setCamera(x, y, z, up) {
+    if (camera) {
+        camera.up = up ?? THREE.Object3D.DEFAULT_UP;
+        camera.position.set(x, y, z);
+    }
+}
+
+export function Diagram3() {
     const initCanvas = (canvas: HTMLCanvasElement) => {
         if (canvas.parentElement === null) return;
         canvas.setAttribute(
@@ -31,7 +38,6 @@ function Diagram3inner() {
         );
         diagram3D3(canvas, diagonalization);
     };
-
     return (
         <>
             <canvas ref={initCanvas} height="400" />
@@ -42,13 +48,37 @@ function Diagram3inner() {
                     setValue={setDiagonalization}
                 />
             </fieldset>
+            <fieldset>
+                <legend>Camera angle</legend>
+                <button onClick={() => setCamera(0, 0, 10, null)}>side</button>
+                <button onClick={() => setCamera(-10, 10, 0, null)}>
+                    diagonal
+                </button>
+                <button
+                    onClick={() =>
+                        /* setCamera(-0, 10, 0, new THREE.Vector3(1, 0, 0)) */
+                        setCamera(-0.0001, 10, 0, null)
+                    }
+                >
+                    top
+                </button>
+                <button onClick={() => setCamera(-6, 5, 10, null)}>
+                    perspective
+                </button>
+            </fieldset>
         </>
     );
 }
 
 const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
-    const { scene, directionalLight, camera, controls, renderer } =
-        setupScene(canvas);
+    const {
+        scene,
+        directionalLight,
+        camera: cam,
+        controls,
+        renderer,
+    } = setupScene(canvas);
+    camera = cam;
     directionalLight.position.set(1, 1, 1);
 
     // Add containing box
@@ -64,7 +94,7 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
                 const outerBall = createBall({
                     color: outerBallColor,
                     transparent: true,
-                    opacity: 0.25,
+                    opacity: 0.1,
                 });
                 outerBall.position.set(y, x, z);
                 outerBallGroup.add(outerBall);
@@ -73,15 +103,17 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
     });
     scene.add(outerBallGroup);
 
-    // Draw the center ball
+    // Add the center ball
     const centerBallGroup = new THREE.Group();
     const centerBall = createBall({
         color: centerBallColor,
         transparent: true,
-        opacity: 0.25,
+        opacity: 0.1,
     });
-    centerBall.scale.setScalar(Math.sqrt(3) - 1);
     centerBallGroup.add(centerBall);
+    // Add the center line
+    const centerLine = createLine(centerBallColor);
+    centerBallGroup.add(centerLine);
 
     scene.add(centerBallGroup);
 
@@ -110,53 +142,77 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
 
     createEffect(() => {
         // animation controllers
-        // animation 1D to 2D progress
-        const anim1t2 = easeInOutQuad(
-            THREE.MathUtils.clamp(diagonalization() * 2 - 0, 0, 1)
-        );
+        let [
+            anim1t2, // animation 1D to 2D progress
+            anim2t3, // animation 2D to 3D progress
+        ] = segmentSlider(2, Number.parseFloat(diagonalization()));
+        // anim2t3 *= 2;
         const rads1t2 = anim1t2 * Math.atan(1);
-        // animation 2D to 3D progress
-        const anim2t3 = easeInOutQuad(
-            THREE.MathUtils.clamp(diagonalization() * 2 - 1, 0, 1)
-        );
         const rads2t3 = anim2t3 * Math.atan(1);
-        // 1D to 2D
-        outerLineFirst.rotation.z = anim1t2 * Math.atan(cosine(rads2t3));
+        const rads1t2i = (1 - anim1t2) * Math.atan(1);
+        const rads2t3i = (1 - anim2t3) * Math.atan(1);
+        const rads2t3d = anim2t3 * Math.atan(Math.SQRT1_2); // diagonal
+
+        outerLineFirst.rotation.z = anim1t2 * Math.atan(cos(rads2t3));
         outerLineFirst.rotation.y = rads2t3;
 
-        const secTrigScale1t2 = 2 * Math.cos(rads1t2);
-        outerLineSecond.rotation.z = rads1t2;
-        outerLineSecond.position.y = -1 + Math.sin(rads1t2) * secTrigScale1t2;
-        outerLineSecond.position.x = Math.cos(rads1t2) * secTrigScale1t2 - 1;
+        centerLine.rotation.z = anim1t2 * Math.atan(cos(rads2t3));
+        centerLine.rotation.y = rads2t3;
+
+        if (true) {
+            outerLineFourth.position.set(0, 0, 0);
+            outerLineFourth.position.add(outerLineFirst.position);
+            outerLineFourth.scale.setScalar(1);
+            outerLineFourth.rotation.set(0, 0, rads1t2);
+            outerLineFourth.rotateOnAxis(
+                new THREE.Vector3(0, 1, 0),
+                rads2t3d
+            );
+
+        }
+
+        outerLineSecond.rotation.y = rads2t3;
+        outerLineSecond.rotation.z = anim1t2 * atan(cos(rads2t3));
+        outerLineSecond.position.x = (2 * cos(rads1t2)) / sec(rads1t2) - 1;
+        outerLineSecond.position.y = (2 * sin(rads1t2)) / sec(rads1t2) - 1;
         outerLineSecond.scale.setScalar(
-            Math.cos(Math.asin(Math.tan(rads1t2) * secTrigScale1t2))
+            cos(asin((2 * tan(rads1t2)) / sec(rads1t2)))
         );
 
-        const rads1t2Inv = ((1 - anim1t2) * Math.PI) / 4;
-        const secTrigScaleA2 = 2 * Math.SQRT2 * Math.cos(rads1t2Inv);
-
-        outerLineThird.rotation.z = rads1t2;
-        outerLineThird.position.y = -1 + Math.sin(rads1t2) * secTrigScaleA2;
-        outerLineThird.position.x = Math.cos(rads1t2) * secTrigScaleA2 - 1;
+        outerLineThird.rotation.y = rads2t3;
+        outerLineThird.rotation.z = anim1t2 * atan(cos(rads2t3));
+        outerLineThird.position.x =
+            (2 * Math.SQRT2 * cos(rads1t2)) / sec(rads1t2i) - 1;
+        outerLineThird.position.y =
+            (2 * Math.SQRT2 * sin(rads1t2)) / sec(rads1t2i) - 1;
+        // outerLineThird.position.z =
+        //     1 - 2 * Math.cos(rads2t3i) * Math.sin(rads2t3);
+        outerLineThird.position.z = 1 - 2 * sin(rads2t3);
+        outerLineThird.position.x += 2 * cos(rads2t3) - 2;
+        outerLineThird.position.y += 2 * cos(rads2t3) - 2;
         outerLineThird.scale.setScalar(
-            Math.cos(Math.asin(Math.tan(rads1t2Inv) * secTrigScaleA2))
+            cos(asin((2 * Math.SQRT2 * tan(rads1t2i)) / sec(rads1t2i))) *
+                cos(asin((2 * Math.SQRT2 * tan(rads2t3d)) / sec(rads2t3d)))
         );
+
+        if (false) {
+            outerLineFourth.rotation.y = rads2t3;
+            outerLineFourth.rotation.z = anim1t2 * atan(cos(rads2t3));
+            outerLineFourth.position.x =
+                (2 * Math.SQRT2 * cos(rads1t2)) / sec(rads1t2i) - 1;
+            outerLineFourth.position.y =
+                (2 * Math.SQRT2 * sin(rads1t2)) / sec(rads1t2i) - 1;
+            outerLineFourth.position.z = 1 - 2 * sin(rads2t3);
+        }
 
         // center ball
-        const cen12 = Math.tan(rads1t2); // Center ball 1D to 2D progress
+        const cen12 = Math.tan(rads1t2); // Center ball 1D to 2D
         const cen23 = Math.tan(rads2t3); // Center ball 2D to 3D progress
         const centerBallScale =
             Math.sqrt(cen12 * cen12 + cen23 * cen23 + 1) - 1;
-        centerBall.scale.setScalar(centerBallScale);
-        centerBall.scale.setScalar(0.1);
-        centerBall.position.y = -1 + cen12;
-        centerBall.position.z = 1 - cen23;
-
-        // 2D to 3D
-
-        // // center ball
-        // const centerBallScale = Math.sqrt(animB * animB + 2) - 1;
-        // centerBall.scale.setScalar(centerBallScale);
-        // centerBall.position.z = 1 - animB;
+        centerBallGroup.scale.setScalar(centerBallScale);
+        // centerBallGroup.scale.setScalar(0.1);
+        centerBallGroup.position.y = -1 + cen12;
+        centerBallGroup.position.z = 1 - cen23;
     });
 };

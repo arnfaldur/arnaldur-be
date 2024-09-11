@@ -3,6 +3,14 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 export const sphereDetail = 10;
 
+export function segmentSlider(segments: number, value: number) {
+    return Array(segments)
+        .fill(0)
+        .map((_, i) =>
+            easeInOutQuad(THREE.MathUtils.clamp(value * segments - i, 0, 1))
+        );
+}
+
 export function setupScene(canvas: HTMLCanvasElement) {
     const renderer = new THREE.WebGLRenderer({
         canvas,
@@ -114,10 +122,7 @@ export function createSquare() {
     return square;
 }
 export function createLine(color) {
-    const points = [
-        new THREE.Vector3(-1, 0, 0),
-        new THREE.Vector3(1, 0, 0),
-    ];
+    const points = [new THREE.Vector3(-1, 0, 0), new THREE.Vector3(1, 0, 0)];
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     const material = new THREE.LineBasicMaterial({
         color,
