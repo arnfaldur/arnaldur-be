@@ -7,6 +7,9 @@ import {
     createContactPoint,
     easeInOutQuad,
     setupScene,
+    centerBallColor,
+    outerBallColor,
+    boundingBoxColor,
 } from "./utilities";
 import { Slider, Checkbox } from "./components";
 
@@ -54,7 +57,9 @@ const diagram3D1 = (
     const clippingPlane = new THREE.Plane(new THREE.Vector3(1, -1, 0), 0);
 
     // Add containing box
-    const box = createBox();
+    const box = createBox({
+        color: boundingBoxColor,
+    });
     scene.add(box);
 
     const firstBallGroup = new THREE.Group();
@@ -63,7 +68,7 @@ const diagram3D1 = (
     [-1, 1].forEach((y) => {
         [-1, 1].forEach((x) => {
             const outerBall = createBall({
-                color: 4346763,
+                color: outerBallColor,
                 clippingPlanes: [clippingPlane],
             });
             outerBall.position.set(y, x, 0);
@@ -79,7 +84,7 @@ const diagram3D1 = (
     // Draw the center circle
     const centerBallGroup = new THREE.Group();
     const centerBall = createBall({
-        color: 8861753,
+        color: centerBallColor,
         clippingPlanes: [clippingPlane],
     });
     centerBall.scale.setScalar(Math.SQRT2 - 1);

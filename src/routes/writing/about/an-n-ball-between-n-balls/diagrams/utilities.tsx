@@ -46,8 +46,6 @@ export function setupScene(canvas: HTMLCanvasElement) {
 
     camera.position.z = 10;
     const controls = new OrbitControls(camera, canvas);
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 0;
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 1);
     scene.add(ambientLight);

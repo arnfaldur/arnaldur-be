@@ -1,11 +1,11 @@
 import { createEffect, createSignal, batch } from "solid-js";
 import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 import {
     createBox,
     createBall,
     createSquare,
-    setupScene,
     sphereDetail,
     createLine,
     easeInOutQuad,
@@ -62,15 +62,74 @@ export function Diagram3() {
 }
 
 const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
-    const {
-        scene,
-        directionalLight,
-        camera: cam,
-        controls,
-        renderer,
-    } = setupScene(canvas);
-    camera = cam;
+    const renderer = new THREE.WebGLRenderer({
+        canvas,
+        alpha: true,
+        antialias: true,
+        powerPreference: "low-power",
+    });
+    renderer.setSize(canvas.width, canvas.height);
+    renderer.autoClear = false;
+    const splitFraction = 19 / 20;
+    let aspectRatio = canvas.width / canvas.height;
+
+    const scene = new THREE.Scene();
+
+    const mcH = 2.5; // main camera height
+    let mcW = (mcH * aspectRatio) / splitFraction; // main camera width
+
+    const icH = 2.5; // isolate camera height
+    let icW = mcH * aspectRatio / splitFraction; // isolate camera width
+
+    const camera = new THREE.OrthographicCamera(
+        -mcW,
+        mcW,
+        mcH,
+        -mcH,
+        0.1,
+        1000
+    );
+    const isolateCam = new THREE.OrthographicCamera(
+        -icW,
+        icW,
+        icH,
+        -icH,
+        0.1,
+        1000
+    );
+
+    window.addEventListener("resize", () => {
+        if (canvas.parentElement === null) return;
+        canvas.setAttribute(
+            "width",
+            getComputedStyle(canvas.parentElement).width
+        );
+        renderer.setSize(canvas.width, canvas.height);
+        aspectRatio = canvas.width / canvas.height;
+        mcW = mcH * aspectRatio;
+        camera.left = -mcW;
+        camera.right = mcW;
+        camera.updateProjectionMatrix();
+
+        isolateCam.left = -icW;
+        isolateCam.right = icW;
+        isolateCam.updateProjectionMatrix();
+    });
+
+    camera.position.z = 10;
+    const controls = new OrbitControls(camera, canvas);
+
+    isolateCam.position.z = 10;
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+    scene.add(ambientLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 3);
+    directionalLight.position.set(0, 0, 1);
+    scene.add(directionalLight);
+
     directionalLight.position.set(1, 1, 1);
+
+    const threeDObjects = [];
 
     // Add containing box
     const box = createBox({
@@ -79,6 +138,7 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
         opacity: 0.5,
         depthWrite: false,
     });
+    threeDObjects.push(box);
     scene.add(box);
 
     const outerBallGroup = new THREE.Group();
@@ -98,6 +158,7 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
             });
         });
     });
+    threeDObjects.push(outerBallGroup);
     scene.add(outerBallGroup);
 
     const lineGroup = new THREE.Group();
@@ -110,6 +171,7 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
         transparent: true,
         opacity: 0.1,
     });
+    threeDObjects.push(centerBall);
     centerBallGroup.add(centerBall);
     // Add the center line
     const centerLine = createLine(centerBallColor);
@@ -146,6 +208,8 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
     boxPoint2.position.x = 3;
     lineGroup.add(boxPoint2);
 
+    lineGroup.add(isolateCam);
+
     scene.add(lineGroup);
 
     createEffect(() => {
@@ -181,6 +245,7 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
         );
 
         centerBallGroup.position.x = sec(rads1t2) * sec(rads2t3);
+        isolateCam.position.x = sec(rads1t2) * sec(rads2t3);
 
         const cen12 = tan(rads1t2); // Center ball 1D to 2D
         const cen23 = Math.SQRT2 * tan(rads2t3); // Center ball 2D to 3D progress
@@ -188,4 +253,53 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
             Math.sqrt(cen12 * cen12 + cen23 * cen23 + 1) - 1;
         centerBallGroup.scale.setScalar(centerBallScale);
     });
+
+    function animate() {
+        controls.update();
+
+        threeDObjects.forEach((obj) => {
+            obj.visible = true;
+        });
+
+        renderer.setViewport(
+            0,
+            canvas.height * (1 - splitFraction),
+            canvas.width,
+            canvas.height * splitFraction
+        );
+        renderer.clear();
+        renderer.render(scene, camera);
+
+        threeDObjects.forEach((obj) => {
+            obj.visible = false;
+        });
+
+        renderer.setViewport(
+            0,
+            0,
+            canvas.width,
+            canvas.height * (1 - splitFraction)
+        );
+        // renderer.clearDepth();
+        renderer.render(scene, isolateCam);
+        renderer.setViewport(
+            0,
+            1,
+            canvas.width,
+            canvas.height * (1 - splitFraction)
+        );
+        renderer.render(scene, isolateCam);
+        renderer.setViewport(
+            0,
+            -1,
+            canvas.width,
+            canvas.height * (1 - splitFraction)
+        );
+        renderer.render(scene, isolateCam);
+    }
+    renderer.setAnimationLoop(animate);
 };
+
+function setupScene(canvas: HTMLCanvasElement) {
+    return { scene, controls, renderer, camera, isolateCam, directionalLight };
+}
