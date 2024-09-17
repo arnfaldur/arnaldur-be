@@ -215,10 +215,10 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
             anim2t3, // animation 2D to 3D progress
         ] = segmentSlider(2, Number.parseFloat(diagonalization()));
 
-        const rads1t2 = anim1t2 * Math.atan(1);
-        const rads1t2i = (1 - anim1t2) * Math.atan(1);
-        const rads2t3 = anim2t3 * Math.atan(Math.SQRT1_2); // diagonal
-        const rads2t3i = (1 - anim2t3) * Math.atan(Math.SQRT1_2); // diagonal
+        const rads1t2 = anim1t2 * atan(1);
+        const rads1t2i = (1 - anim1t2) * atan(1);
+        const rads2t3 = anim2t3 * atan(Math.SQRT1_2); // diagonal
+        const rads2t3i = (1 - anim2t3) * atan(Math.SQRT1_2); // diagonal
 
         lineGroup.rotation.set(0, 0, rads1t2);
         lineGroup.rotateOnAxis(new THREE.Vector3(0, 1, 0), rads2t3);
@@ -252,7 +252,7 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
     });
 
     let renderRequested = false;
-    function render(renderer) {
+    function render(renderer: THREE.WebGLRenderer) {
         threeDObjects.forEach((obj) => {
             obj.visible = true;
         });

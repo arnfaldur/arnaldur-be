@@ -14,8 +14,6 @@ import {
 import { Slider, Checkbox } from "./components";
 import { asin, atan, cos, sec, sin, tan } from "./math";
 
-export const Diagram2 = Diagram2inner;
-
 const [centerSphere, setCenterSphere] = createSignal(0);
 const [diagonalization, setDiagonalization] = createSignal(0);
 const [linkSliders, setLinkSliders] = createSignal(false);
@@ -77,7 +75,7 @@ export function Latter() {
     return <button onClick={setLatter}>latter</button>;
 }
 
-function Diagram2inner() {
+export function Diagram2() {
     const initCanvas = (canvas: HTMLCanvasElement) => {
         if (canvas.parentElement === null) return;
         canvas.setAttribute(
@@ -227,8 +225,8 @@ const diagram3D2 = (
         const rads1 = (animDiag * Math.PI) / 4;
 
         square.rotation.y = rads1;
-        square.position.z = 1 - Math.tan(rads1);
-        square.scale.x = 1 / Math.cos(rads1);
+        square.position.z = 1 - tan(rads1);
+        square.scale.x = sec(rads1);
 
         // pivot rotating circles
         firstCircleGroup.children.forEach((circle) => {
@@ -246,7 +244,6 @@ const diagram3D2 = (
 
         // diagonal appearing circles
         const rads1Inv = ((1 - animDiag) * Math.PI) / 4;
-        const secTrigScale2 = 2 * Math.SQRT2 * Math.cos(rads1Inv);
         thirdCircleGroup.children.forEach((circle) => {
             circle.rotation.y = rads1;
             circle.position.x =
