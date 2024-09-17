@@ -18,14 +18,18 @@ import {
 import { Slider, Checkbox } from "./components";
 import { asin, atan, cos, sec, sin, tan } from "./math";
 
+const splitFraction = 19 / 20;
+
 const [diagonalization, setDiagonalization] = createSignal(0);
 
 let diagonalizationSlider: HTMLInputElement;
-let camera: THREE.OrthographicCamera | undefined;
+let cameraRef: THREE.OrthographicCamera | undefined;
+let cameraUpdatedEvent = new Event("cameraUpdated");
 
 function setCamera(x: number, y: number, z: number) {
-    if (camera) {
-        camera.position.set(x, y, z);
+    if (cameraRef) {
+        cameraRef.position.set(x, y, z);
+        document.dispatchEvent(cameraUpdatedEvent);
     }
 }
 
@@ -68,56 +72,48 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
         antialias: true,
         powerPreference: "low-power",
     });
-    renderer.setSize(canvas.width, canvas.height);
     renderer.autoClear = false;
-    const splitFraction = 19 / 20;
-    let aspectRatio = canvas.width / canvas.height;
 
     const scene = new THREE.Scene();
 
-    const mcH = 2.5; // main camera height
-    let mcW = (mcH * aspectRatio) / splitFraction; // main camera width
+    const mcH = 2.5; // main camera world height
+    const icH = mcH * (1 - splitFraction); // isolate camera world height
 
-    const icH = 2.5; // isolate camera height
-    let icW = mcH * aspectRatio / splitFraction; // isolate camera width
+    const camera = new THREE.OrthographicCamera(0, 0, mcH, -mcH, 0.1, 1000);
+    cameraRef = camera;
+    const isolateCam = new THREE.OrthographicCamera(0, 0, icH, -icH, 0.1, 1000);
 
-    const camera = new THREE.OrthographicCamera(
-        -mcW,
-        mcW,
-        mcH,
-        -mcH,
-        0.1,
-        1000
-    );
-    const isolateCam = new THREE.OrthographicCamera(
-        -icW,
-        icW,
-        icH,
-        -icH,
-        0.1,
-        1000
-    );
-
-    window.addEventListener("resize", () => {
-        if (canvas.parentElement === null) return;
+    function resizeRenderer(renderer: THREE.WebGLRenderer) {
+        const canvas = renderer?.domElement;
+        if (canvas?.parentElement === null) return;
         canvas.setAttribute(
             "width",
             getComputedStyle(canvas.parentElement).width
         );
         renderer.setSize(canvas.width, canvas.height);
-        aspectRatio = canvas.width / canvas.height;
-        mcW = mcH * aspectRatio;
+        const aspectRatio = canvas.width / canvas.height;
+        updateCameraAspect(aspectRatio);
+        requestRender();
+    }
+    function updateCameraAspect(aspectRatio: number) {
+        const mcW = (mcH * aspectRatio) / splitFraction; // main camera width
         camera.left = -mcW;
         camera.right = mcW;
         camera.updateProjectionMatrix();
 
+        const icW = (icH * aspectRatio) / (1 - splitFraction);
         isolateCam.left = -icW;
         isolateCam.right = icW;
         isolateCam.updateProjectionMatrix();
-    });
+    }
+
+    window.addEventListener("resize", () => resizeRenderer(renderer));
 
     camera.position.z = 10;
+
     const controls = new OrbitControls(camera, canvas);
+    controls.addEventListener("change", requestRender);
+    document.addEventListener(cameraUpdatedEvent.type, controls.update);
 
     isolateCam.position.z = 10;
 
@@ -129,7 +125,7 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
 
     directionalLight.position.set(1, 1, 1);
 
-    const threeDObjects = [];
+    const threeDObjects: THREE.Object3D[] = [];
 
     // Add containing box
     const box = createBox({
@@ -252,11 +248,11 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
         const centerBallScale =
             Math.sqrt(cen12 * cen12 + cen23 * cen23 + 1) - 1;
         centerBallGroup.scale.setScalar(centerBallScale);
+        requestRender();
     });
 
-    function animate() {
-        controls.update();
-
+    let renderRequested = false;
+    function render(renderer) {
         threeDObjects.forEach((obj) => {
             obj.visible = true;
         });
@@ -274,32 +270,23 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
             obj.visible = false;
         });
 
-        renderer.setViewport(
-            0,
-            0,
-            canvas.width,
-            canvas.height * (1 - splitFraction)
-        );
-        // renderer.clearDepth();
-        renderer.render(scene, isolateCam);
-        renderer.setViewport(
-            0,
-            1,
-            canvas.width,
-            canvas.height * (1 - splitFraction)
-        );
-        renderer.render(scene, isolateCam);
-        renderer.setViewport(
-            0,
-            -1,
-            canvas.width,
-            canvas.height * (1 - splitFraction)
-        );
-        renderer.render(scene, isolateCam);
+        [0, 1].forEach((offset) => {
+            renderer.setViewport(
+                0,
+                offset,
+                canvas.width,
+                canvas.height * (1 - splitFraction)
+            );
+            renderer.render(scene, isolateCam);
+        });
+        renderRequested = false;
     }
-    renderer.setAnimationLoop(animate);
+    function requestRender() {
+        if (!renderRequested) {
+            renderRequested = true;
+            requestAnimationFrame(() => render(renderer));
+        }
+    }
+    render(renderer); // required to make initial frame transparent
+    resizeRenderer(renderer);
 };
-
-function setupScene(canvas: HTMLCanvasElement) {
-    return { scene, controls, renderer, camera, isolateCam, directionalLight };
-}

@@ -51,7 +51,16 @@ const diagram3D1 = (
     contacts: Function,
     disect: Function
 ) => {
-    const { scene, directionalLight, camera, renderer } = setupScene(canvas);
+    const {
+        scene,
+        directionalLight,
+        camera,
+        controls,
+        renderer,
+        render,
+        requestRender,
+        resizeRenderer,
+    } = setupScene(canvas);
     let cameraShiftMemory = 0;
 
     const clippingPlane = new THREE.Plane(new THREE.Vector3(1, -1, 0), 0);
@@ -169,14 +178,21 @@ const diagram3D1 = (
                 Math.sin(sphereAngle) * centerBallScale
             );
         });
+        controls.update();
+        requestRender();
     });
     createEffect(() => {
         firstContactPointGroup.visible = contacts();
+        requestRender();
     });
     createEffect(() => {
         secondContactPointGroup.visible = transitionValue() >= 1 && contacts();
+        requestRender();
     });
     createEffect(() => {
         renderer.localClippingEnabled = disect();
+        requestRender();
     });
+    render(renderer); // required to make initial frame transparent
+    resizeRenderer(renderer);
 };

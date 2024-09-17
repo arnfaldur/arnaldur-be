@@ -22,30 +22,36 @@ export function setupScene(canvas: HTMLCanvasElement) {
         antialias: true,
         powerPreference: "low-power",
     });
-    renderer.setSize(canvas.width, canvas.height);
-    let aspectRatio = canvas.width / canvas.height;
+    renderer.autoClear = false;
 
     const scene = new THREE.Scene();
-    const cH = 2.5; // camera height
-    let cW = cH * aspectRatio; // camera width
-    const camera = new THREE.OrthographicCamera(-cW, cW, cH, -cH, 0.1, 1000);
 
-    window.addEventListener("resize", () => {
-        if (canvas.parentElement === null) return;
+    const cH = 2.5; // camera height
+    const camera = new THREE.OrthographicCamera(-0, 0, cH, -cH, 0.1, 1000);
+
+    function resizeRenderer(renderer: THREE.WebGLRenderer) {
+        const canvas = renderer?.domElement;
+        if (canvas?.parentElement === null) return;
         canvas.setAttribute(
             "width",
             getComputedStyle(canvas.parentElement).width
         );
         renderer.setSize(canvas.width, canvas.height);
-        aspectRatio = canvas.width / canvas.height;
-        cW = cH * aspectRatio;
+        const aspectRatio = canvas.width / canvas.height;
+        updateCameraAspect(aspectRatio);
+        requestRender();
+    }
+    function updateCameraAspect(aspectRatio: number) {
+        const cW = cH * aspectRatio; // camera width
         camera.left = -cW;
         camera.right = cW;
         camera.updateProjectionMatrix();
-    });
+    }
+    window.addEventListener("resize", () => resizeRenderer(renderer));
 
     camera.position.z = 10;
     const controls = new OrbitControls(camera, canvas);
+    controls.addEventListener("change", requestRender);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 1);
     scene.add(ambientLight);
@@ -53,13 +59,29 @@ export function setupScene(canvas: HTMLCanvasElement) {
     directionalLight.position.set(0, 0, 1);
     scene.add(directionalLight);
 
-    function animate() {
-        controls.update();
+    let renderRequested = false;
+    function render(renderer: THREE.WebGLRenderer) {
+        renderer.clear();
         renderer.render(scene, camera);
+        renderRequested = false;
     }
-    renderer.setAnimationLoop(animate);
+    function requestRender() {
+        if (!renderRequested) {
+            renderRequested = true;
+        }
+        requestAnimationFrame(() => render(renderer));
+    }
 
-    return { scene, controls, renderer, camera, directionalLight };
+    return {
+        scene,
+        renderer,
+        camera,
+        controls,
+        directionalLight,
+        render,
+        requestRender,
+        resizeRenderer,
+    };
 }
 
 export function createBall(
@@ -72,7 +94,9 @@ export function createBall(
     });
     return new THREE.Mesh(geometry, material);
 }
-export function createBox(materialParameters?: THREE.LineBasicMaterialParameters) {
+export function createBox(
+    materialParameters?: THREE.LineBasicMaterialParameters
+) {
     const points = [
         new THREE.Vector3(-2, -2, -2),
         new THREE.Vector3(-2, -2, 2),

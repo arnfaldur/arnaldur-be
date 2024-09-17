@@ -120,8 +120,16 @@ const diagram3D2 = (
     diagonalization: Function,
     isolatePlane: Function
 ) => {
-    const { scene, directionalLight, camera, controls, renderer } =
-        setupScene(canvas);
+    const {
+        scene,
+        directionalLight,
+        camera,
+        controls,
+        renderer,
+        render,
+        requestRender,
+        resizeRenderer,
+    } = setupScene(canvas);
     directionalLight.position.set(1, 1, 1);
 
     // Add containing box
@@ -249,6 +257,7 @@ const diagram3D2 = (
                 cos(asin((2 * Math.SQRT2 * tan(rads1Inv)) / sec(rads1Inv)))
             );
         });
+        requestRender();
     });
     // Center ball transforms
     createEffect(() => {
@@ -257,6 +266,7 @@ const diagram3D2 = (
         const centerBallScale = Math.sqrt(animCenter * animCenter + 2) - 1;
         centerBall.scale.setScalar(centerBallScale);
         centerBall.position.z = 1 - animCenter;
+        requestRender();
     });
     // Center circle transforms
     createEffect(() => {
@@ -277,6 +287,7 @@ const diagram3D2 = (
                 Math.asin((Math.tan(rads3) * secTrigScale3) / centerBallScale)
             ) * centerBallScale
         );
+        requestRender();
     });
     // isolate plane perspective
     createEffect(() => {
@@ -289,6 +300,7 @@ const diagram3D2 = (
             directionalLight.position.set(Math.tan(rads1), 0, 1);
             intersectingPlane.position.z = animDiag - 1;
         }
+        requestRender();
     });
     // isolate plane disabled
     createEffect(() => {
@@ -301,5 +313,8 @@ const diagram3D2 = (
             directionalLight.position.set(1, 1, 1);
             intersectingPlane.position.z = 0;
         }
+        requestRender();
     });
+    render(renderer);
+    resizeRenderer(renderer);
 };
