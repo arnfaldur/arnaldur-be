@@ -61,6 +61,10 @@ const diagram3D4 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
     camera.position.set(-6, 5, 10);
     controls.update();
 
+    const farBallGroupCount = 7;
+
+    const allGroup = new THREE.Group();
+
     // Add containing box
     const box = createBox({
         color: boundingBoxColor,
@@ -68,14 +72,25 @@ const diagram3D4 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
         opacity: 0.5,
         depthWrite: false,
     });
-    scene.add(box);
+    allGroup.add(box);
 
     const leftBallGroup = new THREE.Group();
-    leftBallGroup.position.x = -1;
+    leftBallGroup.position.x = 0;
     const rightBallGroup = new THREE.Group();
-    rightBallGroup.position.x = 1;
-    const farBallGroup = new THREE.Group();
-    farBallGroup.position.x = Math.SQRT2;
+    rightBallGroup.position.x = 2;
+
+    const farBallGroups = Array.from(
+        { length: farBallGroupCount },
+        (x, i) => i
+    ).map((x, i) => {
+        const group = new THREE.Group();
+        group.position.x = 2 * Math.sqrt(i + 2);
+        return group;
+    });
+    // const far4DBallGroup = new THREE.Group();
+    // far4DBallGroup.position.x = 2 * Math.SQRT2;
+    // const far5DBallGroup = new THREE.Group();
+    // far5DBallGroup.position.x = 2 * Math.sqrt(3);
     [-1, 1].forEach((z) => {
         [-1, 1].forEach((y) => {
             // add the left spheres
@@ -91,17 +106,35 @@ const diagram3D4 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
             rightBall.position.set(0, y, z);
             rightBallGroup.add(rightBall);
             // add the far (appearing) spheres
-            const farBall = createBall({
-                color: outerBallColor,
-            });
-            farBall.position.set(0, y, z);
-            farBall.scale.setScalar(0);
-            farBallGroup.add(farBall);
+            for (let i = 0; i < farBallGroupCount; i++) {
+                const farBall = createBall({ color: outerBallColor });
+                farBall.position.set(0, y, z);
+                farBall.scale.setScalar(0);
+                farBallGroups[i].add(farBall);
+            }
+            // // add the far 4D (appearing) spheres
+            // const far4DBall = createBall({
+            //     color: outerBallColor,
+            // });
+            // far4DBall.position.set(0, y, z);
+            // far4DBall.scale.setScalar(0);
+            // far4DBallGroup.add(far4DBall);
+            // // add the far 5D (appearing) spheres
+            // const far5DBall = createBall({
+            //     color: outerBallColor,
+            // });
+            // far5DBall.position.set(0, y, z);
+            // far5DBall.scale.setScalar(0);
+            // far5DBallGroup.add(far5DBall);
         });
     });
-    scene.add(leftBallGroup);
-    scene.add(rightBallGroup);
-    scene.add(farBallGroup);
+    allGroup.add(leftBallGroup);
+    allGroup.add(rightBallGroup);
+    for (let i = 0; i < farBallGroupCount; i++) {
+        allGroup.add(farBallGroups[i]);
+    }
+    // allGroup.add(far4DBallGroup);
+    // allGroup.add(far5DBallGroup);
 
     // Draw the center ball
     const centerBallGroup = new THREE.Group();
@@ -109,42 +142,78 @@ const diagram3D4 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
         color: centerBallColor,
     });
     centerBall.scale.setScalar(Math.sqrt(3) - 1);
-    centerBallGroup.add(centerBall);
+    allGroup.add(centerBall);
 
-    scene.add(centerBallGroup);
+    scene.add(allGroup);
 
     // Center ball transforms
     createEffect(() => {
         // animation controllers
-        const [
-            anim3t4, // animation 1D to 2D progress
-            anim4t5, // animation 2D to 3D progress
-        ] = segmentSlider(2, Number.parseFloat(diagonalization()));
-        const rads3t4 = anim3t4 * atan(1);
-        const rads3t4i = (1 - anim3t4) * atan(1);
-        const rads4t5 = anim4t5 * atan(Math.SQRT1_2);
-        const rads4t5i = (1 - anim4t5) * atan(Math.SQRT1_2);
+        const anims = segmentSlider(
+            farBallGroupCount,
+            Number.parseFloat(diagonalization())
+        );
+        const rads = Array.from({ length: farBallGroupCount }, (x, i) => i + 1)
+            .map((x) => atan(1 / Math.sqrt(x)))
+            .map((x, i) => [anims[i] * x, (1 - anims[i]) * x]);
 
-        box.scale.x = sec(rads3t4);
+        const [[rads3t4, rads3t4i]] =
+            rads;
 
-        leftBallGroup.position.x = -sec(rads3t4);
+        const secProd = rads.reduce((acc, x) => acc * sec(x[0]), 1);
 
-        rightBallGroup.position.x = 2 / sec(rads3t4) - sec(rads3t4);
+        // TODO: animate zoom to fit construct better
+        box.position.x = secProd;
+        box.scale.x = secProd;
+
+        allGroup.position.x = -secProd;
+
+        rightBallGroup.position.x = 2 / sec(rads3t4);
         const rightBallSize = cos(asin((2 * tan(rads3t4)) / sec(rads3t4)));
         rightBallGroup.children.forEach((ball) => {
             ball.scale.setScalar(rightBallSize);
         });
-
-        farBallGroup.position.x = Math.SQRT2 * 2 / sec(rads3t4i) - sec(rads3t4);
-        const farBallSize = cos(
-            asin((2 * Math.SQRT2 * tan(rads3t4i)) / sec(rads3t4i))
-        );
-        farBallGroup.children.forEach((ball) => {
-            ball.scale.setScalar(farBallSize);
+        farBallGroups.slice(0, -1).forEach((farBallGroup, i) => {
+            farBallGroup.position.x =
+                2 * Math.sqrt(i + 2) * cos(rads[i][1]) * cos(rads[i + 1][0]);
+            const farBallSize =
+                cos(
+                    asin(
+                        2 * Math.sqrt(i + 2) * tan(rads[i][1]) * cos(rads[i][1])
+                    )
+                ) *
+                cos(
+                    asin(
+                        2 *
+                            Math.sqrt(i + 2) *
+                            tan(rads[i + 1][0]) *
+                            cos(rads[i + 1][0])
+                    )
+                );
+            farBallGroup.children.forEach((ball) => {
+                ball.scale.setScalar(farBallSize);
+            });
         });
+        {
+            // Last farBallGroup needs special treatment
+            // similar to rightBallGroup but inverse
+            const farBallGroup = farBallGroups[farBallGroupCount - 1];
+            const i = farBallGroupCount - 1;
 
-        const cen12 = tan(rads3t4);
-        const centerBallScale = Math.sqrt(cen12 * cen12 + 3) - 1;
+            farBallGroup.position.x = 2 * Math.sqrt(i + 2) * cos(rads[i][1]);
+            const farBallSize = cos(
+                asin(2 * Math.sqrt(i + 2) * tan(rads[i][1]) * cos(rads[i][1]))
+            );
+            farBallGroup.children.forEach((ball) => {
+                ball.scale.setScalar(farBallSize);
+            });
+        }
+
+        centerBall.position.x = secProd;
+        const cens = rads.map((x, i) => Math.sqrt(i + 1) * tan(x[0]));
+        const centerBallScale =
+            Math.sqrt(cens.reduce((acc, x) => acc + x * x, 3)) - 1;
+
         centerBall.scale.setScalar(centerBallScale);
         requestRender();
     });
