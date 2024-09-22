@@ -4,9 +4,7 @@ import * as THREE from "three";
 import {
     createBox,
     createBall,
-    createSquare,
     setupScene,
-    sphereDetail,
     outerBallColor,
     centerBallColor,
     boundingBoxColor,
@@ -15,10 +13,7 @@ import {
 import { Slider, Checkbox } from "./components";
 import { asin, atan, cos, sec, sin, tan } from "./math";
 
-const [centerSphere, setCenterSphere] = createSignal(0);
 const [diagonalization, setDiagonalization] = createSignal(0);
-const [linkSliders, setLinkSliders] = createSignal(false);
-const [isolatePlane, setIsolatePlane] = createSignal(false);
 
 let diagonalizationSlider: HTMLInputElement;
 
@@ -58,10 +53,10 @@ const diagram3D4 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
         resizeRenderer,
     } = setupScene(canvas);
     directionalLight.position.set(1, 1, 1);
-    camera.position.set(-6, 5, 10);
+    camera.position.set(-600, 500, 1000);
     controls.update();
 
-    const farBallGroupCount = 7;
+    const farBallGroupCount = 7 + 0;
 
     const allGroup = new THREE.Group();
 
@@ -112,20 +107,6 @@ const diagram3D4 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
                 farBall.scale.setScalar(0);
                 farBallGroups[i].add(farBall);
             }
-            // // add the far 4D (appearing) spheres
-            // const far4DBall = createBall({
-            //     color: outerBallColor,
-            // });
-            // far4DBall.position.set(0, y, z);
-            // far4DBall.scale.setScalar(0);
-            // far4DBallGroup.add(far4DBall);
-            // // add the far 5D (appearing) spheres
-            // const far5DBall = createBall({
-            //     color: outerBallColor,
-            // });
-            // far5DBall.position.set(0, y, z);
-            // far5DBall.scale.setScalar(0);
-            // far5DBallGroup.add(far5DBall);
         });
     });
     allGroup.add(leftBallGroup);
@@ -133,8 +114,6 @@ const diagram3D4 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
     for (let i = 0; i < farBallGroupCount; i++) {
         allGroup.add(farBallGroups[i]);
     }
-    // allGroup.add(far4DBallGroup);
-    // allGroup.add(far5DBallGroup);
 
     // Draw the center ball
     const centerBallGroup = new THREE.Group();
@@ -157,8 +136,7 @@ const diagram3D4 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
             .map((x) => atan(1 / Math.sqrt(x)))
             .map((x, i) => [anims[i] * x, (1 - anims[i]) * x]);
 
-        const [[rads3t4, rads3t4i]] =
-            rads;
+        const [[rads3t4]] = rads;
 
         const secProd = rads.reduce((acc, x) => acc * sec(x[0]), 1);
 
@@ -191,6 +169,7 @@ const diagram3D4 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
                     )
                 );
             farBallGroup.children.forEach((ball) => {
+                ball.visible = !!farBallSize;
                 ball.scale.setScalar(farBallSize);
             });
         });

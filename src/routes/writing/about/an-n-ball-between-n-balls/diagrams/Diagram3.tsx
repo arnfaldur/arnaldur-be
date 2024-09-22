@@ -28,7 +28,7 @@ let cameraUpdatedEvent = new Event("cameraUpdated");
 
 function setCamera(x: number, y: number, z: number) {
     if (cameraRef) {
-        cameraRef.position.set(x, y, z);
+        cameraRef.position.set(x * 100, y * 100, z * 100);
         document.dispatchEvent(cameraUpdatedEvent);
     }
 }
@@ -79,9 +79,9 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
     const mcH = 2.5; // main camera world height
     const icH = mcH * (1 - splitFraction); // isolate camera world height
 
-    const camera = new THREE.OrthographicCamera(0, 0, mcH, -mcH, 0.1, 1000);
+    const camera = new THREE.OrthographicCamera(0, 0, mcH, -mcH, 0.1, 10000);
     cameraRef = camera;
-    const isolateCam = new THREE.OrthographicCamera(0, 0, icH, -icH, 0.1, 1000);
+    const isolateCam = new THREE.OrthographicCamera(0, 0, icH, -icH, 0.1, 10000);
 
     function resizeRenderer(renderer: THREE.WebGLRenderer) {
         const canvas = renderer?.domElement;
@@ -109,7 +109,7 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
 
     window.addEventListener("resize", () => resizeRenderer(renderer));
 
-    camera.position.z = 10;
+    camera.position.z = 1000;
 
     const controls = new OrbitControls(camera, canvas);
     controls.addEventListener("change", requestRender);

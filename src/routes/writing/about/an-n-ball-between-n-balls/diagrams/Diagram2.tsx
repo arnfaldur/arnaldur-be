@@ -292,7 +292,7 @@ const diagram3D2 = (
         const rads1 = (animDiag * Math.PI) / 4;
 
         if (isolatePlane()) {
-            camera.position.set(Math.tan(rads1) * 10, 0, 10);
+            camera.position.set(Math.tan(rads1) * 1000, 0, 1000);
             controls.update();
             directionalLight.position.set(Math.tan(rads1), 0, 1);
             intersectingPlane.position.z = animDiag - 1;

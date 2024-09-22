@@ -154,8 +154,8 @@ const diagram3D1 = (
             Math.pow(animA, 2),
             1
         );
-        camera.position.x -= cameraShift * 6;
-        camera.position.y += cameraShift * 4;
+        camera.position.x -= cameraShift * 600;
+        camera.position.y += cameraShift * 400;
         // Second phase
         firstBallGroup.position.z = animB;
         // Math.SQRT2 / Math.cos(Math.atan(animB / Math.SQRT2)) - 1 simplifies to:

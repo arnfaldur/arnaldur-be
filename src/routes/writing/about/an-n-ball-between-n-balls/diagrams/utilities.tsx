@@ -27,7 +27,7 @@ export function setupScene(canvas: HTMLCanvasElement) {
     const scene = new THREE.Scene();
 
     const cH = 2.5; // camera height
-    const camera = new THREE.OrthographicCamera(-0, 0, cH, -cH, 0.1, 1000);
+    const camera = new THREE.OrthographicCamera(-0, 0, cH, -cH, 0.1, 10000);
 
     function resizeRenderer(renderer: THREE.WebGLRenderer) {
         const canvas = renderer?.domElement;
@@ -49,7 +49,7 @@ export function setupScene(canvas: HTMLCanvasElement) {
     }
     window.addEventListener("resize", () => resizeRenderer(renderer));
 
-    camera.position.z = 10;
+    camera.position.z = 1000;
     const controls = new OrbitControls(camera, canvas);
     controls.addEventListener("change", requestRender);
 
