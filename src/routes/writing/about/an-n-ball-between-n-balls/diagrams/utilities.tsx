@@ -15,6 +15,12 @@ export function segmentSlider(segments: number, value: number) {
         );
 }
 
+export function updateCameraAspect(camera, zoom, aspectRatio: number) {
+    const cW = zoom * aspectRatio; // camera width
+    camera.left = -cW;
+    camera.right = cW;
+    camera.updateProjectionMatrix();
+}
 export function setupScene(canvas: HTMLCanvasElement) {
     const renderer = new THREE.WebGLRenderer({
         canvas,
@@ -38,14 +44,8 @@ export function setupScene(canvas: HTMLCanvasElement) {
         );
         renderer.setSize(canvas.width, canvas.height);
         const aspectRatio = canvas.width / canvas.height;
-        updateCameraAspect(aspectRatio);
+        updateCameraAspect(camera, cH, aspectRatio);
         requestRender();
-    }
-    function updateCameraAspect(aspectRatio: number) {
-        const cW = cH * aspectRatio; // camera width
-        camera.left = -cW;
-        camera.right = cW;
-        camera.updateProjectionMatrix();
     }
     window.addEventListener("resize", () => resizeRenderer(renderer));
 

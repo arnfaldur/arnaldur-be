@@ -57,6 +57,7 @@ const diagram3D4 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
     controls.update();
 
     const farBallGroupCount = 7 + 0;
+    let cameraZoomMemory = 0;
 
     const allGroup = new THREE.Group();
 
@@ -127,11 +128,9 @@ const diagram3D4 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
 
     // Center ball transforms
     createEffect(() => {
+        const animRaw = Number.parseFloat(diagonalization());
         // animation controllers
-        const anims = segmentSlider(
-            farBallGroupCount,
-            Number.parseFloat(diagonalization())
-        );
+        const anims = segmentSlider(farBallGroupCount, animRaw);
         const rads = Array.from({ length: farBallGroupCount }, (x, i) => i + 1)
             .map((x) => atan(1 / Math.sqrt(x)))
             .map((x, i) => [anims[i] * x, (1 - anims[i]) * x]);
@@ -139,6 +138,14 @@ const diagram3D4 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
         const [[rads3t4]] = rads;
 
         const secProd = rads.reduce((acc, x) => acc * sec(x[0]), 1);
+
+        const cameraZoom = Math.max(0, animRaw - cameraZoomMemory);
+        cameraZoomMemory = Math.max(cameraZoomMemory, animRaw);
+
+        // camera.zoom += cameraZoom * 10;
+        camera.left = -((animRaw + 1) * 3);
+        camera.right = (animRaw + 1) * 3;
+        camera.updateProjectionMatrix();
 
         // TODO: animate zoom to fit construct better
         box.position.x = secProd;
