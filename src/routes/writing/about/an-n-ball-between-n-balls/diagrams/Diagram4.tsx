@@ -9,6 +9,7 @@ import {
     centerBallColor,
     boundingBoxColor,
     segmentSlider,
+    updateCameraZoom,
 } from "./utilities";
 import { Slider, Checkbox } from "./components";
 import { asin, atan, cos, sec, sin, tan } from "./math";
@@ -142,12 +143,8 @@ const diagram3D4 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
         const cameraZoom = Math.max(0, animRaw - cameraZoomMemory);
         cameraZoomMemory = Math.max(cameraZoomMemory, animRaw);
 
-        // camera.zoom += cameraZoom * 10;
-        camera.left = -((animRaw + 1) * 3);
-        camera.right = (animRaw + 1) * 3;
-        camera.updateProjectionMatrix();
+        updateCameraZoom(camera, 2.5 + cameraZoomMemory*1.5);
 
-        // TODO: animate zoom to fit construct better
         box.position.x = secProd;
         box.scale.x = secProd;
 

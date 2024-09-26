@@ -15,11 +15,29 @@ export function segmentSlider(segments: number, value: number) {
         );
 }
 
-export function updateCameraAspect(camera, zoom, aspectRatio: number) {
+let outerRequestRender = () => {};
+export function updateCameraZoom(
+    camera: THREE.OrthographicCamera,
+    zoom: number
+) {
+    const aspectRatio = camera.right / camera.top;
+    camera.top = zoom;
+    camera.bottom = -zoom;
     const cW = zoom * aspectRatio; // camera width
     camera.left = -cW;
     camera.right = cW;
     camera.updateProjectionMatrix();
+    outerRequestRender();
+}
+export function updateCameraAspect(
+    camera: THREE.OrthographicCamera,
+    aspectRatio: number
+) {
+    const cW = camera.top * aspectRatio; // camera width
+    camera.left = -cW;
+    camera.right = cW;
+    camera.updateProjectionMatrix();
+    outerRequestRender();
 }
 export function setupScene(canvas: HTMLCanvasElement) {
     const renderer = new THREE.WebGLRenderer({
@@ -44,7 +62,9 @@ export function setupScene(canvas: HTMLCanvasElement) {
         );
         renderer.setSize(canvas.width, canvas.height);
         const aspectRatio = canvas.width / canvas.height;
-        updateCameraAspect(camera, cH, aspectRatio);
+        updateCameraAspect(camera, aspectRatio);
+        // it's kinda unneccesary to call this but it might not be called
+        // at early init time in updateCameraAspect and the cost is low so might as well
         requestRender();
     }
     window.addEventListener("resize", () => resizeRenderer(renderer));
@@ -71,6 +91,7 @@ export function setupScene(canvas: HTMLCanvasElement) {
         }
         requestAnimationFrame(() => render(renderer));
     }
+    outerRequestRender = requestRender;
 
     return {
         scene,
