@@ -121,6 +121,7 @@ details[open] > summary {
 main.writing > .video {
     container-type: inline-size;
     width: 100%;
+    margin-bottom: 1rem;
 }
 
 main.writing > div.ar4-3 > iframe {
