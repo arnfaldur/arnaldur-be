@@ -15,7 +15,6 @@ import rehypeKatex from "rehype-katex";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 
-// TODO: consider remark-smartypants
 const remarkPlugins = [
     remarkFrontmatter,
     remarkMdxFrontmatter,

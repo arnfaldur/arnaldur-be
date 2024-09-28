@@ -55,7 +55,7 @@ There are a few important behaviors to note from this interactable.
 3. The differences between the <Former/> and <Latter/> configuration.
     1. The enclosing box's width grows from $$4$$ to $$4\sqrt{2}$$.
     2. Similarly, the balls' horizontal positions shift from $$\pm 1$$ to $$\pm \sqrt{2}$$
-    3. The red ball's radius grows from $$\sqrt{2} - 1$$ to $$\sqrt{3} - 1$$
+    3. The red ball's radius $$r$$ grows from $$\sqrt{2} - 1$$ to $$\sqrt{3} - 1$$
 
 ### 1D Intersection of 3D Construct
 import { Diagram3 } from "./diagrams/Diagram3";
@@ -71,15 +71,37 @@ As visualizing higher dimensions is not intuitive, we can't rely on a lower dime
 The similarities should be evident however.
 
 ### 3D Intersection of 10D Construct
-import { Diagram4 } from "./diagrams/Diagram4";
+import { Diagram4, SideView } from "./diagrams/Diagram4";
 
 <Diagram4 />
 
-it's not spiky, here's why...
+Two of the boxes dimensions maintain their constant height of $$4$$ while the third elongates to disect the remaining eight dimension of the 10D construct.
+It's length transitions from $$4 = 4\sqrt{1}$$ up to $$4\sqrt{8}$$,
+the length of the longest diagonal of an $$8$$ dimensional box.
 
-show a 3D diagonal slice through a 4D construct, compressing 2 dimensions into 1. Then a 3D diagonal through 5D construct, compressing 3 dimensions into 1.
+Viewing the fully diagonalized construct from the <SideView /> we can see the property it's known for. The red ball reaches outside of the green box. Pieces of the red ball are outside the green box. This is absurd when considering how enclosed it is in the two and three dimensional versions, and even if it's mathematically clear that $$r > 2$$ when $$D > 9$$, the fact is hard to accept.
 
-[asdf](https://www.youtube.com/watch?v=uU_Q2a0S0zI&t=1716s)
+Some people have tried to analogize this property as spikeyness 
+<sup>[[1](https://stanislavfort.com/blog/sphere-spilling-out/)]</sup>
+<sup>[[2](http://www.solipsys.co.uk/new/SpikeySpheres.html?HN_20161120)]</sup> of the red ball.
+I don't think the analogy is good.
+A 3D sphere is perfectly circular, no matter how you slice it.
+Similarly, an n-dimensional hyperball, is perfectly spherical from all perspectives.
+It's ballness just reaches into more hard to grasp dimensions than we're used to.
+
+### Hamming's lecture
+Here is a segment from a lecture that reveals this fact without mincing words.
+
+<div class="video ar4-3">
+
+https://www.youtube.com/watch?v=uU_Q2a0S0zI&t=1716s
+
+</div>
+
+## Further Analysis
+
+
+
 
 {
 // https://x.com/fdalmaso/status/1818650977672569085

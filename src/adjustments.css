@@ -117,3 +117,13 @@ details.green {
 details[open] > summary {
     border-radius: calc(var(--bd-radius) - 1px) calc(var(--bd-radius) - 1px) 0 0;
 }
+
+main.writing > .video {
+    container-type: inline-size;
+    width: 100%;
+}
+
+main.writing > div.ar4-3 > iframe {
+    width: 100%;
+    height: calc(100cqi / 4 * 3);
+}

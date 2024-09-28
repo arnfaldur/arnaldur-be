@@ -8,7 +8,7 @@ export default function WritingLayout(props) {
             <header>
                 <Breadcrumb />
             </header>
-            <main>{props.children}</main>
+            <main class="writing">{props.children}</main>
             <footer>
                 <Breadcrumb />
             </footer>

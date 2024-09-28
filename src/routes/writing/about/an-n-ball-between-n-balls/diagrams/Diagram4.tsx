@@ -18,6 +18,12 @@ const [diagonalization, setDiagonalization] = createSignal(0);
 
 let diagonalizationSlider: HTMLInputElement;
 
+let setSideView = () => {};
+
+export function SideView() {
+    return <button onClick={setSideView}>side</button>;
+}
+
 export function Diagram4() {
     const initCanvas = (canvas: HTMLCanvasElement) => {
         if (canvas.parentElement === null) return;
@@ -59,6 +65,14 @@ const diagram3D4 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
 
     const farBallGroupCount = 7 + 0;
     let cameraZoomMemory = 0;
+
+    setSideView = () => {
+        setDiagonalization(1);
+        diagonalizationSlider.value = "1";
+        camera.position.set(0, 0, 1000);
+        controls.update();
+        requestRender();
+    };
 
     const allGroup = new THREE.Group();
 
@@ -118,7 +132,6 @@ const diagram3D4 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
     }
 
     // Draw the center ball
-    const centerBallGroup = new THREE.Group();
     const centerBall = createBall({
         color: centerBallColor,
     });
@@ -143,7 +156,7 @@ const diagram3D4 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
         const cameraZoom = Math.max(0, animRaw - cameraZoomMemory);
         cameraZoomMemory = Math.max(cameraZoomMemory, animRaw);
 
-        updateCameraZoom(camera, 2.5 + cameraZoomMemory*1.5);
+        updateCameraZoom(camera, 2.5 + cameraZoomMemory * 1.5);
 
         box.position.x = secProd;
         box.scale.x = secProd;
