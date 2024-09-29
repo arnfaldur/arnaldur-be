@@ -153,9 +153,7 @@ const diagram3D4 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
 
         const secProd = rads.reduce((acc, x) => acc * sec(x[0]), 1);
 
-        const cameraZoom = Math.max(0, animRaw - cameraZoomMemory);
         cameraZoomMemory = Math.max(cameraZoomMemory, animRaw);
-
         updateCameraZoom(camera, 2.5 + cameraZoomMemory * 1.5);
 
         box.position.x = secProd;

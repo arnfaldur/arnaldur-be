@@ -100,19 +100,51 @@ https://www.youtube.com/watch?v=uU_Q2a0S0zI&t=1716s
 
 ## Further Analysis
 
-
-a unit n-cube has a unit <abbr>volume</abbr> (put "n-dimensional volume" in the abbrev).
-A unit n-ball has a volume of $$formula$$ which rapidly approaches zero as $$D$$ grows.
+A unit n-cube has a unit <abbr data-title="n-dimensional volume">volume</abbr> for any $$D$$.
+A unit n-ball has a volume of $$\frac{\pi^{D/2}}{\Gamma(D/2+1)}$$ which rapidly approaches zero as $$D$$ grows.
 Intuitively, a sphere and a cylinder are both 3D extensions of a circle.
 There is more volume in the cylinder than the sphere.
-We can thus consider the sphere loosing some volume when a dimension is added.
+With some imprecision, we can thus consider the sphere loosing some volume when a dimension is added, while a cylinder or a box do not.
 This *volume loss* occurs in every additional dimension.
-In a sense it has more dimensions to split it's unit radius amongst.
-$$
-\sqrt{d_1^2 + d_2^2 + \dots + d_n^2 } = 1
-$$
-The left hand side has an increasing number of terms while the right hand side remains constant.
+So instead of considering n-balls to be spiky, it's the space around them that outgrows them.
 
+### Cubing the Ball
+The volume of the red ball is:
+$$
+\frac{(\sqrt{D}-1)^D\pi^{\frac{D}{2}}}{\Gamma(\frac{D}{2}+1)}
+$$
+and if we normalize the size of the green box to 1 by dividing it's sidelength by 4, the volume of the red ball becomes:
+$$
+V(D) = \frac{\frac{\sqrt{D}-1}{4}^D\pi^{\frac{D}{2}}}{\Gamma(\frac{D}{2}+1)}
+$$
+
+Which has this plot:
+![Red ball relative size](./diagrams/ball-size-plot.png)
+
+There are a few notable/interesting values of $$D$$.
+
+* $$V(0) = 1$$
+* $$V(1) = 0$$
+* $$V(2) \approx 0.033688...$$
+* $$V(264) \approx 0.00001000428...$$ (a local minimum)
+* $$V(1206) \approx 1.01158...$$ (smallest $$V(D) \geq 1 \mid D > 0$$)
+* $$V(1390) \approx 29.741...$$
+Here the red ball's volume exceeds the box's volume by the a larger ratio than the square exceeds the area of the circle, when $$D=2$$
+* $$V(1405) \approx 39.499...$$ The same as above but $$D=3$$
+* $$V(1486) \approx 186.299...$$ The same as above but $$D=10$$
+
+
+Not only does some of the ball reach outside of the box (as happens when $$D=10$$) it goes much further.
+A more adventurous mathematician than me can try to find the value of $$D$$ when the volume of all the [hyperspherical caps](https://en.wikipedia.org/wiki/Spherical_cap#Hyperspherical_cap) become more than half of the volume of the sphere. 
+At that point, most of the ball's volume is outside the box. At $$D=1206$$ the ball becomes larger than the box and as $$D$$ increases, the relative size of the ball grows without bound.
+
+import { Diagram5 } from "./diagrams/Diagram5";
+
+<Diagram5 />
+
+### More stuff
+
+[Here is a Desmos calculator interactable](https://www.desmos.com/calculator/osvrtc1t9m) that visualises a 2D slice of the 10D construct. Notice how much empty space there is between the balls.
 
 {
 // https://x.com/fdalmaso/status/1818650977672569085
