@@ -32,7 +32,7 @@ export default function Writing() {
     );
     return (
         <For each={postList}>
-            {([url, post], i) => (
+            {([url, post]) => (
                 <article>
                     <A href={url}>
                         <h2>{post.title}</h2>

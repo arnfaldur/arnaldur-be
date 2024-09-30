@@ -1,22 +1,19 @@
-import { createEffect, createSignal, batch } from "solid-js";
+import { createEffect, createSignal, onMount } from "solid-js";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 import {
     createBox,
     createBall,
-    createSquare,
-    sphereDetail,
     createLine,
-    easeInOutQuad,
     segmentSlider,
     createPoint,
     outerBallColor,
     centerBallColor,
     boundingBoxColor,
 } from "./utilities";
-import { Slider, Checkbox } from "./components";
-import { asin, atan, cos, sec, sin, tan } from "./math";
+import { Slider } from "./components";
+import { asin, atan, cos, sec, tan } from "./math";
 
 const splitFraction = 19 / 20;
 
@@ -35,12 +32,15 @@ function setCamera(x: number, y: number, z: number) {
 
 export function Diagram3() {
     const initCanvas = (canvas: HTMLCanvasElement) => {
-        if (canvas.parentElement === null) return;
-        canvas.setAttribute(
-            "width",
-            getComputedStyle(canvas.parentElement).width
-        );
-        diagram3D3(canvas, diagonalization);
+        onMount(() => {
+            if (canvas.parentElement !== null) {
+                canvas.setAttribute(
+                    "width",
+                    getComputedStyle(canvas.parentElement).width
+                );
+            }
+            diagram3D3(canvas, diagonalization);
+        });
     };
     return (
         <>
@@ -81,7 +81,14 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
 
     const camera = new THREE.OrthographicCamera(0, 0, mcH, -mcH, 0.1, 10000);
     cameraRef = camera;
-    const isolateCam = new THREE.OrthographicCamera(0, 0, icH, -icH, 0.1, 10000);
+    const isolateCam = new THREE.OrthographicCamera(
+        0,
+        0,
+        icH,
+        -icH,
+        0.1,
+        10000
+    );
 
     function resizeRenderer(renderer: THREE.WebGLRenderer) {
         const canvas = renderer?.domElement;

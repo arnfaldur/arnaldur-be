@@ -1,4 +1,4 @@
-import { createEffect, createSignal, batch } from "solid-js";
+import { createEffect, createSignal, batch, onMount } from "solid-js";
 import * as THREE from "three";
 
 import {
@@ -77,12 +77,15 @@ export function Latter() {
 
 export function Diagram2() {
     const initCanvas = (canvas: HTMLCanvasElement) => {
-        if (canvas.parentElement === null) return;
-        canvas.setAttribute(
-            "width",
-            getComputedStyle(canvas.parentElement).width
-        );
-        diagram3D2(canvas, centerSphere, diagonalization, isolatePlane);
+        onMount(() => {
+            if (canvas.parentElement !== null) {
+                canvas.setAttribute(
+                    "width",
+                    getComputedStyle(canvas.parentElement).width
+                );
+            }
+            diagram3D2(canvas, centerSphere, diagonalization, isolatePlane);
+        });
     };
 
     return (

@@ -1,4 +1,4 @@
-import { createEffect, createSignal, batch } from "solid-js";
+import { createEffect, createSignal, onMount } from "solid-js";
 import * as THREE from "three";
 
 import {
@@ -11,8 +11,8 @@ import {
     segmentSlider,
     updateCameraZoom,
 } from "./utilities";
-import { Slider, Checkbox } from "./components";
-import { asin, atan, cos, sec, sin, tan } from "./math";
+import { Slider } from "./components";
+import { asin, atan, cos, sec, tan } from "./math";
 
 const [diagonalization, setDiagonalization] = createSignal(0);
 
@@ -26,12 +26,15 @@ export function SideView() {
 
 export function Diagram4() {
     const initCanvas = (canvas: HTMLCanvasElement) => {
-        if (canvas.parentElement === null) return;
-        canvas.setAttribute(
-            "width",
-            getComputedStyle(canvas.parentElement).width
-        );
-        diagram3D4(canvas, diagonalization);
+        onMount(() => {
+            if (canvas.parentElement !== null) {
+                canvas.setAttribute(
+                    "width",
+                    getComputedStyle(canvas.parentElement).width
+                );
+            }
+            diagram3D4(canvas, diagonalization);
+        });
     };
 
     return (

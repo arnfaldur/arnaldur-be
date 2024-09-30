@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { onMount } from "solid-js";
 
 import {
     createBox,
@@ -18,12 +19,15 @@ export function SideView() {
 
 export function Diagram5() {
     const initCanvas = (canvas: HTMLCanvasElement) => {
-        if (canvas.parentElement === null) return;
-        canvas.setAttribute(
-            "width",
-            getComputedStyle(canvas.parentElement).width
-        );
-        diagram3D5(canvas);
+        onMount(() => {
+            if (canvas.parentElement !== null) {
+                canvas.setAttribute(
+                    "width",
+                    getComputedStyle(canvas.parentElement).width
+                );
+            }
+            diagram3D5(canvas);
+        });
     };
 
     return (

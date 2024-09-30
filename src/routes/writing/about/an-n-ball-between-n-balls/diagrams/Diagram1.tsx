@@ -1,4 +1,4 @@
-import { createSignal, createEffect } from "solid-js";
+import { createSignal, createEffect, onMount } from "solid-js";
 import * as THREE from "three";
 
 import {
@@ -13,9 +13,6 @@ import {
 } from "./utilities";
 import { Slider, Checkbox } from "./components";
 
-// export const Diagram3D2 = clientOnly(() =>
-//   Promise.resolve({ default: Diagram3D2inner }),
-// );
 export const Diagram1 = Diagram1inner;
 
 function Diagram1inner() {
@@ -24,12 +21,15 @@ function Diagram1inner() {
     const [disect, setDisect] = createSignal(false);
 
     const initCanvas = (canvas: HTMLCanvasElement) => {
-        if (canvas.parentElement === null) return;
-        canvas.setAttribute(
-            "width",
-            getComputedStyle(canvas.parentElement).width
-        );
-        diagram3D1(canvas, transitionValue, contacts, disect);
+        onMount(() => {
+            if (canvas.parentElement !== null) {
+                canvas.setAttribute(
+                    "width",
+                    getComputedStyle(canvas.parentElement).width
+                );
+            }
+            diagram3D1(canvas, transitionValue, contacts, disect);
+        });
     };
 
     return (
