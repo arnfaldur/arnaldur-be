@@ -20,12 +20,6 @@ export function SideView() {
 export function Diagram5() {
     const initCanvas = (canvas: HTMLCanvasElement) => {
         onMount(() => {
-            if (canvas.parentElement !== null) {
-                canvas.setAttribute(
-                    "width",
-                    getComputedStyle(canvas.parentElement).width
-                );
-            }
             diagram3D5(canvas);
         });
     };

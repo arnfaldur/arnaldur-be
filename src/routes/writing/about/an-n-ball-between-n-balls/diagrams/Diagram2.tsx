@@ -78,12 +78,6 @@ export function Latter() {
 export function Diagram2() {
     const initCanvas = (canvas: HTMLCanvasElement) => {
         onMount(() => {
-            if (canvas.parentElement !== null) {
-                canvas.setAttribute(
-                    "width",
-                    getComputedStyle(canvas.parentElement).width
-                );
-            }
             diagram3D2(canvas, centerSphere, diagonalization, isolatePlane);
         });
     };

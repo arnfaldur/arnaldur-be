@@ -47,10 +47,11 @@ export function setupScene(canvas: HTMLCanvasElement) {
         powerPreference: "low-power",
     });
     renderer.autoClear = false;
+    renderer.setPixelRatio(window.devicePixelRatio);
 
     const scene = new THREE.Scene();
 
-    const cH = 2.5; // camera height
+    const cH = 3.0; // camera height
     const camera = new THREE.OrthographicCamera(-0, 0, cH, -cH, 0.1, 10000);
 
     function resizeRenderer(renderer: THREE.WebGLRenderer) {
@@ -60,7 +61,7 @@ export function setupScene(canvas: HTMLCanvasElement) {
             "width",
             getComputedStyle(canvas.parentElement).width
         );
-        renderer.setSize(canvas.width, canvas.height);
+        renderer.setSize(canvas.width , canvas.height / window.devicePixelRatio);
         const aspectRatio = canvas.width / canvas.height;
         updateCameraAspect(camera, aspectRatio);
         // it's kinda unneccesary to call this but it might not be called
@@ -88,8 +89,8 @@ export function setupScene(canvas: HTMLCanvasElement) {
     function requestRender() {
         if (!renderRequested) {
             renderRequested = true;
+            requestAnimationFrame(() => render(renderer));
         }
-        requestAnimationFrame(() => render(renderer));
     }
     outerRequestRender = requestRender;
 

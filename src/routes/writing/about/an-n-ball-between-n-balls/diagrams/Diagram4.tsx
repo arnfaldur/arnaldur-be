@@ -27,12 +27,6 @@ export function SideView() {
 export function Diagram4() {
     const initCanvas = (canvas: HTMLCanvasElement) => {
         onMount(() => {
-            if (canvas.parentElement !== null) {
-                canvas.setAttribute(
-                    "width",
-                    getComputedStyle(canvas.parentElement).width
-                );
-            }
             diagram3D4(canvas, diagonalization);
         });
     };

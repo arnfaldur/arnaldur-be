@@ -33,12 +33,6 @@ function setCamera(x: number, y: number, z: number) {
 export function Diagram3() {
     const initCanvas = (canvas: HTMLCanvasElement) => {
         onMount(() => {
-            if (canvas.parentElement !== null) {
-                canvas.setAttribute(
-                    "width",
-                    getComputedStyle(canvas.parentElement).width
-                );
-            }
             diagram3D3(canvas, diagonalization);
         });
     };
@@ -73,6 +67,7 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
         powerPreference: "low-power",
     });
     renderer.autoClear = false;
+    renderer.setPixelRatio(window.devicePixelRatio);
 
     const scene = new THREE.Scene();
 
@@ -97,18 +92,18 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
             "width",
             getComputedStyle(canvas.parentElement).width
         );
-        renderer.setSize(canvas.width, canvas.height);
+        renderer.setSize(canvas.width, canvas.height / window.devicePixelRatio);
         const aspectRatio = canvas.width / canvas.height;
         updateCameraAspect(aspectRatio);
         requestRender();
     }
     function updateCameraAspect(aspectRatio: number) {
-        const mcW = (mcH * aspectRatio) / splitFraction; // main camera width
+        const mcW = (camera.top * aspectRatio) / splitFraction; // main camera width
         camera.left = -mcW;
         camera.right = mcW;
         camera.updateProjectionMatrix();
 
-        const icW = (icH * aspectRatio) / (1 - splitFraction);
+        const icW = (isolateCam.top * aspectRatio) / (1 - splitFraction);
         isolateCam.left = -icW;
         isolateCam.right = icW;
         isolateCam.updateProjectionMatrix();
@@ -122,7 +117,7 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
     controls.addEventListener("change", requestRender);
     document.addEventListener(cameraUpdatedEvent.type, controls.update);
 
-    isolateCam.position.z = 10;
+    isolateCam.position.z = 1000;
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 1);
     scene.add(ambientLight);
@@ -266,9 +261,9 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
 
         renderer.setViewport(
             0,
-            canvas.height * (1 - splitFraction),
-            canvas.width,
-            canvas.height * splitFraction
+            canvas.height * (1 - splitFraction) / window.devicePixelRatio,
+            canvas.width / window.devicePixelRatio,
+            canvas.height * splitFraction / window.devicePixelRatio
         );
         renderer.clear();
         renderer.render(scene, camera);
@@ -280,9 +275,9 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
         [0, 1].forEach((offset) => {
             renderer.setViewport(
                 0,
-                offset,
-                canvas.width,
-                canvas.height * (1 - splitFraction)
+                offset / window.devicePixelRatio,
+                canvas.width / window.devicePixelRatio,
+                canvas.height * (1 - splitFraction) / window.devicePixelRatio
             );
             renderer.render(scene, isolateCam);
         });

@@ -21,13 +21,9 @@ function Diagram1inner() {
     const [disect, setDisect] = createSignal(false);
 
     const initCanvas = (canvas: HTMLCanvasElement) => {
+        // Here the canvas element exists but hasn't been rendered or attached to the DOM
         onMount(() => {
-            if (canvas.parentElement !== null) {
-                canvas.setAttribute(
-                    "width",
-                    getComputedStyle(canvas.parentElement).width
-                );
-            }
+            // here the canvas element has been attached so relative elements can be accessed
             diagram3D1(canvas, transitionValue, contacts, disect);
         });
     };
