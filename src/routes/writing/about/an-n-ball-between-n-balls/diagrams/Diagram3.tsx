@@ -88,11 +88,12 @@ const diagram3D3 = (canvas: HTMLCanvasElement, diagonalization: Function) => {
     function resizeRenderer(renderer: THREE.WebGLRenderer) {
         const canvas = renderer?.domElement;
         if (canvas?.parentElement === null) return;
-        canvas.setAttribute(
-            "width",
-            getComputedStyle(canvas.parentElement).width
-        );
-        renderer.setSize(canvas.width, canvas.height / window.devicePixelRatio);
+        const styleWidth = getComputedStyle(canvas.parentElement).width;
+        const width = Number.parseInt(styleWidth.slice(0, -2));
+        const height = Math.min(400, Number.parseInt(styleWidth.slice(0, -2)));
+        canvas.setAttribute("width", `${width}px`);
+        canvas.setAttribute("height", `${height}px`);
+        renderer.setSize(canvas.width, canvas.height);
         const aspectRatio = canvas.width / canvas.height;
         updateCameraAspect(aspectRatio);
         requestRender();
