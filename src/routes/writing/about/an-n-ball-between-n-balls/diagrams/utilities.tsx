@@ -57,23 +57,13 @@ export function setupScene(canvas: HTMLCanvasElement) {
     function resizeRenderer(renderer: THREE.WebGLRenderer) {
         const canvas = renderer?.domElement;
         if (canvas?.parentElement === null) return;
-        const compWidth = Number.parseInt(
-            getComputedStyle(canvas.parentElement).width.slice(0, -2)
-        );
-        const compHeight = Math.min(
-            400,
-            Number.parseInt(
-                getComputedStyle(canvas.parentElement).width.slice(0, -2)
-            )
-        );
-        console.log({ compWidth, compHeight });
-        console.log("boii", getComputedStyle(canvas).width);
-        console.log("height", getComputedStyle(canvas.parentElement).height);
-        canvas.setAttribute("width", `${compWidth}px`);
-        canvas.setAttribute("height", `${compHeight}px`);
-        // renderer.setSize(canvas.width, canvas.height / window.devicePixelRatio);
-        renderer.setSize(canvas.width, canvas.height );
-        const aspectRatio = Math.max(0, canvas.width / canvas.height);
+        const styleWidth = getComputedStyle(canvas.parentElement).width;
+        const width = Number.parseInt(styleWidth.slice(0, -2));
+        const height = Math.min(400, Number.parseInt(styleWidth.slice(0, -2)));
+        canvas.setAttribute("width", `${width}px`);
+        canvas.setAttribute("height", `${height}px`);
+        renderer.setSize(canvas.width, canvas.height);
+        const aspectRatio = canvas.width / canvas.height;
         updateCameraAspect(camera, aspectRatio);
         // it's kinda unneccesary to call this but it might not be called
         // at early init time in updateCameraAspect and the cost is low so might as well
