@@ -35,7 +35,7 @@ function Diagram1inner() {
                 <legend>Add 3rd dimension</legend>
                 <Slider setValue={setTransitionValue} />
             </fieldset>
-            <Checkbox setValue={setContacts}>Show contact points</Checkbox>
+            {/* <Checkbox setValue={setContacts}>Show contact points</Checkbox> */}
             <Checkbox setValue={setDisect}>Disect construct</Checkbox>
         </>
     );
