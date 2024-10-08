@@ -21,7 +21,7 @@ let diagonalizationSlider: HTMLInputElement;
 let setSideView = () => {};
 
 export function SideView() {
-    return <button onClick={setSideView}>side</button>;
+    return <button onClick={() => setSideView()}>side</button>;
 }
 
 export function Diagram4() {

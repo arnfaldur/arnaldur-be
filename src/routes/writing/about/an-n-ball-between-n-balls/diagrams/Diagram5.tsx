@@ -11,12 +11,6 @@ import {
     updateCameraZoom,
 } from "./utilities";
 
-let setSideView = () => {};
-
-export function SideView() {
-    return <button onClick={setSideView}>side</button>;
-}
-
 export function Diagram5() {
     const initCanvas = (canvas: HTMLCanvasElement) => {
         onMount(() => {
