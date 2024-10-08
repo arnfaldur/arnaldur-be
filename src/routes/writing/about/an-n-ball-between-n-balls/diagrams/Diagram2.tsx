@@ -68,11 +68,11 @@ function setLatter() {
 }
 
 export function Former() {
-    return <button onClick={setFormer}>former</button>;
+    return <button onClick={setFormer}>Initial</button>;
 }
 
 export function Latter() {
-    return <button onClick={setLatter}>latter</button>;
+    return <button onClick={setLatter}>Final</button>;
 }
 
 export function Diagram2() {
@@ -99,12 +99,18 @@ export function Diagram2() {
                     setValue={updateDiagonalization}
                 />
             </fieldset>
-            <Checkbox ref={linkSlidersCheckbox} setValue={setLinkSliders}>
-                Link sliders
-            </Checkbox>
-            <Checkbox ref={isolatePlaneCheckbox} setValue={setIsolatePlane}>
-                Isolate plane
-            </Checkbox>
+            <div
+                style={{ display: "grid", "grid-template-columns": "1fr 1fr" }}
+            >
+                <Checkbox ref={linkSlidersCheckbox} setValue={setLinkSliders}>
+                    Link sliders
+                </Checkbox>
+                <Checkbox ref={isolatePlaneCheckbox} setValue={setIsolatePlane}>
+                    Isolate plane
+                </Checkbox>
+                <Former />
+                <Latter />
+            </div>
         </>
     );
 }
