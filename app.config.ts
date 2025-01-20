@@ -14,6 +14,7 @@ import rehypeMdxImportMedia from "rehype-mdx-import-media";
 import rehypeKatex from "rehype-katex";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
+import { visit } from "unist-util-visit";
 
 const remarkPlugins = [
     remarkFrontmatter,
@@ -33,13 +34,14 @@ const remarkPlugins = [
     remarkMath,
 ];
 const rehypePlugins = [
-    rehypeMdxImportMedia,
     rehypeSlug,
     [
         rehypeAutolinkHeadings,
         { properties: { class: "autolink-heading" }, behavior: "wrap" },
     ],
     rehypeKatex,
+    rehypeMdxImportMedia,
+    rehypeZoomableImg,
 ];
 
 const server = {
@@ -66,3 +68,43 @@ export default defineConfig({
         ],
     },
 });
+
+function rehypeZoomableImg() {
+    const imgReplacement = "ZoomableImg";
+    return function (tree) {
+        tree.children.unshift({
+            type: "mdxjsEsm",
+            value: "",
+            data: {
+                estree: {
+                    type: "Program",
+                    sourceType: "module",
+                    body: [
+                        {
+                            type: "ImportDeclaration",
+                            source: {
+                                type: "Literal",
+                                value: "~/components/ZoomableImg",
+                            },
+                            specifiers: [
+                                {
+                                    type: "ImportDefaultSpecifier",
+                                    local: {
+                                        type: "Identifier",
+                                        name: imgReplacement,
+                                    },
+                                },
+                            ],
+                        },
+                    ],
+                },
+            },
+        });
+        visit(tree, function (node) {
+            // TODO: downgrade this to second ugliest hack ever
+            if (node.name === "img") {
+                node.name = "ZoomableImg";
+            }
+        });
+    };
+}
