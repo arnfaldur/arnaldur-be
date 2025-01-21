@@ -61,7 +61,7 @@ html_table = replace(
     r" style *= *\".*\"" => "",
     "<tr class = \"header headerLastRow\">" => "<tr>")
 html_table =
-    "export default function Table() {\n\treturn (\n\t" *
+    "export function Table() {\n\treturn (\n\t" *
     html_table[1:6] *
     " class=\"llmr-numbers\"" *
     html_table[7:end] *

@@ -1,4 +1,4 @@
-export default function Table() {
+export function Table() {
     return (
         <table class="llmr-numbers">
             <thead>

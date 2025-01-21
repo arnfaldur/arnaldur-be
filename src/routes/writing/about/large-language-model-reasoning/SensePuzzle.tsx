@@ -1,4 +1,4 @@
-export default function SensePuzzle() {
+export function SensePuzzle() {
     return (
         <>
             <details>

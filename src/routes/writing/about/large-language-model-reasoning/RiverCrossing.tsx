@@ -1,4 +1,4 @@
-export default function RiverCrossing() {
+export function RiverCrossing() {
     return (
         <details>
             <summary>

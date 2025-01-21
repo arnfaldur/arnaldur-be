@@ -12,6 +12,8 @@ import "./adjustments.css";
 // import "./app.css";
 
 export default function App() {
+    const routes = FileRoutes();
+    const filteredRoutes = filterRoutes(routes);
     return (
         <Router
             root={(props) => (
@@ -20,7 +22,38 @@ export default function App() {
                 </MetaProvider>
             )}
         >
-            <FileRoutes />
+            {filteredRoutes}
         </Router>
     );
+}
+
+function filterRoutes(routes, path = "") {
+    // the last slash matches subcomponents of articles. They shouldn't be made into pages.
+    // As long as modules don't have default exports, they aren't rendered as pages.
+    // const writingRegex = new RegExp("/writing/about/.*/");
+    return routes
+        .filter((route: any) => {
+            const subpath: string = path + route.path;
+            const remove =
+                // writingRegex.test(subpath) ||
+                (import.meta.env.PROD && subpath.startsWith("/wip"));
+            return !remove;
+        })
+        .map((route: any) => ({
+            ...route,
+            children: route.children
+                ? filterRoutes(route.children, path + route.path)
+                : undefined,
+        }));
+}
+
+function printRoutes(routes, path = "") {
+    for (const route of routes) {
+        const subpath: string = path + route.path;
+        console.log("subpath", subpath);
+        console.log("route", route);
+        if (route.children) {
+            printRoutes(route.children, subpath);
+        }
+    }
 }

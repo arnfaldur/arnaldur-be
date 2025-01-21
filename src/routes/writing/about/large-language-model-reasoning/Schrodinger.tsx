@@ -1,6 +1,6 @@
 import katex from "katex";
 
-export default function RiverCrossing() {
+export function Schrodinger() {
     return (
         <details>
             <summary>Two questions involving Schrödinger's dead cat.</summary>

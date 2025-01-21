@@ -235,7 +235,7 @@ score. The blue dots are the responses from the models.
 
 ![Six plots showing each models' answers to the query](./plots/plots.svg)
 
-import Table from "./plots/Table";
+import { Table } from "./plots/Table";
 
 {<details>
 
@@ -446,7 +446,7 @@ This lapse of reason is hilarious, and there are more like it.
 Prompt formats can have a significant effect on the output---for example, by preventing or causing step-by-step reasoning.
 I rephrased the question 19 times to see how reliably it would fail the _puzzle_.
 
-import RiverCrossing from "./RiverCrossing";
+import { RiverCrossing } from "./RiverCrossing";
 
 <RiverCrossing />
 
@@ -465,7 +465,7 @@ Answer **18** was correct but the semantic similarity among queries **16** to **
 
 GPT-4o falls for a similar trap when asked about the health of an already dead Schrödinger's cat.
 
-import Schrodinger from "./Schrodinger";
+import { Schrodinger } from "./Schrodinger";
 
 <Schrodinger />
 
@@ -488,7 +488,7 @@ A logical puzzle that is resolved by realizing that the people in the puzzle hav
 I couldn't come up with a remotely challenging puzzle with this premise.
 I employed ChatGPT 4o to the task, and all the puzzles it made required using higher abstractions like theory of mind.
 
-import SensePuzzle from "./SensePuzzle";
+import { SensePuzzle } from "./SensePuzzle";
 
 <SensePuzzle />
 
@@ -672,7 +672,7 @@ recurrence/.style={->, draw=blue!70, thick, rounded corners}]
 ```
 </details>
 
-import LatexDiagramCode from "./LatexDiagramCode";
+import { LatexDiagramCode } from "./LatexDiagramCode";
 
 <details>
     <summary>The response from ChatGPT.</summary>
@@ -697,4 +697,3 @@ In fairness, the text-native manipulation that the instructions entail are not f
 And the less abstract, structured text the code presented to the LLM, made it easier to see patterns to extrapolate.
 
 Quantifying reasoning is hard, but it seems absurd to think of this task as requiring no reasoning.
-```

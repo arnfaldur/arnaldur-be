@@ -1,4 +1,4 @@
-export default function LatexDiagramCode() {
+export function LatexDiagramCode() {
     return (
         <>
             <p>
