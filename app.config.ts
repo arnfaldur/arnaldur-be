@@ -14,6 +14,7 @@ import rehypeMdxImportMedia from "rehype-mdx-import-media";
 import rehypeKatex from "rehype-katex";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
+
 import { visit } from "unist-util-visit";
 
 const remarkPlugins = [

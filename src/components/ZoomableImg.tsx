@@ -1,14 +1,14 @@
-import { Image } from "@unpic/solid";
-import { createEffect, createSignal, Show } from "solid-js";
+import { createSignal, Show } from "solid-js";
 
 export default function ZoomableImg(props: any) {
     const [isOpen, setIsOpen] = createSignal(false);
 
     return (
         <>
-            <Image
+            <img
                 src={props.src}
                 alt={props.alt}
+                loading="lazy"
                 onClick={() => setIsOpen(true)}
                 style={{
                     cursor: "pointer",
@@ -31,7 +31,7 @@ export default function ZoomableImg(props: any) {
                     }}
                     onClick={() => setIsOpen(false)}
                 >
-                    <Image src={props.src} alt={props.alt} />
+                    <img src={props.src} alt={props.alt} loading="lazy" />
                 </div>
             </Show>
         </>

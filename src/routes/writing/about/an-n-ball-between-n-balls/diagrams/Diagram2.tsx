@@ -100,7 +100,10 @@ export function Diagram2() {
                 />
             </fieldset>
             <div
-                style={{ display: "grid", "grid-template-columns": "1fr 1fr" }}
+                style={{
+                    display: "grid",
+                    "grid-template-columns": "1fr 1fr",
+                }}
             >
                 <Checkbox ref={linkSlidersCheckbox} setValue={setLinkSliders}>
                     Link sliders

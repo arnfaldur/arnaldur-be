@@ -1,10 +1,10 @@
-import { For, Show } from "solid-js";
+import { For } from "solid-js";
 import { A } from "@solidjs/router";
 
 const unfilteredPosts: {
-    component: any;
-    frontmatter: { title: string; date: string; hidden?: boolean };
-} = import.meta.glob("./about/**/*.{md,mdx}", { eager: true });
+    component: any,
+    frontmatter: { title: string, date: string, hidden?: boolean },
+} = import.meta.glob("./about/**/(*).{md,mdx}", { eager: true });
 
 const posts = Object.fromEntries(
     Object.entries(unfilteredPosts).filter(
@@ -13,10 +13,10 @@ const posts = Object.fromEntries(
 );
 
 const entries: {
-    [t: string]: { title: string; date: Date; hidden?: boolean };
+    [t: string]: { title: string, date: Date, hidden?: boolean },
 } = Object.fromEntries(
     Object.entries(posts).map(
-        ([post, { frontmatter }]): [string, { title: string; date: Date }] => [
+        ([post, { frontmatter }]): [string, { title: string, date: Date }] => [
             "/writing" + post.slice(1).replace(/\/\(.*\)\.mdx/, ""),
             {
                 title: frontmatter.title,
