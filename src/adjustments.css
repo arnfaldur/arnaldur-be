@@ -60,6 +60,14 @@ h1, h2, h3, h4, h5, h6, #breadcrumb {
 em {
     font-weight: 500;
 }
+h1 em,
+h2 em,
+h3 em,
+h4 em,
+h5 em,
+h6 em {
+    font-weight: inherit;
+}
 
 a {
     color: oklch(80% 0.2 270);
@@ -124,7 +132,7 @@ main.writing > .video {
     margin-bottom: 1rem;
 }
 
-main.writing > div.ar4-3 > iframe {
+main.writing > div.ar4-3 > * {
     width: 100%;
     height: calc(100cqi / 4 * 3);
 }
