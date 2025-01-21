@@ -57,6 +57,30 @@ export default defineConfig({
     extensions: ["mdx", "md"],
     server,
     vite: {
+        build: {
+            rollupOptions: {
+                external: [
+                    "three",
+                    // "katex"
+                ],
+                output: [
+                    {
+                        format: "es",
+                        paths: {
+                            three: "https://cdn.jsdelivr.net/npm/three@0.172.0/+esm",
+                        },
+                    },
+                    // I can't figure out how to make katex work from a CDN
+                    // {
+                    //     format: "cjs",
+                    //     paths: {
+                    //         // katex: "https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js",
+                    //         katex: "https://cdn.jsdelivr.net/npm/katex@0.16.21/+esm",
+                    //     },
+                    // },
+                ],
+            },
+        },
         plugins: [
             mdx.default.withImports({})({
                 jsxImportSource: "solid-jsx",

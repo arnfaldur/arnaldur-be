@@ -16,6 +16,12 @@ export default createHandler(
                             rel="icon"
                             href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22><text y=%32px%22 font-size=%2232%22>🆎</text></svg>"
                         />
+                        <link
+                            rel="stylesheet"
+                            href="https:cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css"
+                            integrity="sha384-zh0CIslj+VczCZtlzBcjt5ppRcsAmDnRem7ESsYwWwg3m/OaJ2l4x7YBZl9Kxxib"
+                            crossorigin="anonymous"
+                        />
                         {assets}
                     </head>
                     <body>
