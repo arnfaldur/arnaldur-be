@@ -1,8 +1,12 @@
 // @refresh reload
+import type { JSX, ParentProps } from "solid-js";
 import { Suspense } from "solid-js";
 import { MetaProvider } from "@solidjs/meta";
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
+
+import Title from "~/components/Title";
+import Breadcrumb from "~/components/Breadcrumb";
 
 // import "katex/dist/katex.min.css";
 import "./fonts.css";
@@ -11,6 +15,21 @@ import "./adjustments.css";
 // import "./columns.css";
 // import "./app.css";
 
+function Layout(props: ParentProps): JSX.Element {
+    return (
+        <>
+            <Title />
+            <header>
+                <Breadcrumb />
+            </header>
+            <main class="writing">{props.children}</main>
+            <footer>
+                <Breadcrumb />
+            </footer>
+        </>
+    );
+}
+
 export default function App() {
     const routes = FileRoutes();
     const filteredRoutes = filterRoutes(routes);
@@ -18,7 +37,9 @@ export default function App() {
         <Router
             root={(props) => (
                 <MetaProvider>
-                    <Suspense>{props.children}</Suspense>
+                    <Suspense>
+                        <Layout>{props.children}</Layout>
+                    </Suspense>
                 </MetaProvider>
             )}
         >
@@ -27,7 +48,7 @@ export default function App() {
     );
 }
 
-function filterRoutes(routes, path = "") {
+function filterRoutes(routes: any, path = "") {
     // the last slash matches subcomponents of articles. They shouldn't be made into pages.
     // As long as modules don't have default exports, they aren't rendered as pages.
     // const writingRegex = new RegExp("/writing/about/.*/");
@@ -36,7 +57,7 @@ function filterRoutes(routes, path = "") {
             const subpath: string = path + route.path;
             const remove =
                 // writingRegex.test(subpath) ||
-                (import.meta.env.PROD && subpath.startsWith("/wip"));
+                import.meta.env.PROD && subpath.startsWith("/wip");
             return !remove;
         })
         .map((route: any) => ({
@@ -47,7 +68,7 @@ function filterRoutes(routes, path = "") {
         }));
 }
 
-function printRoutes(routes, path = "") {
+function printRoutes(routes: any, path = "") {
     for (const route of routes) {
         const subpath: string = path + route.path;
         console.log("subpath", subpath);

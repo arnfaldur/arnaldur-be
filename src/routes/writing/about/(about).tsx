@@ -1,5 +1,10 @@
-import { Navigate } from "@solidjs/router";
+import { Suspense } from "solid-js";
+import { PostList } from "../postList";
 
 export default function About() {
-    return <Navigate href="/writing" />;
+    return (
+        <Suspense>
+            <PostList />
+        </Suspense>
+    );
 }

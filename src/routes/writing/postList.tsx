@@ -1,4 +1,3 @@
-import { Suspense } from "solid-js";
 import { createResource, For } from "solid-js";
 import { A } from "@solidjs/router";
 
@@ -8,40 +7,39 @@ type Frontmatter = {
     topic?: string[],
     hidden?: boolean,
 };
-const unfilteredPosts = import.meta.glob<Frontmatter>("./**/(*).{md,mdx}", {
-    eager: false,
-});
+const unfilteredPosts = import.meta.glob<Frontmatter>(
+    "./about/**/(*).{md,mdx}",
+    { eager: false }
+);
 
 async function filterTransformPosts(
     unfilteredPosts: Record<string, () => Promise<Frontmatter>>
 ) {
-    console.log("unf", unfilteredPosts);
     const unfilteredPostEntries = Object.entries(unfilteredPosts);
     const promises = unfilteredPostEntries.map<Promise<[string, Frontmatter]>>(
         async ([s, p]) => [s, await p()]
     );
     const postEntries = await Promise.all(promises);
 
-    console.log(postEntries);
-    const transformedPosts = postEntries.map<
+    const filteredPosts = postEntries.filter(
+        ([_, frontmatter]) => !frontmatter?.hidden && frontmatter?.title
+    );
+    const transformedPosts = filteredPosts.map<
         [string, { title: string, date: Date, topic: string[] }]
-    >(([post, frontmatter]) => {
-        const boi = post.slice(1).replace(/\/\(.*\)\.mdx/, "");
-        return [
-            "/wip" + boi,
-            {
-                title: frontmatter?.title ?? boi.slice(1),
-                date: frontmatter?.date ?? new Date(),
-                topic: frontmatter?.topic ?? [],
-            },
-        ];
-    });
+    >(([post, frontmatter]) => [
+        "/writing" + post.slice(1).replace(/\/\(.*\)\.mdx/, ""),
+        {
+            title: frontmatter?.title ?? "Missing Title",
+            date: frontmatter?.date ?? new Date(),
+            topic: frontmatter?.topic ?? [],
+        },
+    ]);
     return transformedPosts.sort(
         (a, b) => b[1].date.valueOf() - a[1].date.valueOf()
     );
 }
 
-function PostList() {
+export function PostList() {
     const [postList] = createResource(() =>
         filterTransformPosts(unfilteredPosts)
     );
@@ -60,13 +58,5 @@ function PostList() {
                 </article>
             )}
         </For>
-    );
-}
-
-export default function Wip() {
-    return (
-        <Suspense>
-            <PostList />
-        </Suspense>
     );
 }
