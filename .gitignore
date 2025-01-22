@@ -33,3 +33,6 @@ Thumbs.db
 *.fdb_latexmk
 *.aux
 **/.auctex-auto/
+
+# sst
+.sst
