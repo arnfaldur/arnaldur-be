@@ -9,8 +9,6 @@ const { default: mdx } = mdxCjs;
 import Inspect from "vite-plugin-inspect";
 
 import remarkGfm from "remark-gfm";
-import remarkFrontmatter from "remark-frontmatter";
-import remarkMdxFrontmatter from "remark-mdx-frontmatter";
 import remarkMath from "remark-math";
 import remarkEmbedder from "@remark-embedder/core";
 import oEmbedTransformer from "@remark-embedder/transformer-oembed";
@@ -25,8 +23,6 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import { visit } from "unist-util-visit";
 
 const remarkPlugins = [
-    remarkFrontmatter,
-    remarkMdxFrontmatter,
     [remarkSmartypants, { dashes: "oldschool" }],
     [
         // @ts-ignore

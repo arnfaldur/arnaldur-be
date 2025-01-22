@@ -2,28 +2,32 @@ import { For } from "solid-js";
 import { A } from "@solidjs/router";
 
 const unfilteredPosts: {
-    component: any,
-    frontmatter: { title: string, date: string, hidden?: boolean },
-} = import.meta.glob("./about/**/(*).{md,mdx}", { eager: true });
+    [postName: string]: {
+        title?: string,
+        date?: Date,
+        topic?: string[],
+        hidden?: boolean,
+    },
+} = import.meta.glob("./about/**/(*).{md,mdx}", {
+    eager: true,
+});
 
+// const posts = unfilteredPosts;
 const posts = Object.fromEntries(
     Object.entries(unfilteredPosts).filter(
-        ([post, { frontmatter }]) => !frontmatter?.hidden && frontmatter?.title
+        ([_, frontmatter]) => !frontmatter?.hidden && frontmatter?.title
     )
 );
 
-const entries: {
-    [t: string]: { title: string, date: Date, hidden?: boolean },
-} = Object.fromEntries(
-    Object.entries(posts).map(
-        ([post, { frontmatter }]): [string, { title: string, date: Date }] => [
-            "/writing" + post.slice(1).replace(/\/\(.*\)\.mdx/, ""),
-            {
-                title: frontmatter.title,
-                ...(frontmatter?.date && { date: new Date(frontmatter.date) }),
-            },
-        ]
-    )
+const entries = Object.fromEntries(
+    Object.entries(posts).map(([post, frontmatter]) => [
+        "/writing" + post.slice(1).replace(/\/\(.*\)\.mdx/, ""),
+        {
+            title: frontmatter?.title ?? "Missing Title",
+            date: frontmatter?.date ?? new Date(),
+            topic: frontmatter?.topic ?? [],
+        },
+    ])
 );
 
 export default function Writing() {

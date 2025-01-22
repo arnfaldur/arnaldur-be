@@ -1,6 +1,8 @@
+<!--
+--- 
+geometry: margin=2cm 
 ---
-geometry: margin=2cm
----
+-->
 
 # Large Language Model Reasoning
 
