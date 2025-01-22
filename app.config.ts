@@ -1,6 +1,12 @@
 import { defineConfig } from "@solidjs/start/config";
 
-import mdx from "@vinxi/plugin-mdx";
+// @ts-ignore
+import mdxCjs from "@vinxi/plugin-mdx";
+const { default: mdx } = mdxCjs;
+
+// import mdx from "@mdx-js/rollup";
+
+import Inspect from "vite-plugin-inspect";
 
 import remarkGfm from "remark-gfm";
 import remarkFrontmatter from "remark-frontmatter";
@@ -10,6 +16,7 @@ import remarkEmbedder from "@remark-embedder/core";
 import oEmbedTransformer from "@remark-embedder/transformer-oembed";
 import embedderCache from "@remark-embedder/cache";
 import remarkSmartypants from "remark-smartypants";
+// @ts-ignore
 import rehypeMdxImportMedia from "rehype-mdx-import-media";
 import rehypeKatex from "rehype-katex";
 import rehypeSlug from "rehype-slug";
@@ -22,10 +29,12 @@ const remarkPlugins = [
     remarkMdxFrontmatter,
     [remarkSmartypants, { dashes: "oldschool" }],
     [
+        // @ts-ignore
         remarkEmbedder.default,
         {
             embedderCache,
             transformers: [
+                // @ts-ignore
                 oEmbedTransformer.default,
                 // { params: { theme: "dark", dnt: true } },
             ],
@@ -46,15 +55,18 @@ const rehypePlugins = [
 ];
 
 const server = {
-    preset: "aws-amplify",
-    // prerender: {
-    //   routes: ["/", "/writing", "/laughing"],
-    //   crawlLinks: true,
-    // },
+    prerender: {
+        autoSubfolderIndex: false,
+        concurrency: 4,
+        failOnError: true,
+        routes: ["/writing", "/laughing", "/experimenting"],
+        crawlLinks: true,
+    },
 };
 
 export default defineConfig({
     extensions: ["mdx", "md"],
+    devOverlay: true,
     server,
     vite: {
         build: {
@@ -82,7 +94,7 @@ export default defineConfig({
             },
         },
         plugins: [
-            mdx.default.withImports({})({
+            mdx.withImports({})({
                 jsxImportSource: "solid-jsx",
                 remarkPlugins,
                 rehypePlugins,
@@ -90,13 +102,28 @@ export default defineConfig({
                 elementAttributeNameCase: "html",
                 enforce: "pre",
             }),
+            // {
+            //     ...mdx({
+            //         jsxImportSource: "solid-jsx",
+            //         remarkPlugins,
+            //         rehypePlugins,
+            //         stylePropertyNameCase: "css",
+            //         elementAttributeNameCase: "html",
+            //     }),
+            //     enforce: "pre",
+            // },
+            Inspect({
+                build: true,
+                outputDir: ".output/vite-inspect",
+                embedded: true,
+            }),
         ],
     },
 });
 
 function rehypeZoomableImg() {
     const imgReplacement = "ZoomableImg";
-    return function (tree) {
+    return function (tree: any) {
         tree.children.unshift({
             type: "mdxjsEsm",
             value: "",
