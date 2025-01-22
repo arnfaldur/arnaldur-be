@@ -9,9 +9,7 @@ type Frontmatter = {
 };
 const unfilteredPosts = import.meta.glob<Frontmatter>(
     "./about/**/(*).{md,mdx}",
-    {
-        eager: false,
-    }
+    { eager: false }
 );
 
 async function filterTransformPosts(
