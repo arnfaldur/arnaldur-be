@@ -1,11 +1,24 @@
 import { createResource, For } from "solid-js";
 import { A } from "@solidjs/router";
 
+import HNLogo from "./y18.svg";
+
 type Frontmatter = {
     title?: string,
     date?: Date,
     topic?: string[],
     hidden?: boolean,
+    hn?: Hn,
+};
+type PostType = {
+    title: string,
+    date: Date,
+    topic: string[],
+    hn?: Hn,
+};
+type Hn = {
+    url: string,
+    points: number,
 };
 const unfilteredPosts = import.meta.glob<Frontmatter>(
     "./about/**/(*).{md,mdx}",
@@ -24,16 +37,17 @@ async function filterTransformPosts(
     const filteredPosts = postEntries.filter(
         ([_, frontmatter]) => !frontmatter?.hidden && frontmatter?.title
     );
-    const transformedPosts = filteredPosts.map<
-        [string, { title: string, date: Date, topic: string[] }]
-    >(([post, frontmatter]) => [
-        "/writing" + post.slice(1).replace(/\/\(.*\)\.mdx/, ""),
-        {
-            title: frontmatter?.title ?? "Missing Title",
-            date: frontmatter?.date ?? new Date(),
-            topic: frontmatter?.topic ?? [],
-        },
-    ]);
+    const transformedPosts = filteredPosts.map<[string, PostType]>(
+        ([post, frontmatter]) => [
+            "/writing" + post.slice(1).replace(/\/\(.*\)\.mdx/, ""),
+            {
+                title: frontmatter?.title ?? "Missing Title",
+                date: frontmatter?.date ?? new Date(),
+                topic: frontmatter?.topic ?? [],
+                hn: frontmatter?.hn,
+            },
+        ]
+    );
     return transformedPosts.sort(
         (a, b) => b[1].date.valueOf() - a[1].date.valueOf()
     );
@@ -43,20 +57,28 @@ export function PostList() {
     const [postList] = createResource(() =>
         filterTransformPosts(unfilteredPosts)
     );
-    return (
-        <For each={postList()}>
-            {([url, post]) => (
-                <article>
-                    <A href={url}>
-                        <h2>{post.title}</h2>
-                    </A>
-                    <small>
-                        {post.date.toLocaleDateString("en-GB", {
-                            dateStyle: "medium",
-                        })}
-                    </small>
-                </article>
-            )}
-        </For>
-    );
+    return <For each={postList()}>{Post}</For>;
 }
+
+const Post = ([url, post]: [string, PostType]) => (
+    <article>
+        <A href={url}>
+            <h2>{post.title}</h2>
+        </A>
+        <small style={{ display: "flex" }}>
+            <span style={{ "flex-grow": "1" }}>
+                {post.date.toLocaleDateString("en-GB", {
+                    dateStyle: "medium",
+                })}
+            </span>
+            <a href={post?.hn?.url} style={{ display: "flex" }}>
+                <span>{post?.hn?.points} points @&nbsp;</span>
+                <img
+                    style={{ "flex-grow": "0", "border-radius": "0" }}
+                    class="hacker-news"
+                    src={HNLogo}
+                />
+            </a>
+        </small>
+    </article>
+);
