@@ -52,6 +52,10 @@ main {
 :is(h1, h2, h3, h4, h5, h6)#breadcrumb > a:hover::before {
     content: none;
 }
+/* add bottom border for all headings */
+:not(:is(dialog, article, body) > header:first-child) > :is(h1, h2, h3, h4, h5, h6) {
+    border-color: var(--bd-muted);
+}
 
 h1, h2, h3, h4, h5, h6, #breadcrumb {
     font-family: "varela-round", sans-serif;
