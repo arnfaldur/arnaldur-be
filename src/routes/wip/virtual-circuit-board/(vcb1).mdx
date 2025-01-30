@@ -1,0 +1,127 @@
+export const title = "VCB: Designing a Fast Bespoke Adder"
+export const date = new Date("2025-01-19T18:17:14.226Z")
+export const topic = ["programming"]
+
+# VCB: Designing a Fast Bespoke Adder
+
+I stumbled upon a beautiful program called [Virtual Circuit board](https://store.steampowered.com/app/1885690/Virtual_Circuit_Board/) (VCB) some time ago.
+It resonated with my soft spot for vibrant colors, minimalist aesthetics, and the subject of computing.
+
+Some years prior I *played* the game [NandGame](https://nandgame.com/) which tought me how to build a computer from simple logic gate primitives.
+The simplicity of the task had me surprised, as although I have been computer savy all my life, I perceived the inner workings of a computer to be some complex dark magic.
+
+## The Challenge
+
+After a quick "It can't be that hard", I decided to challenge myself to make a **RETROACTIVELY CHOSEN GAME** from memory, and from scratch, using Virtual Circuit Board. 
+Importantly, _I can't reference any sources to aid me with the task_.
+
+## The Virtual Circuit Board
+
+import vid1 from "./1-vcb-demo.webm";
+
+<video controls loop preload="metadata">
+    <source src={vid1} type="video/webm" />
+</video>
+
+In this video you can see the elementary behavior of VCB.
+- Latches, logic gates, and more are called components.
+- A single component can comprise many units of the same type, and all the connected units act as one.
+- Components are connected by traces via read and write elements (marked as `R` and `W`).
+- There is a single tick delay between a read element lighting up and it's connected component activating.
+- The trace colors are mostly cosmetic, so touching traces of any color are considered connected.
+- The hollow cross is an element that lets traces cross without connecting.
+- Components are updated once per tick
+
+This circuit model is straight forward, although I believe it to be unlike typical physical circuits.
+The biggest difference being that signals propagate infinitely fast along traces and within components.
+The lock step nature of the tick model means that the latency of a logic design can be measured in ticks.
+
+### Adders
+
+I started by designing logic to add numbers.
+![Adders](./2-1-adders.avif)
+I'll emphasize it once again, I'm still under the self-imposed information embargo.
+I think the design on the left is known as a half-adder, and the one on the right, a full-adder.
+I don't know this for sure, and I can't look it up yet.
+These are in any case designs I discovered were needed to add binary numbers.
+
+Notice that there are three disconnected and gates on the full adder connected to the same trace.
+As the trace is activated when any component writes to it, this design functions as a zero-delay or gate.
+I use this trick a lot, although it is succeptible to an issue where the signal flows in the wrong direction.
+
+![4-bit adders](./2-2-4-bit-adders.avif)
+These are both four bit adders. The left one only uses half-adders and the right one, full-adders.
+The green elements with a play icon on them are one-tick delays that ensure a synchronized signal propagation.
+Both of these designs have a four tick delay due to the most significant bit (cyan trace)
+having a dependency on the least significant bit (orange trace).
+
+When extending (and compacting) the right design to eight bits:
+![8-bit adders](./2-3-8-bit-adder.avif)
+I realized that the time complexity of the design was $O(b)$ where $b$ is the number of bits.
+This was surprising, as I had always thought it was a constant time operation.
+Addition is a fast operation in real world CPUs and I look forward to learning if it really is $O(b)$,
+it's a quirk of VCB, or if real CPUs use other faster designs.
+
+The red, green, and blue elements with lightning symbols on them are busses.
+Busses let you bundle differently colored traces together, facilitating more compact designs.
+
+#### A Faster Adder
+
+I found the time complexity unsatisfying, so I set out to design a faster adder.
+The bottleneck of the current design was that each adder needed the output of the previous one.
+Each output was just one bit of information, or just one of two options.
+I had the idea of having two adders for the four <abbr data-title="Most significant bits">MSB</abbr>.
+Each would assume it received one of the two possible outputs,
+and their output would be gated by the actual output when it was available.
+![faster adder](./2-4-faster-adder.avif)
+Each trace color represents a bit of a given significance. 
+The <abbr data-title="These are all in-game color names">yellow</abbr>
+trace is the least significant, and the purple carry bit in the top left is the most significant.
+Notice how the turqoise bit from the right 4-bit adder controls the outputs of the two leftmost adders via and gates.
+
+This design added 8 bits on only 6 ticks. 4 ticks for the adders and 2 ticks for the output gate.
+The only reason the output gate needed two ticks was the single red not gate, controlling the left outputs.
+This gate was controlled by the output of three and gates, or-ed together using the zero-delay trick.
+<abbr data-title="Don't ask my how I remembered this">De-morgan's rules</abbr>
+state that $\lnot(a \land b \land c) = \lnot a \lor \lnot b \lor \lnot c$.
+VCB has a nor gate with that exact behavior.
+
+Here is a video of the 5 tick design, incorporating the idea.
+
+import vid2 from "./2-5-faster-adder.webm";
+
+<video controls loop preload="metadata">
+    <source src={vid2} type="video/webm" />
+</video>
+The video depicts the design going through an exhaustive test, adding all combinations of 8-bit integers.
+I speed up the simulation to a point where non-trivial values are being added,
+and slow it down there such that the signal propagation is clearly visible.
+I then speed it up again until the test is over, triggering a breakpoint.
+A second test cycle is started when the breakpoint triggers and the video ends.
+
+Notice the turqoise trace, activated by the afforementioned nor gates at the start of the video.
+This small change let me remove a whole row of delays, reducing the latency of the design to 5 ticks.
+
+#### Logarithmic Adder
+
+If an 8-bit adder can be split into three 4-bit adders.
+It stands to reason that a 4-bit adder can be split into three 2-bit adders the same way. And a 2-bit into to 1-bit.
+
+I decided to try that, and here is the evolution of the design:
+![log adders](./2-6-log-adders-2.avif)
+
+To my dissapointment, the final design only reduced the latency by one tick, down to four.
+I realize now that splitting the 4-bit adders improved the speed but splitting the 2-bit adders did not,
+as a 2-bit adder already has a two tick latency.
+The design can easily be generalized to 16 bits which would only add one tick of latency but would triple the footprint.
+It's latency is $\log_2(b)$ ticks, while the fotprint is $O(b^{\log_2(3)})$. 
+I was surprised to encounter a logarithm when designing an adder, but when working with binary, $\log_2(x)$ is never far away.
+
+Although VCB has a fairly large canvas, I had already made created some repeating designs that filled a significant portion of the canvas.
+These were low latency lookup tables that displayed 8-bit signed integers on a 7 segment display. See if you can spot them:
+![canvas](./2-7-canvas.avif)
+I tried to make all my designs as compact as possible,
+without sacrificing structure too much, i.e. repeating patterns should be fairly obvious.
+
+Here is the final logarithmic-latency adder:
+![log adder](./2-8-log-adder.avif)
