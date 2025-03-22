@@ -83,7 +83,6 @@ export function DrawingCanvas() {
 	const lineWidth = 0.002;
 
 	const [points, setPoints] = createSignal<Point[]>([]);
-	/* const [redraw, setRedraw] = createSignal(() => {}); */
 	const [rotation, setRotation] = createSignal(0);
 	const pointsDft = createMemo(() => dft(points()));
 	const pointsIdft = createMemo(() => idft(points()));
@@ -118,7 +117,6 @@ export function DrawingCanvas() {
 			if (distance(point, lastPoint) < 0.001) return;
 			setPoints([...points(), point]);
 			lastPoint = point;
-			/* redraw()(); */
 		};
 
 		const stopDrawing = () => {
@@ -134,13 +132,6 @@ export function DrawingCanvas() {
 			return new Point(x, y);
 		};
 
-		/* const innerRedraw = () => {
-			drawDrawing(ctx);
-			drawDft(ctx);
-		};
-
-		setRedraw(() => innerRedraw); */
-
 		const resizeCanvas = () => {
 			const width = Math.min(
 				window.innerWidth * relativeWidth,
@@ -152,12 +143,9 @@ export function DrawingCanvas() {
 				canvas.width = width;
 				canvas.height = height;
 
-				// Scale the canvas to fit the desired coordinate system
+				// Scale the canvas to fit the coordinate system
 				ctx.translate(canvas.width / 2, canvas.height / 2);
 				ctx.scale(canvas.width / 2, -canvas.height / 2);
-
-				// Redraw the existing points
-				/* redraw()(); */
 			}
 		};
 
@@ -191,22 +179,18 @@ export function DrawingCanvas() {
 				let acc = new Point(0, 0);
 				ctx.beginPath();
 				ctx.moveTo(0, 0);
-				/* console.log("rotation", rotation); */
-				let boii = [];
 				pointsIdft().forEach((point, i, pointsIdft) => {
 					const samples = pointsIdft.length;
-					const shiftedIndex = i > samples / 2 ? i - samples : i;
+					const shiftedIndex = -(i >= samples / 2 ? i - samples : i);
+
 					const rads = ((2 * Math.PI) / samples) * shiftedIndex * rotation;
-					const brads = rads > Math.PI ? rads - 2 * Math.PI : rads; // % (2 * Math.PI);
-					boii.push([rads, brads]);
-					acc = acc.add(point.rotate(brads));
+					acc = acc.add(point.rotate(rads));
 					if (point?.visible) {
 						ctx.lineTo(acc.x, acc.y);
 					} else {
 						ctx.moveTo(acc.x, acc.y);
 					}
 				});
-				/* console.log(boii); */
 				ctx.stroke();
 				ctx.closePath();
 			};
