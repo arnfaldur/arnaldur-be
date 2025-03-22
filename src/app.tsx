@@ -12,8 +12,6 @@ import Breadcrumb from "~/components/Breadcrumb";
 import "./fonts.css";
 import "./matcha.css";
 import "./adjustments.css";
-// import "./columns.css";
-// import "./app.css";
 
 function Layout(props: ParentProps): JSX.Element {
     return (
