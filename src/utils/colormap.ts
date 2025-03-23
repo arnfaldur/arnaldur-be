@@ -25,7 +25,7 @@ export function turboColormapSample(x: number): RGB {
 }
 
 export function rgbToCss(rgb: RGB): string {
-	return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+	return `rgb(${rgb[0] * 256}, ${rgb[1] * 256}, ${rgb[2] * 256})`;
 }
 
 const turboColormapData: Colormap = [

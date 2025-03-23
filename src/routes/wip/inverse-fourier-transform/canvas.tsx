@@ -1,4 +1,11 @@
-import { createEffect, createMemo, createSignal, onCleanup } from "solid-js";
+import { JSXElement } from "solid-js";
+import {
+	createEffect,
+	createMemo,
+	createSignal,
+	onCleanup,
+	Setter,
+} from "solid-js";
 import { rgbToCss, turboColormapSample } from "~/utils/colormap";
 
 /* type Point = { x: number; y: number; visible?: boolean }; */
@@ -43,8 +50,11 @@ class Point {
 			Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2),
 		);
 	}
-	arg(): number {
+	abs(): number {
 		return Math.sqrt(this.x * this.x + this.y * this.y);
+	}
+	arg(): number {
+		return Math.atan2(this.y, this.x);
 	}
 }
 
@@ -80,37 +90,108 @@ function idft(points: Point[]): Point[] {
 	);
 }
 
+function shuffleArray<T>(array: T[]) {
+	for (let i = array.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[array[i], array[j]] = [array[j], array[i]];
+	}
+	return array;
+}
+export const Checkbox = (props: {
+	setValue: Setter<boolean>;
+	children: JSXElement;
+	ref?: Setter<HTMLInputElement>;
+}) => (
+	<label
+		style={{
+			scale: "1.25",
+			width: "calc(100% / 1.25)",
+			margin: "0 auto 0.75rem auto",
+		}}
+	>
+		<input
+			ref={(el) => {
+				props.setValue(el.checked);
+				if (props.ref) {
+					props.ref(el);
+				}
+			}}
+			type="checkbox"
+			onInput={(e) => props.setValue(e.target.checked)}
+		/>
+		{props.children}
+	</label>
+);
+
+const Slider = (props: {
+	setValue: Setter<number>;
+	value?: number;
+	ref?: Setter<HTMLInputElement>;
+}) => (
+	<input
+		ref={(el) => {
+			props.setValue(Number(el.value));
+			if (props.ref) props.ref(el);
+		}}
+		type="range"
+		value={props?.value ?? 0}
+		max={1}
+		step="any"
+		onInput={(e) => props.setValue(Number(e.target.value))}
+		style={{
+			scale: "1.5",
+			width: "calc(100% / 1.5)",
+			margin: "0 auto 0.75rem auto",
+		}}
+	/>
+);
+
 export function DrawingCanvas() {
 	const relativeWidth = 0.9;
-	const relativeHeight = 0.8;
+	const relativeHeight = 0.7;
 
 	const strokeStyle = "white";
 	const lineWidth = 0.002;
 
 	const [points, setPoints] = createSignal<Point[]>([]);
 	const [rotation, setRotation] = createSignal(0);
-	const pointsDft = createMemo(() => dft(points()));
-	const pointsIdft = createMemo(() => idft(points()));
-	const pointsSpecial = createMemo(() =>
-		pointsIdft()
-			.map<[Point, number]>((point, i) => [point, i])
-			.toSorted((a, b) => b[0].arg() - a[0].arg()),
+	const [unscaledRotationRate, setUnscaledRotationRate] = createSignal(0.5);
+	const rotationRate = () => Math.pow(2, unscaledRotationRate() * 12 - 14);
+
+	const pointsIdft = createMemo(() =>
+		idft(points()).map<[Point, number]>((point, i) => [point, i]),
+	);
+	const pointsSortedBySize = createMemo(() =>
+		pointsIdft().toSorted((a, b) => b[0].abs() - a[0].abs()),
+	);
+	const pointsSortedBySizeRev = createMemo(() =>
+		pointsSortedBySize().toReversed(),
+	);
+	const pointsSortedByAngle = createMemo(() =>
+		pointsIdft().toSorted((a, b) => b[0].arg() - a[0].arg()),
 	);
 	const pointsAlternating = createMemo(() =>
 		pointsIdft().map<[Point, number]>((_, i, arr) => {
 			const ix =
 				i % 2 === 0 ? Math.floor(i / 2) : arr.length - Math.ceil(i / 2);
-			return [arr[ix], ix];
+			return [arr[ix][0], ix];
 		}),
 	);
+	const pointsAlternatingRev = createMemo(() =>
+		pointsAlternating().toReversed(),
+	);
+	const pointsShuffled = createMemo(() => shuffleArray(pointsIdft().slice()));
+	const pointsDefault = pointsIdft;
+	const pointsDefaultRev = createMemo(() => pointsIdft().toReversed());
+	const pointsInsideOut = createMemo(() => pointsDefault());
 
-	const pointsSelected = createMemo(() => pointsAlternating());
-
-	createEffect(() => {
-		console.log("points", points());
-		console.log("dft", pointsIdft());
-	});
-
+	const pointsSelected = createMemo(() => pointsSortedBySize());
+	/*
+	 * 	createEffect(() => {
+	 * 		console.log("points", points());
+	 * 		console.log("dft", pointsIdft());
+	 * 	});
+	 *  */
 	const setupCanvas = (canvas: HTMLCanvasElement) => {
 		const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
 		if (!ctx) return null;
@@ -133,7 +214,7 @@ export function DrawingCanvas() {
 		const draw = (event: MouseEvent) => {
 			if (!isDrawing) return;
 			const point = getMousePosition(event);
-			if (point.distance(lastPoint) < 0.001) return;
+			if (point.distance(lastPoint) < 0.01) return;
 			setPoints([...points(), point]);
 			lastPoint = point;
 		};
@@ -191,7 +272,7 @@ export function DrawingCanvas() {
 		const animationLoop = (timestamp: DOMHighResTimeStamp) => {
 			const deltaTime = timestamp - lastTime;
 			lastTime = timestamp;
-			rotation += deltaTime / 100;
+			rotation += deltaTime * rotationRate();
 			if (pointsSelected().length === 0) {
 				rotation = 0;
 			} else if (rotation >= pointsSelected().length) {
@@ -212,7 +293,10 @@ export function DrawingCanvas() {
 					ctx.beginPath();
 					ctx.moveTo(acc.x, acc.y);
 					acc = acc.add(point.rotate(rads));
-					ctx.strokeStyle = i >= samples / 2 ? "red" : "green";
+					/* ctx.strokeStyle = i >= samples / 2 ? "red" : "green"; */
+					ctx.strokeStyle = rgbToCss(
+						turboColormapSample((i / samples) * 0.8 + 0.1),
+					);
 					ctx.lineTo(acc.x, acc.y);
 					ctx.stroke();
 					ctx.closePath();
@@ -271,6 +355,11 @@ export function DrawingCanvas() {
 			<button onClick={resetPoints}>Reset</button>
 			<button onClick={() => undoPoint(1)}>Undo</button>
 			<button onClick={() => undoPoint(10)}>Undo 10</button>
+
+			<fieldset>
+				<legend>Animation speed</legend>
+				<Slider value={0.5} setValue={setUnscaledRotationRate} />
+			</fieldset>
 		</>
 	);
 }
