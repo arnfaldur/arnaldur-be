@@ -28,7 +28,7 @@ export default function DeferredYoutube(props: any) {
         <>
             <Show when={isOpen()} fallback={Placeholder}>
                 <iframe
-                    src={props.yturl}
+                    src={props.url}
                     title="YouTube video player"
                     allow="clipboard-write; encrypted-media; web-share"
                     referrerpolicy="strict-origin-when-cross-origin"
