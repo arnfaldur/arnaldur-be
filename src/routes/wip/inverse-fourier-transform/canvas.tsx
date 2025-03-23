@@ -90,6 +90,11 @@ export function DrawingCanvas() {
 	const [rotation, setRotation] = createSignal(0);
 	const pointsDft = createMemo(() => dft(points()));
 	const pointsIdft = createMemo(() => idft(points()));
+	const pointsSpecial = createMemo(() =>
+		idft(points())
+			.map<[Point, number]>((point, i) => [point, i])
+			.toSorted((a, b) => b[0].arg() - a[0].arg()),
+	);
 
 	createEffect(() => {
 		console.log("points", points());
@@ -172,31 +177,39 @@ export function DrawingCanvas() {
 		resizeCanvas();
 
 		let lastTime = performance.now();
+		let rotation = 0;
 		const animationLoop = (timestamp: DOMHighResTimeStamp) => {
 			const deltaTime = timestamp - lastTime;
 			lastTime = timestamp;
-			const rotation = timestamp / 100;
+			rotation += deltaTime / 100;
+			if (pointsSpecial().length === 0) {
+				rotation = 0;
+			} else if (rotation >= pointsSpecial().length) {
+				rotation = rotation % pointsSpecial().length;
+			}
 
 			const drawDft = (ctx: CanvasRenderingContext2D) => {
 				ctx.lineWidth = lineWidth;
 				ctx.strokeStyle = "red";
 				let acc = new Point(0, 0);
-				ctx.beginPath();
-				ctx.moveTo(0, 0);
-				pointsIdft().forEach((point, i, pointsIdft) => {
-					const samples = pointsIdft.length;
+				pointsSpecial().forEach(([point, i], _, iPoints) => {
+					const samples = iPoints.length;
 
-					const ix =
-						i % 2 === 0 ? Math.floor(i / 2) : samples - Math.ceil(i / 2);
+					/* const ix =
+						i % 2 === 0 ? Math.floor(i / 2) : samples - Math.ceil(i / 2); */
+					const ix = i;
 
 					const shiftedIndex = ix >= samples / 2 ? ix - samples : ix;
 
 					const rads = -((2 * Math.PI) / samples) * shiftedIndex * rotation;
-					acc = acc.add(pointsIdft[ix].rotate(rads));
+					ctx.beginPath();
+					ctx.moveTo(acc.x, acc.y);
+					acc = acc.add(point.rotate(rads));
+					ctx.strokeStyle = ix >= samples / 2 ? "red" : "green";
 					ctx.lineTo(acc.x, acc.y);
+					ctx.stroke();
+					ctx.closePath();
 				});
-				ctx.stroke();
-				ctx.closePath();
 			};
 
 			const drawDrawing = (ctx: CanvasRenderingContext2D) => {
