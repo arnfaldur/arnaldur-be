@@ -15,7 +15,7 @@ The simplicity of the task had me surprised, as although I have been computer sa
 After a quick "It can't be that hard", I decided to challenge myself to make a **RETROACTIVELY CHOSEN GAME** from memory, and from scratch, using Virtual Circuit Board. 
 Importantly, _I can't reference any sources to aid me with the task_.
 
-## The Virtual Circuit Board
+## Virtual Circuit Board
 
 import vid1 from "./1-vcb-demo.webm";
 
@@ -36,6 +36,15 @@ This circuit model is straight forward, although I believe it to be unlike typic
 The biggest difference being that signals propagate infinitely fast along traces and within components.
 The lock step nature of the tick model means that the latency of a logic design can be measured in ticks.
 
+To aid with modularity, I decided that all my designs would have these properties:
+- The design has a delay of $d$ ticks.
+- A single tick input signal will cause a single tick output signal after $d$ ticks.
+- No input signal can affect another signal that was input at a different time.
+- A sequence of inputs therefore produces a delayed sequence of correct outputs.
+
+These constraints seemed fairly obvious and I suspect that designs that don't follow these rules 
+are much harder to work with.
+
 ### Adders
 
 I started by designing logic to add numbers.
@@ -47,7 +56,7 @@ These are in any case designs I discovered were needed to add binary numbers.
 
 Notice that there are three disconnected and gates on the full adder connected to the same trace.
 As the trace is activated when any component writes to it, this design functions as a zero-delay or gate.
-I use this trick a lot, although it is succeptible to an issue where the signal flows in the wrong direction.
+I use this trick a lot, although it is susceptible to an issue where the signal flows in the wrong direction.
 
 ![4-bit adders](./2-2-4-bit-adders.avif)
 These are both four bit adders. The left one only uses half-adders and the right one, full-adders.
@@ -77,7 +86,7 @@ and their output would be gated by the actual output when it was available.
 Each trace color represents a bit of a given significance. 
 The <abbr data-title="These are all in-game color names">yellow</abbr>
 trace is the least significant, and the purple carry bit in the top left is the most significant.
-Notice how the turqoise bit from the right 4-bit adder controls the outputs of the two leftmost adders via and gates.
+Notice how the turquoise bit from the right 4-bit adder controls the outputs of the two leftmost adders via and gates.
 
 This design added 8 bits on only 6 ticks. 4 ticks for the adders and 2 ticks for the output gate.
 The only reason the output gate needed two ticks was the single red not gate, controlling the left outputs.
@@ -99,7 +108,7 @@ and slow it down there such that the signal propagation is clearly visible.
 I then speed it up again until the test is over, triggering a breakpoint.
 A second test cycle is started when the breakpoint triggers and the video ends.
 
-Notice the turqoise trace, activated by the afforementioned nor gates at the start of the video.
+Notice the turquoise trace, activated by the aforementioned nor gates at the start of the video.
 This small change let me remove a whole row of delays, reducing the latency of the design to 5 ticks.
 
 #### Logarithmic Adder
@@ -110,18 +119,23 @@ It stands to reason that a 4-bit adder can be split into three 2-bit adders the 
 I decided to try that, and here is the evolution of the design:
 ![log adders](./2-6-log-adders-2.avif)
 
-To my dissapointment, the final design only reduced the latency by one tick, down to four.
+To my disappointment, the final design only reduced the latency by one tick, down to four.
 I realize now that splitting the 4-bit adders improved the speed but splitting the 2-bit adders did not,
 as a 2-bit adder already has a two tick latency.
 The design can easily be generalized to 16 bits which would only add one tick of latency but would triple the footprint.
-It's latency is $\log_2(b)$ ticks, while the fotprint is $O(b^{\log_2(3)})$. 
+It's latency is $\log_2(b)$ ticks, while the footprint is $O(\log_2(b) b^{\log_2(3)})$. 
 I was surprised to encounter a logarithm when designing an adder, but when working with binary, $\log_2(x)$ is never far away.
 
 Although VCB has a fairly large canvas, I had already made created some repeating designs that filled a significant portion of the canvas.
 These were low latency lookup tables that displayed 8-bit signed integers on a 7 segment display. See if you can spot them:
 ![canvas](./2-7-canvas.avif)
-I tried to make all my designs as compact as possible,
+Because of this, I tried to make all my designs as compact as possible,
 without sacrificing structure too much, i.e. repeating patterns should be fairly obvious.
 
 Here is the final logarithmic-latency adder:
 ![log adder](./2-8-log-adder.avif)
+
+#### Even Faster Adder
+ using half-adders and full-add
+
+TODO: consider this: https://github.com/simonihmig/responsive-image
