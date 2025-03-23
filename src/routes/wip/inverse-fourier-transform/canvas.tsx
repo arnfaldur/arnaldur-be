@@ -1,4 +1,5 @@
 import { createEffect, createMemo, createSignal, onCleanup } from "solid-js";
+import { rgbToCss, turboColormapSample } from "~/utils/colormap";
 
 /* type Point = { x: number; y: number; visible?: boolean }; */
 
@@ -91,10 +92,19 @@ export function DrawingCanvas() {
 	const pointsDft = createMemo(() => dft(points()));
 	const pointsIdft = createMemo(() => idft(points()));
 	const pointsSpecial = createMemo(() =>
-		idft(points())
+		pointsIdft()
 			.map<[Point, number]>((point, i) => [point, i])
 			.toSorted((a, b) => b[0].arg() - a[0].arg()),
 	);
+	const pointsAlternating = createMemo(() =>
+		pointsIdft().map<[Point, number]>((_, i, arr) => {
+			const ix =
+				i % 2 === 0 ? Math.floor(i / 2) : arr.length - Math.ceil(i / 2);
+			return [arr[ix], ix];
+		}),
+	);
+
+	const pointsSelected = createMemo(() => pointsAlternating());
 
 	createEffect(() => {
 		console.log("points", points());
@@ -182,30 +192,27 @@ export function DrawingCanvas() {
 			const deltaTime = timestamp - lastTime;
 			lastTime = timestamp;
 			rotation += deltaTime / 100;
-			if (pointsSpecial().length === 0) {
+			if (pointsSelected().length === 0) {
 				rotation = 0;
-			} else if (rotation >= pointsSpecial().length) {
-				rotation = rotation % pointsSpecial().length;
+			} else if (rotation >= pointsSelected().length) {
+				rotation = rotation % pointsSelected().length;
 			}
 
 			const drawDft = (ctx: CanvasRenderingContext2D) => {
 				ctx.lineWidth = lineWidth;
 				ctx.strokeStyle = "red";
 				let acc = new Point(0, 0);
-				pointsSpecial().forEach(([point, i], _, iPoints) => {
+				ctx.strokeStyle = rgbToCss(turboColormapSample(0));
+				pointsSelected().forEach(([point, i], _, iPoints) => {
 					const samples = iPoints.length;
 
-					/* const ix =
-						i % 2 === 0 ? Math.floor(i / 2) : samples - Math.ceil(i / 2); */
-					const ix = i;
-
-					const shiftedIndex = ix >= samples / 2 ? ix - samples : ix;
+					const shiftedIndex = i >= samples / 2 ? i - samples : i;
 
 					const rads = -((2 * Math.PI) / samples) * shiftedIndex * rotation;
 					ctx.beginPath();
 					ctx.moveTo(acc.x, acc.y);
 					acc = acc.add(point.rotate(rads));
-					ctx.strokeStyle = ix >= samples / 2 ? "red" : "green";
+					ctx.strokeStyle = i >= samples / 2 ? "red" : "green";
 					ctx.lineTo(acc.x, acc.y);
 					ctx.stroke();
 					ctx.closePath();
