@@ -37,10 +37,14 @@ class Point {
 	asHidden(): Point {
 		return new Point(this.x, this.y, false);
 	}
-}
-
-function distance(a: Point, b: Point): number {
-	return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+	distance(other: Point): number {
+		return Math.sqrt(
+			Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2),
+		);
+	}
+	arg(): number {
+		return Math.sqrt(this.x * this.x + this.y * this.y);
+	}
 }
 
 // Derived from https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Definition
@@ -114,7 +118,7 @@ export function DrawingCanvas() {
 		const draw = (event: MouseEvent) => {
 			if (!isDrawing) return;
 			const point = getMousePosition(event);
-			if (distance(point, lastPoint) < 0.001) return;
+			if (point.distance(lastPoint) < 0.001) return;
 			setPoints([...points(), point]);
 			lastPoint = point;
 		};
@@ -181,15 +185,15 @@ export function DrawingCanvas() {
 				ctx.moveTo(0, 0);
 				pointsIdft().forEach((point, i, pointsIdft) => {
 					const samples = pointsIdft.length;
-					const shiftedIndex = -(i >= samples / 2 ? i - samples : i);
 
-					const rads = ((2 * Math.PI) / samples) * shiftedIndex * rotation;
-					acc = acc.add(point.rotate(rads));
-					if (point?.visible) {
-						ctx.lineTo(acc.x, acc.y);
-					} else {
-						ctx.moveTo(acc.x, acc.y);
-					}
+					const ix =
+						i % 2 === 0 ? Math.floor(i / 2) : samples - Math.ceil(i / 2);
+
+					const shiftedIndex = ix >= samples / 2 ? ix - samples : ix;
+
+					const rads = -((2 * Math.PI) / samples) * shiftedIndex * rotation;
+					acc = acc.add(pointsIdft[ix].rotate(rads));
+					ctx.lineTo(acc.x, acc.y);
 				});
 				ctx.stroke();
 				ctx.closePath();
