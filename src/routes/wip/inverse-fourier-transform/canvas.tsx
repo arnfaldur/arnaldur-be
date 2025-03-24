@@ -196,41 +196,11 @@ export function DrawingCanvas() {
 		const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
 		if (!ctx) return null;
 
-		let isDrawing = false;
-		let lastPoint = new Point(0, 0);
-
 		// Scale the canvas to fit the desired coordinate system
 		ctx.translate(canvas.width / 2, canvas.height / 2);
 		ctx.scale(canvas.width / 2, -canvas.height / 2);
 
-		const startDrawing = (event: MouseEvent) => {
-			isDrawing = true;
-			const point = getMousePosition(event);
-			setPoints([...points(), point.asHidden()]);
-			setPoints([...points(), point.asVisible()]);
-			lastPoint = point;
-		};
-
-		const draw = (event: MouseEvent) => {
-			if (!isDrawing) return;
-			const point = getMousePosition(event);
-			if (point.distance(lastPoint) < 0.01) return;
-			setPoints([...points(), point]);
-			lastPoint = point;
-		};
-
-		const stopDrawing = () => {
-			isDrawing = false;
-		};
-
-		const getMousePosition = (event: MouseEvent) => {
-			const rect = canvas.getBoundingClientRect();
-			const x =
-				(event.clientX - rect.left - canvas.width / 2) / (canvas.width / 2);
-			const y =
-				-(event.clientY - rect.top - canvas.height / 2) / (canvas.height / 2);
-			return new Point(x, y);
-		};
+		attachDrawingLogic(canvas, points, setPoints);
 
 		const resizeCanvas = () => {
 			const width = Math.min(
@@ -249,18 +219,8 @@ export function DrawingCanvas() {
 			}
 		};
 
-		canvas.addEventListener("mousedown", startDrawing);
-		canvas.addEventListener("mousemove", draw);
-		canvas.addEventListener("mouseup", stopDrawing);
-		canvas.addEventListener("mouseout", stopDrawing);
-
 		window.addEventListener("resize", resizeCanvas);
-
 		onCleanup(() => {
-			canvas.removeEventListener("mousedown", startDrawing);
-			canvas.removeEventListener("mousemove", draw);
-			canvas.removeEventListener("mouseup", stopDrawing);
-			canvas.removeEventListener("mouseout", stopDrawing);
 
 			window.removeEventListener("resize", resizeCanvas);
 		});
@@ -362,5 +322,54 @@ export function DrawingCanvas() {
 			</fieldset>
 		</>
 	);
+}
+
+function attachDrawingLogic(
+	canvas: HTMLCanvasElement,
+	points: Accessor<Point[]>,
+	setPoints: Setter<Point[]>,
+) {
+	let lastPoint = new Point(0, 0);
+	let isDrawing = false;
+
+	const startDrawing = (event: MouseEvent) => {
+		isDrawing = true;
+		const point = getMousePosition(event);
+		setPoints([...points(), point.asHidden()]);
+		setPoints([...points(), point.asVisible()]);
+		lastPoint = point;
+	};
+
+	const draw = (event: MouseEvent) => {
+		if (!isDrawing) return;
+		const point = getMousePosition(event);
+		if (point.distance(lastPoint) < 0.01) return;
+		setPoints([...points(), point]);
+		lastPoint = point;
+	};
+
+	const stopDrawing = () => {
+		isDrawing = false;
+	};
+
+	const getMousePosition = (event: MouseEvent) => {
+		const rect = canvas.getBoundingClientRect();
+		const x =
+			(event.clientX - rect.left - canvas.width / 2) / (canvas.width / 2);
+		const y =
+			-(event.clientY - rect.top - canvas.height / 2) / (canvas.height / 2);
+		return new Point(x, y);
+	};
+
+	canvas.addEventListener("mousedown", startDrawing);
+	canvas.addEventListener("mousemove", draw);
+	canvas.addEventListener("mouseup", stopDrawing);
+	canvas.addEventListener("mouseout", stopDrawing);
+	onCleanup(() => {
+		canvas.removeEventListener("mousedown", startDrawing);
+		canvas.removeEventListener("mousemove", draw);
+		canvas.removeEventListener("mouseup", stopDrawing);
+		canvas.removeEventListener("mouseout", stopDrawing);
+	});
 }
 /* style="width: 100%; border: 1px solid black; display: block;" */
