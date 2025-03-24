@@ -332,17 +332,18 @@ function attachDrawingLogic(
 	let lastPoint = new Point(0, 0);
 	let isDrawing = false;
 
-	const startDrawing = (event: MouseEvent) => {
+	const startDrawing = (event: MouseEvent | TouchEvent) => {
 		isDrawing = true;
-		const point = getMousePosition(event);
+		const point = getPosition("touches" in event ? event.touches[0] : event);
 		setPoints([...points(), point.asHidden()]);
 		setPoints([...points(), point.asVisible()]);
 		lastPoint = point;
 	};
 
-	const draw = (event: MouseEvent) => {
+	const draw = (event: MouseEvent | TouchEvent) => {
+		event.preventDefault();
 		if (!isDrawing) return;
-		const point = getMousePosition(event);
+		const point = getPosition("touches" in event ? event.touches[0] : event);
 		if (point.distance(lastPoint) < 0.01) return;
 		setPoints([...points(), point]);
 		lastPoint = point;
@@ -352,7 +353,7 @@ function attachDrawingLogic(
 		isDrawing = false;
 	};
 
-	const getMousePosition = (event: MouseEvent) => {
+	const getPosition = (event: MouseEvent | Touch) => {
 		const rect = canvas.getBoundingClientRect();
 		const x =
 			(event.clientX - rect.left - canvas.width / 2) / (canvas.width / 2);
@@ -362,14 +363,22 @@ function attachDrawingLogic(
 	};
 
 	canvas.addEventListener("mousedown", startDrawing);
+	canvas.addEventListener("touchstart", startDrawing);
 	canvas.addEventListener("mousemove", draw);
+	canvas.addEventListener("touchmove", draw);
 	canvas.addEventListener("mouseup", stopDrawing);
+	canvas.addEventListener("touchend", stopDrawing);
 	canvas.addEventListener("mouseout", stopDrawing);
+	canvas.addEventListener("touchcancel", stopDrawing);
 	onCleanup(() => {
 		canvas.removeEventListener("mousedown", startDrawing);
+		canvas.removeEventListener("touchstart", startDrawing);
 		canvas.removeEventListener("mousemove", draw);
+		canvas.removeEventListener("touchmove", draw);
 		canvas.removeEventListener("mouseup", stopDrawing);
+		canvas.removeEventListener("touchend", stopDrawing);
 		canvas.removeEventListener("mouseout", stopDrawing);
+		canvas.removeEventListener("touchcancel", stopDrawing);
 	});
 }
 /* style="width: 100%; border: 1px solid black; display: block;" */
