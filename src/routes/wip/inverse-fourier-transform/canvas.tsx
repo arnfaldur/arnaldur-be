@@ -275,9 +275,10 @@ export function DrawingCanvas() {
 					ctx.moveTo(acc.x, acc.y);
 					acc = acc.add(point.rotate(rads));
 					/* ctx.strokeStyle = i >= samples / 2 ? "red" : "green"; */
-					ctx.strokeStyle = rgbToCss(
-						turboColormapSample((i / samples) * 0.8 + 0.1),
-					);
+					ctx.strokeStyle =
+						i === 0
+							? `color-mix(in lch, ${rgbToCss(turboColormapSample(0.1))}, ${rgbToCss(turboColormapSample(0.9))})`
+							: rgbToCss(turboColormapSample((i / samples) * 0.8 + 0.1));
 					ctx.lineTo(acc.x, acc.y);
 					ctx.stroke();
 					ctx.closePath();
