@@ -1,4 +1,6 @@
 import { JSXElement } from "solid-js";
+import { For } from "solid-js";
+import { Accessor } from "solid-js";
 import {
 	createEffect,
 	createMemo,
@@ -104,8 +106,7 @@ export const Checkbox = (props: {
 }) => (
 	<label
 		style={{
-			scale: "1.25",
-			width: "calc(100% / 1.25)",
+			width: "100%",
 			margin: "0 auto 0.75rem auto",
 		}}
 	>
@@ -146,6 +147,23 @@ const Slider = (props: {
 	/>
 );
 
+type Ordering =
+	| "default"
+	| "insideOut"
+	| "alternating"
+	| "bySize"
+	| "byAngle"
+	| "shuffled";
+
+const orderingData: { [key in Ordering]: string } = {
+	default: "Default",
+	insideOut: "Inside Out",
+	alternating: "Alternating",
+	bySize: "By Size",
+	byAngle: "By Angle",
+	shuffled: "Shuffled",
+};
+
 export function DrawingCanvas() {
 	const relativeWidth = 0.9;
 	const relativeHeight = 0.7;
@@ -156,19 +174,13 @@ export function DrawingCanvas() {
 	const [points, setPoints] = createSignal<Point[]>([]);
 	const [rotation, setRotation] = createSignal(0);
 	const [unscaledRotationRate, setUnscaledRotationRate] = createSignal(0.5);
+	const [pointOrdering, setPointOrdering] = createSignal<Ordering>("default");
+	const [pointOrderingReversed, setPointOrderingReversed] =
+		createSignal<boolean>(false);
 	const rotationRate = () => Math.pow(2, unscaledRotationRate() * 12 - 14);
 
 	const pointsIdft = createMemo(() =>
 		idft(points()).map<[Point, number]>((point, i) => [point, i]),
-	);
-	const pointsSortedBySize = createMemo(() =>
-		pointsIdft().toSorted((a, b) => b[0].abs() - a[0].abs()),
-	);
-	const pointsSortedBySizeRev = createMemo(() =>
-		pointsSortedBySize().toReversed(),
-	);
-	const pointsSortedByAngle = createMemo(() =>
-		pointsIdft().toSorted((a, b) => b[0].arg() - a[0].arg()),
 	);
 	const pointsAlternating = createMemo(() =>
 		pointsIdft().map<[Point, number]>((_, i, arr) => {
@@ -177,21 +189,31 @@ export function DrawingCanvas() {
 			return [arr[ix][0], ix];
 		}),
 	);
-	const pointsAlternatingRev = createMemo(() =>
-		pointsAlternating().toReversed(),
+	const pointsInsideOut = createMemo(() => [
+		...pointsIdft().slice(Math.ceil(points().length / 2)),
+		...pointsIdft().slice(0, Math.ceil(points().length / 2)),
+	]);
+	const pointsBySize = createMemo(() =>
+		pointsIdft().toSorted((a, b) => b[0].abs() - a[0].abs()),
+	);
+	const pointsByAngle = createMemo(() =>
+		pointsIdft().toSorted((a, b) => b[0].arg() - a[0].arg()),
 	);
 	const pointsShuffled = createMemo(() => shuffleArray(pointsIdft().slice()));
-	const pointsDefault = pointsIdft;
-	const pointsDefaultRev = createMemo(() => pointsIdft().toReversed());
-	const pointsInsideOut = createMemo(() => pointsDefault());
 
-	const pointsSelected = createMemo(() => pointsSortedBySize());
-	/*
-	 * 	createEffect(() => {
-	 * 		console.log("points", points());
-	 * 		console.log("dft", pointsIdft());
-	 * 	});
-	 *  */
+	const pointsSelected = createMemo(() => {
+		const mapping: { [key in Ordering]: [Point, number][] } = {
+			default: pointsIdft(),
+			insideOut: pointsInsideOut(),
+			alternating: pointsAlternating(),
+			bySize: pointsBySize(),
+			byAngle: pointsByAngle(),
+			shuffled: pointsShuffled(),
+		};
+		const result = mapping[pointOrdering()];
+		return pointOrderingReversed() ? result.toReversed() : result;
+	});
+
 	const setupCanvas = (canvas: HTMLCanvasElement) => {
 		const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
 		if (!ctx) return null;
@@ -221,7 +243,6 @@ export function DrawingCanvas() {
 
 		window.addEventListener("resize", resizeCanvas);
 		onCleanup(() => {
-
 			window.removeEventListener("resize", resizeCanvas);
 		});
 
@@ -312,13 +333,52 @@ export function DrawingCanvas() {
 					"margin-left": `max(-${relativeWidth * 50}vw, -${relativeHeight * 50}vh)`,
 				}}
 			/>
-			<button onClick={resetPoints}>Reset</button>
-			<button onClick={() => undoPoint(1)}>Undo</button>
+			{/* <button onClick={() => undoPoint(1)}>Undo</button>
 			<button onClick={() => undoPoint(10)}>Undo 10</button>
-
+ */}
 			<fieldset>
 				<legend>Animation speed</legend>
 				<Slider value={0.5} setValue={setUnscaledRotationRate} />
+			</fieldset>
+			<div
+				style={{
+					display: "grid",
+					"grid-template-columns": "1fr 1fr 1fr",
+				}}
+			>
+				<button onClick={() => undoPoint(1)}>Undo</button>
+				<button onClick={() => undoPoint(10)}>Undo 10</button>
+				<button type="reset" onClick={resetPoints}>
+					Reset
+				</button>
+			</div>
+
+			<fieldset>
+				<legend>Ordering</legend>
+				<div
+					style={{
+						display: "grid",
+						"grid-template-columns": "1fr 1fr 1fr",
+					}}
+				>
+					<For each={Object.entries(orderingData)}>
+						{([ordering, description], i) => (
+							<label>
+								<input
+									type="radio"
+									name="ordering"
+									value={ordering}
+									onInput={(el) =>
+										setPointOrdering((previous) => el.target.value as Ordering)
+									}
+									checked={i() === 0}
+								/>
+								{description}
+							</label>
+						)}
+					</For>
+					<Checkbox setValue={setPointOrderingReversed}>Reversed</Checkbox>
+				</div>
 			</fieldset>
 		</>
 	);
