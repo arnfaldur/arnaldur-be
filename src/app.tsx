@@ -1,32 +1,13 @@
 // @refresh reload
-import type { JSX, ParentProps } from "solid-js";
 import { Suspense } from "solid-js";
 import { MetaProvider } from "@solidjs/meta";
 import { Router } from "@solidjs/router";
 import { FileRoutes } from "@solidjs/start/router";
 
-import Title from "~/components/Title";
-import Breadcrumb from "~/components/Breadcrumb";
-
 // import "katex/dist/katex.min.css";
 import "./fonts.css";
 import "./matcha.css";
 import "./adjustments.css";
-
-function Layout(props: ParentProps): JSX.Element {
-    return (
-        <>
-            <Title />
-            <header>
-                <Breadcrumb />
-            </header>
-            <main class="writing">{props.children}</main>
-            <footer>
-                <Breadcrumb />
-            </footer>
-        </>
-    );
-}
 
 export default function App() {
     const routes = FileRoutes();
@@ -35,9 +16,7 @@ export default function App() {
         <Router
             root={(props) => (
                 <MetaProvider>
-                    <Suspense>
-                        <Layout>{props.children}</Layout>
-                    </Suspense>
+                    <Suspense>{props.children}</Suspense>
                 </MetaProvider>
             )}
         >
