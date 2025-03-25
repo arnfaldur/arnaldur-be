@@ -9,8 +9,9 @@
     "devDependencies": {
         "@types/three": "^0.174.0",
         "typescript": "^5.8.2",
-        "vite": "^6.0.9",
-        "vite-plugin-inspect": "^10.0.7"
+        "vite": "^6.2.3",
+        "vite-plugin-inspect": "^11.0.0",
+        "vite-plugin-solid": "^2.11.6"
     },
     "dependencies": {
         "@mdx-js/mdx": "^3.1.0",
@@ -35,8 +36,7 @@
         "sst": "3.10.11",
         "three": "^0.174.0",
         "unist-util-visit": "^5.0.0",
-        "vinxi": "^0.5.1",
-        "vite-plugin-solid": "^2.11.0"
+        "vinxi": "^0.5.1"
     },
     "engines": {
         "node": ">=18"
