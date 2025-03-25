@@ -19,10 +19,10 @@ const [diagonalization, setDiagonalization] = createSignal(0);
 const [linkSliders, setLinkSliders] = createSignal(false);
 const [isolatePlane, setIsolatePlane] = createSignal(false);
 
-let centerSphereSlider: HTMLInputElement;
-let diagonalizationSlider: HTMLInputElement;
-let linkSlidersCheckbox: HTMLInputElement;
-let isolatePlaneCheckbox: HTMLInputElement;
+let centerSphereSlider!: HTMLInputElement;
+let diagonalizationSlider!: HTMLInputElement;
+let linkSlidersCheckbox!: HTMLInputElement;
+let isolatePlaneCheckbox!: HTMLInputElement;
 const updateCenterSphere = (value: number) =>
     batch(() => {
         setCenterSphere(value);

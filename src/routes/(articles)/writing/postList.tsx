@@ -10,7 +10,7 @@ type Frontmatter = {
     hidden?: boolean,
     hn?: Hn,
 };
-type PostType = {
+type Post = {
     title: string,
     date: Date,
     topic: string[],
@@ -37,7 +37,7 @@ async function filterTransformPosts(
     const filteredPosts = postEntries.filter(
         ([_, frontmatter]) => !frontmatter?.hidden && frontmatter?.title
     );
-    const transformedPosts = filteredPosts.map<[string, PostType]>(
+    const transformedPosts = filteredPosts.map<[string, Post]>(
         ([post, frontmatter]) => [
             "/writing" + post.slice(1).replace(/\/\(.*\)\.mdx/, ""),
             {
@@ -57,10 +57,10 @@ export function PostList() {
     const [postList] = createResource(() =>
         filterTransformPosts(unfilteredPosts)
     );
-    return <For each={postList()}>{Post}</For>;
+    return <For each={postList()}>{PostComp}</For>;
 }
 
-const Post = ([url, post]: [string, PostType]) => (
+const PostComp = ([url, post]: [string, Post]) => (
     <article>
         <A href={url}>
             <h2>{post.title}</h2>

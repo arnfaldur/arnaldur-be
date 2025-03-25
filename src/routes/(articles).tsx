@@ -1,14 +1,16 @@
+import type { JSX, ParentProps } from "solid-js";
+
 import Title from "~/components/Title";
 import Breadcrumb from "~/components/Breadcrumb";
 
-export default function ExperimentingLayout(props) {
+export default function ArticleLayout(props: ParentProps): JSX.Element {
     return (
         <>
             <Title />
             <header>
                 <Breadcrumb />
             </header>
-            <main>{props.children}</main>
+            <main class="writing">{props.children}</main>
             <footer>
                 <Breadcrumb />
             </footer>
