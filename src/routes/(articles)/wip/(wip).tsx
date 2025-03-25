@@ -3,28 +3,27 @@ import { createResource, For } from "solid-js";
 import { A } from "@solidjs/router";
 
 type Frontmatter = {
-    title?: string,
-    date?: Date,
-    topic?: string[],
-    hidden?: boolean,
+    title?: string;
+    date?: Date;
+    topic?: string[];
+    hidden?: boolean;
 };
-const unfilteredPosts = import.meta.glob<Frontmatter>("./**/(*).{md,mdx}", {
+const unfilteredPosts = import.meta.glob<Frontmatter>("./**/(*).{md,mdx,tsx}", {
     eager: false,
 });
 
 async function filterTransformPosts(
     unfilteredPosts: Record<string, () => Promise<Frontmatter>>
 ) {
-    console.log("unf", unfilteredPosts);
+    console.log("soidfj", process.env.NODE_ENV);
     const unfilteredPostEntries = Object.entries(unfilteredPosts);
     const promises = unfilteredPostEntries.map<Promise<[string, Frontmatter]>>(
         async ([s, p]) => [s, await p()]
     );
     const postEntries = await Promise.all(promises);
 
-    console.log(postEntries);
     const transformedPosts = postEntries.map<
-        [string, { title: string, date: Date, topic: string[] }]
+        [string, { title: string; date: Date; topic: string[] }]
     >(([post, frontmatter]) => {
         const boi = post.slice(1).replace(/\/\(.*\)\.mdx/, "");
         return [
