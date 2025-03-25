@@ -99,6 +99,9 @@ a {
 
 a:visited {
     color: oklch(80% 0.2 310);
+    button {
+        color: oklch(80% 0.2 310);
+    }
 }
 
 q::before {
