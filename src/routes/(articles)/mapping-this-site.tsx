@@ -28,46 +28,48 @@ type RouteData = {
 async function processRoutes(
     rawRoutes: Record<string, () => Promise<RouteData>>
 ) {
-    const thing = Object.entries(rawRoutes).map<Promise<[string, RouteData]>>(
-        async ([s, p]) => [s, await p()]
-    );
-    const thong = await Promise.all(thing);
-    /* const rawRoutes = [] */
-
-    const sitemappedRoutes = thong.filter(
-        ([route, data]) => data?.sitemapped !== false
-    );
-
-    const cleanedRoutes = sitemappedRoutes.map(([route]) =>
-        route.replace(/\/\(.*\)\//, "/")
-    );
-    /* console.log("cleanedRoutes", cleanedRoutes); */
+    const cleanedRoutes = Object.entries(rawRoutes).map<
+        [string, Promise<RouteData>]
+    >(([route, contents]) => [route.replace(/\/\(.*\)\//, "/"), contents]);
     const filteredRoutes = cleanedRoutes.filter(
-        (route) =>
+        ([route]) =>
             route.match("\\(.*\\).((mdx)|(tsx))$") &&
             !route.startsWith("/src/routes/wip") &&
             !route.startsWith("/src/routes/laughing") &&
             route !== "/src/routes/writing"
     );
-    /* console.log("filteredRoutes ", filteredRoutes); */
-    const routes = filteredRoutes.map((route) =>
-        route.replace("/src/routes", "").replace(/\/\(.*\).(mdx|tsx)$/, "")
+    const formattedRoutes = filteredRoutes.map<[string, Promise<RouteData>]>(
+        ([route, contents]) => [
+            route.replace("/src/routes", "").replace(/\/\(.*\).(mdx|tsx)$/, ""),
+            contents,
+        ]
     );
+    const uwrappedPromises = await Promise.all(
+        formattedRoutes.map<Promise<[string, RouteData]>>(async ([s, p]) => [
+            s,
+            await p(),
+        ])
+    );
+
+    const sitemappedRoutes = uwrappedPromises.filter(
+        ([route, data]) => data?.sitemapped !== false
+    );
+    const routes = sitemappedRoutes.map(([route]) => route);
+
     return routes;
 }
 
 export default function Page() {
+    /* const imported = []; */
     const imported = import.meta.glob<RouteData>("~/routes/**/(*).{mdx,tsx}", {
         eager: false,
     });
-    console.log("imported", imported["/src/routes/(articles).tsx"]());
 
     const [routes] = createResource(() => processRoutes(imported));
-    console.log("routes", routes);
     return <For each={routes()}>{Route}</For>;
 }
 
-const Route = (route) => (
+const Route = (route: string) => (
     <article>
         <A href={route}>
             <h2 style={{ "font-size": "1.3rem" }}>{route}</h2>
