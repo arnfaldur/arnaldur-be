@@ -36,7 +36,7 @@
         "sst": "3.10.11",
         "three": "^0.174.0",
         "unist-util-visit": "^5.0.0",
-        "vinxi": "^0.5.1"
+        "vinxi": "^0.5.2"
     },
     "engines": {
         "node": ">=18"
