@@ -28,9 +28,11 @@ type RouteData = {
 async function processRoutes(
     rawRoutes: Record<string, () => Promise<RouteData>>
 ) {
-    const cleanedRoutes = Object.entries(rawRoutes).map<
-        [string, Promise<RouteData>]
-    >(([route, contents]) => [route.replace(/\/\(.*\)\//, "/"), contents]);
+    type RoutePair = [string, () => Promise<RouteData>];
+    const cleanedRoutes = Object.entries(rawRoutes).map<RoutePair>(
+        ([route, contents]) => [route.replace(/\/\(.*\)\//, "/"), contents]
+    );
+    console.log("cleanedRoutes", cleanedRoutes);
     const filteredRoutes = cleanedRoutes.filter(
         ([route]) =>
             route.match("\\(.*\\).((mdx)|(tsx))$") &&
@@ -38,12 +40,15 @@ async function processRoutes(
             !route.startsWith("/src/routes/laughing") &&
             route !== "/src/routes/writing"
     );
-    const formattedRoutes = filteredRoutes.map<[string, Promise<RouteData>]>(
+    console.log("filteredRoutes ", filteredRoutes);
+    const formattedRoutes = filteredRoutes.map<RoutePair>(
         ([route, contents]) => [
             route.replace("/src/routes", "").replace(/\/\(.*\).(mdx|tsx)$/, ""),
             contents,
         ]
     );
+    console.log("formattedRoutes ", formattedRoutes);
+    /* const furtherFilteredRoutes = formattedRoutes.filter(([route] => route)) */
     const uwrappedPromises = await Promise.all(
         formattedRoutes.map<Promise<[string, RouteData]>>(async ([s, p]) => [
             s,
@@ -60,7 +65,6 @@ async function processRoutes(
 }
 
 export default function Page() {
-    /* const imported = []; */
     const imported = import.meta.glob<RouteData>("~/routes/**/(*).{mdx,tsx}", {
         eager: false,
     });
