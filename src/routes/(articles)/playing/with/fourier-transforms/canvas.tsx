@@ -1,13 +1,7 @@
 import { JSXElement } from "solid-js";
 import { For } from "solid-js";
 import { Accessor } from "solid-js";
-import {
-	createEffect,
-	createMemo,
-	createSignal,
-	onCleanup,
-	Setter,
-} from "solid-js";
+import { createEffect, createMemo, createSignal, onCleanup, Setter } from "solid-js";
 import { rgbToCss, turboColormapSample } from "~/utils/colormap";
 
 /* type Point = { x: number; y: number; visible?: boolean }; */
@@ -30,10 +24,7 @@ class Point {
 		return new Point(this.x + other.x, this.y + other.y);
 	}
 	mul(other: Point): Point {
-		return new Point(
-			this.x * other.x - this.y * other.y,
-			this.x * other.y + this.y * other.x,
-		);
+		return new Point(this.x * other.x - this.y * other.y, this.x * other.y + this.y * other.x);
 	}
 	scale(scale: number): Point {
 		return new Point(this.x * scale, this.y * scale);
@@ -48,9 +39,7 @@ class Point {
 		return new Point(this.x, this.y, false);
 	}
 	distance(other: Point): number {
-		return Math.sqrt(
-			Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2),
-		);
+		return Math.sqrt(Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2));
 	}
 	abs(): number {
 		return Math.sqrt(this.x * this.x + this.y * this.y);
@@ -147,13 +136,7 @@ const Slider = (props: {
 	/>
 );
 
-type Ordering =
-	| "default"
-	| "insideOut"
-	| "alternating"
-	| "bySize"
-	| "byAngle"
-	| "shuffled";
+type Ordering = "default" | "insideOut" | "alternating" | "bySize" | "byAngle" | "shuffled";
 
 const orderingData: { [key in Ordering]: string } = {
 	default: "Default",
@@ -175,8 +158,7 @@ export function DrawingCanvas() {
 	const [rotation, setRotation] = createSignal(0);
 	const [unscaledRotationRate, setUnscaledRotationRate] = createSignal(0.5);
 	const [pointOrdering, setPointOrdering] = createSignal<Ordering>("default");
-	const [pointOrderingReversed, setPointOrderingReversed] =
-		createSignal<boolean>(false);
+	const [pointOrderingReversed, setPointOrderingReversed] = createSignal<boolean>(false);
 	const rotationRate = () => Math.pow(2, unscaledRotationRate() * 12 - 14);
 
 	const pointsIdft = createMemo(() =>
@@ -184,8 +166,7 @@ export function DrawingCanvas() {
 	);
 	const pointsAlternating = createMemo(() =>
 		pointsIdft().map<[Point, number]>((_, i, arr) => {
-			const ix =
-				i % 2 === 0 ? Math.floor(i / 2) : arr.length - Math.ceil(i / 2);
+			const ix = i % 2 === 0 ? Math.floor(i / 2) : arr.length - Math.ceil(i / 2);
 			return [arr[ix][0], ix];
 		}),
 	);
@@ -193,9 +174,7 @@ export function DrawingCanvas() {
 		...pointsIdft().slice(Math.ceil(points().length / 2)),
 		...pointsIdft().slice(0, Math.ceil(points().length / 2)),
 	]);
-	const pointsBySize = createMemo(() =>
-		pointsIdft().toSorted((a, b) => b[0].abs() - a[0].abs()),
-	);
+	const pointsBySize = createMemo(() => pointsIdft().toSorted((a, b) => b[0].abs() - a[0].abs()));
 	const pointsByAngle = createMemo(() =>
 		pointsIdft().toSorted((a, b) => b[0].arg() - a[0].arg()),
 	);
@@ -277,7 +256,9 @@ export function DrawingCanvas() {
 					/* ctx.strokeStyle = i >= samples / 2 ? "red" : "green"; */
 					ctx.strokeStyle =
 						i === 0
-							? `color-mix(in lch, ${rgbToCss(turboColormapSample(0.1))}, ${rgbToCss(turboColormapSample(0.9))})`
+							? `color-mix(in lch, ${rgbToCss(turboColormapSample(0.1))}, ${rgbToCss(
+									turboColormapSample(0.9),
+							  )})`
 							: rgbToCss(turboColormapSample((i / samples) * 0.8 + 0.1));
 					ctx.lineTo(acc.x, acc.y);
 					ctx.stroke();
@@ -416,10 +397,8 @@ function attachDrawingLogic(
 
 	const getPosition = (event: MouseEvent | Touch) => {
 		const rect = canvas.getBoundingClientRect();
-		const x =
-			(event.clientX - rect.left - canvas.width / 2) / (canvas.width / 2);
-		const y =
-			-(event.clientY - rect.top - canvas.height / 2) / (canvas.height / 2);
+		const x = (event.clientX - rect.left - canvas.width / 2) / (canvas.width / 2);
+		const y = -(event.clientY - rect.top - canvas.height / 2) / (canvas.height / 2);
 		return new Point(x, y);
 	};
 
