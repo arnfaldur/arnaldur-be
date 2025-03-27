@@ -129,8 +129,7 @@ const Slider = (props: {
 		step="any"
 		onInput={(e) => props.setValue(Number(e.target.value))}
 		style={{
-			scale: "1.5",
-			width: "calc(100% / 1.5)",
+			width: "100%",
 			margin: "0 auto 0.75rem auto",
 		}}
 	/>
@@ -148,11 +147,11 @@ const orderingData: { [key in Ordering]: string } = {
 };
 
 export function DrawingCanvas() {
-	const relativeWidth = 0.9;
+	const relativeWidth = 0.99;
 	const relativeHeight = 0.7;
 
 	const strokeStyle = "white";
-	const lineWidth = 0.002;
+	const lineWidth = 2;
 
 	const [points, setPoints] = createSignal<Point[]>([]);
 	const [rotation, setRotation] = createSignal(0);
@@ -197,9 +196,10 @@ export function DrawingCanvas() {
 		const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
 		if (!ctx) return null;
 
+		const reScale = window?.devicePixelRatio ?? 1;
 		// Scale the canvas to fit the desired coordinate system
 		ctx.translate(canvas.width / 2, canvas.height / 2);
-		ctx.scale(canvas.width / 2, -canvas.height / 2);
+		ctx.scale(canvas.width / 2 * reScale, -canvas.height / 2 * reScale);
 
 		attachDrawingLogic(canvas, points, setPoints);
 
@@ -240,7 +240,7 @@ export function DrawingCanvas() {
 			}
 
 			const drawDft = (ctx: CanvasRenderingContext2D) => {
-				ctx.lineWidth = lineWidth;
+				ctx.lineWidth = lineWidth / (canvas.height ?? 400);
 				ctx.strokeStyle = "red";
 				let acc = new Point(0, 0);
 				ctx.strokeStyle = rgbToCss(turboColormapSample(0));
@@ -268,7 +268,7 @@ export function DrawingCanvas() {
 
 			const drawDrawing = (ctx: CanvasRenderingContext2D) => {
 				// Set the line width
-				ctx.lineWidth = lineWidth;
+				ctx.lineWidth = lineWidth / (canvas.height ?? 400);
 				ctx.strokeStyle = strokeStyle;
 				ctx.beginPath();
 				ctx.moveTo(0, 0);
@@ -309,7 +309,6 @@ export function DrawingCanvas() {
 				height="400"
 				style={{
 					/* width: "99vw", */
-					border: "1px solid black",
 					position: "relative",
 					left: "50%",
 					"margin-left": `max(-${relativeWidth * 50}vw, -${relativeHeight * 50}vh)`,
@@ -410,6 +409,7 @@ function attachDrawingLogic(
 	canvas.addEventListener("touchend", stopDrawing);
 	canvas.addEventListener("mouseout", stopDrawing);
 	canvas.addEventListener("touchcancel", stopDrawing);
+	canvas.addEventListener("mouseleave", stopDrawing);
 	onCleanup(() => {
 		canvas.removeEventListener("mousedown", startDrawing);
 		canvas.removeEventListener("touchstart", startDrawing);
