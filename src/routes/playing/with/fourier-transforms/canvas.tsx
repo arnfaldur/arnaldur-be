@@ -3,91 +3,9 @@ import { For } from "solid-js";
 import { Accessor } from "solid-js";
 import { createEffect, createMemo, createSignal, onCleanup, Setter } from "solid-js";
 import { rgbToCss, turboColormapSample } from "~/utils/colormap";
+import { Point } from "./Point";
+import { ifft, idft, gifft, shuffleArray } from "./utils";
 
-/* type Point = { x: number; y: number; visible?: boolean }; */
-
-class Point {
-	x: number;
-	y: number;
-	visible: boolean;
-	/* constructor({ x, y, visible }: { x: number; y: number; visible?: boolean }) {
-		this.x = x;
-		this.y = y;
-		this.visible = visible;
-	} */
-	constructor(x: number = 0, y: number = 0, visible: boolean = true) {
-		this.x = x;
-		this.y = y;
-		this.visible = visible;
-	}
-	add(other: Point): Point {
-		return new Point(this.x + other.x, this.y + other.y);
-	}
-	mul(other: Point): Point {
-		return new Point(this.x * other.x - this.y * other.y, this.x * other.y + this.y * other.x);
-	}
-	scale(scale: number): Point {
-		return new Point(this.x * scale, this.y * scale);
-	}
-	rotate(radians: number): Point {
-		return this.mul(new Point(Math.cos(radians), Math.sin(radians)));
-	}
-	asVisible(): Point {
-		return new Point(this.x, this.y, true);
-	}
-	asHidden(): Point {
-		return new Point(this.x, this.y, false);
-	}
-	distance(other: Point): number {
-		return Math.sqrt(Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2));
-	}
-	abs(): number {
-		return Math.sqrt(this.x * this.x + this.y * this.y);
-	}
-	arg(): number {
-		return Math.atan2(this.y, this.x);
-	}
-}
-
-// Derived from https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Definition
-function dft(points: Point[]): Point[] {
-	return points.map((_, k) =>
-		points.reduce((acc, point, n) =>
-			acc.add(
-				point.mul(
-					new Point(
-						Math.cos(((2 * Math.PI * k) / points.length) * n),
-						-Math.sin(((2 * Math.PI * k) / points.length) * n),
-					),
-				),
-			),
-		),
-	);
-}
-function idft(points: Point[]): Point[] {
-	return points.map((_, k) =>
-		points
-			.reduce((acc, point, n) =>
-				acc.add(
-					point.mul(
-						new Point(
-							Math.cos(((2 * Math.PI * k) / points.length) * n),
-							Math.sin(((2 * Math.PI * k) / points.length) * n),
-						),
-					),
-				),
-			)
-			.scale(1 / points.length),
-	);
-}
-
-function shuffleArray<T>(array: T[]) {
-	for (let i = array.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[array[i], array[j]] = [array[j], array[i]];
-	}
-	return array;
-}
 export const Checkbox = (props: {
 	setValue: Setter<boolean>;
 	children: JSXElement;
@@ -160,37 +78,35 @@ export function DrawingCanvas() {
 	const [pointOrderingReversed, setPointOrderingReversed] = createSignal<boolean>(false);
 	const rotationRate = () => Math.pow(2, unscaledRotationRate() * 12 - 14);
 
-	const pointsIdft = createMemo(() =>
-		idft(points()).map<[Point, number]>((point, i) => [point, i]),
-	);
-	const pointsAlternating = createMemo(() =>
-		pointsIdft().map<[Point, number]>((_, i, arr) => {
-			const ix = i % 2 === 0 ? Math.floor(i / 2) : arr.length - Math.ceil(i / 2);
-			return [arr[ix][0], ix];
-		}),
-	);
-	const pointsInsideOut = createMemo(() => [
-		...pointsIdft().slice(Math.ceil(points().length / 2)),
-		...pointsIdft().slice(0, Math.ceil(points().length / 2)),
-	]);
-	const pointsBySize = createMemo(() => pointsIdft().toSorted((a, b) => b[0].abs() - a[0].abs()));
-	const pointsByAngle = createMemo(() =>
-		pointsIdft().toSorted((a, b) => b[0].arg() - a[0].arg()),
-	);
-	const pointsShuffled = createMemo(() => shuffleArray(pointsIdft().slice()));
+	const visiblePoints = createMemo(() => points().filter((point) => point.visible));
 
-	const pointsSelected = createMemo(() => {
-		const mapping: { [key in Ordering]: [Point, number][] } = {
-			default: pointsIdft(),
-			insideOut: pointsInsideOut(),
-			alternating: pointsAlternating(),
-			bySize: pointsBySize(),
-			byAngle: pointsByAngle(),
-			shuffled: pointsShuffled(),
-		};
-		const result = mapping[pointOrdering()];
-		return pointOrderingReversed() ? result.toReversed() : result;
+	const pointsIfft = createMemo(() =>
+		gifft(visiblePoints()).map<[Point, number]>((point, i) => [point, i]),
+	);
+	/* createEffect(() => {
+		const boy = idft(visiblePoints());
+		const boi = fft(visiblePoints());
+		const gil = ifft(fft(ifft(visiblePoints())));
+		if (boy.length === gil.length) {
+			console.log("pointsIdft", boy);
+			console.log("pointsIfft", boi);
+			console.log("bibibi", gil);
+		}
 	});
+ */
+	const pointsIdft = createMemo(() =>
+		idft(visiblePoints()).map<[Point, number]>((point, i) => [point, i]),
+	);
+	const pointsSelectedIdft = createPointOrderings(
+		pointsIdft,
+		pointOrdering,
+		pointOrderingReversed,
+	);
+	const pointsSelectedIfft = createPointOrderings(
+		pointsIfft,
+		pointOrdering,
+		pointOrderingReversed,
+	);
 
 	const setupCanvas = (canvas: HTMLCanvasElement) => {
 		const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
@@ -199,7 +115,7 @@ export function DrawingCanvas() {
 		const reScale = window?.devicePixelRatio ?? 1;
 		// Scale the canvas to fit the desired coordinate system
 		ctx.translate(canvas.width / 2, canvas.height / 2);
-		ctx.scale(canvas.width / 2 * reScale, -canvas.height / 2 * reScale);
+		ctx.scale((canvas.width / 2) * reScale, (-canvas.height / 2) * reScale);
 
 		attachDrawingLogic(canvas, points, setPoints);
 
@@ -228,43 +144,15 @@ export function DrawingCanvas() {
 		resizeCanvas();
 
 		let lastTime = performance.now();
-		let rotation = 0;
 		const animationLoop = (timestamp: DOMHighResTimeStamp) => {
 			const deltaTime = timestamp - lastTime;
 			lastTime = timestamp;
-			rotation += deltaTime * rotationRate();
-			if (pointsSelected().length === 0) {
-				rotation = 0;
-			} else if (rotation >= pointsSelected().length) {
-				rotation = rotation % pointsSelected().length;
+			setRotation((rotation) => rotation + deltaTime * rotationRate());
+			if (pointsSelectedIdft().length === 0) {
+				setRotation(0);
+			} else if (rotation() >= pointsSelectedIdft().length) {
+				setRotation((rotation) => rotation % pointsSelectedIdft().length);
 			}
-
-			const drawDft = (ctx: CanvasRenderingContext2D) => {
-				ctx.lineWidth = lineWidth / (canvas.height ?? 400);
-				ctx.strokeStyle = "red";
-				let acc = new Point(0, 0);
-				ctx.strokeStyle = rgbToCss(turboColormapSample(0));
-				pointsSelected().forEach(([point, i], _, iPoints) => {
-					const samples = iPoints.length;
-
-					const shiftedIndex = i >= samples / 2 ? i - samples : i;
-
-					const rads = -((2 * Math.PI) / samples) * shiftedIndex * rotation;
-					ctx.beginPath();
-					ctx.moveTo(acc.x, acc.y);
-					acc = acc.add(point.rotate(rads));
-					/* ctx.strokeStyle = i >= samples / 2 ? "red" : "green"; */
-					ctx.strokeStyle =
-						i === 0
-							? `color-mix(in lch, ${rgbToCss(turboColormapSample(0.1))}, ${rgbToCss(
-									turboColormapSample(0.9),
-							  )})`
-							: rgbToCss(turboColormapSample((i / samples) * 0.8 + 0.1));
-					ctx.lineTo(acc.x, acc.y);
-					ctx.stroke();
-					ctx.closePath();
-				});
-			};
 
 			const drawDrawing = (ctx: CanvasRenderingContext2D) => {
 				// Set the line width
@@ -284,7 +172,10 @@ export function DrawingCanvas() {
 			};
 
 			ctx.clearRect(-1, -1, 2, 2);
-			drawDft(ctx);
+
+			ctx.lineWidth = lineWidth / (ctx.canvas.height ?? 400);
+			/* drawDft(ctx, pointsSelectedIdft, rotation()); */
+			drawDft(ctx, pointsSelectedIfft, rotation());
 			drawDrawing(ctx);
 
 			requestAnimationFrame(animationLoop);
@@ -301,6 +192,13 @@ export function DrawingCanvas() {
 		/* redraw()(); */
 	};
 
+	let positionSlider!: HTMLInputElement;
+	createEffect(() => {
+		positionSlider.value = (rotation() / pointsSelectedIfft().length).toString();
+	});
+
+	positionSlider.addEventListener("mousedown", listener)
+
 	return (
 		<>
 			<canvas
@@ -309,17 +207,26 @@ export function DrawingCanvas() {
 				height="400"
 				style={{
 					/* width: "99vw", */
+					border: "1px solid black",
 					position: "relative",
 					left: "50%",
 					"margin-left": `max(-${relativeWidth * 50}vw, -${relativeHeight * 50}vh)`,
 				}}
 			/>
-			{/* <button onClick={() => undoPoint(1)}>Undo</button>
-			<button onClick={() => undoPoint(10)}>Undo 10</button>
- */}
-			<fieldset>
+			<fieldset style={{ display: "grid", grid: "auto-flow dense / 0fr 1fr", gap: "0 1rem" }}>
 				<legend>Animation speed</legend>
-				<Slider value={0.5} setValue={setUnscaledRotationRate} />
+				Progress
+				<span>
+					<Slider
+						ref={positionSlider}
+						value={0}
+						setValue={(v) => setRotation(Number(v) * pointsSelectedIfft().length)}
+					/>
+				</span>
+				Speed
+				<span>
+					<Slider value={0.5} setValue={setUnscaledRotationRate} />
+				</span>
 			</fieldset>
 			<div
 				style={{
@@ -365,6 +272,75 @@ export function DrawingCanvas() {
 	);
 }
 
+function createPointOrderings(
+	points: Accessor<[Point, number][]>,
+	pointOrdering: Accessor<Ordering>,
+	pointOrderingReversed: Accessor<boolean>,
+) {
+	const pointsAlternating = createMemo(() =>
+		points().map<[Point, number]>((_, i, arr) => {
+			const ix = i % 2 === 0 ? Math.floor(i / 2) : arr.length - Math.ceil(i / 2);
+			return [arr[ix][0], ix];
+		}),
+	);
+	const pointsInsideOut = createMemo(() => [
+		...points().slice(Math.ceil(points().length / 2)),
+		...points().slice(0, Math.ceil(points().length / 2)),
+	]);
+	const pointsBySize = createMemo(() => points().toSorted((a, b) => b[0].abs() - a[0].abs()));
+	const pointsByAngle = createMemo(() => points().toSorted((a, b) => b[0].arg() - a[0].arg()));
+	const pointsShuffled = () => shuffleArray(points().slice());
+	/* const [pointsShuffled, setPointsShuffled] = createSignal()
+	const updatePointsShuffled = () => {
+		setPointsShuffled(shuffleArray(points().slice()));
+	}; */
+
+	const pointsSelected = createMemo(() => {
+		const mapping: {
+			[key in Ordering]: [Point, number][];
+		} = {
+			default: points(),
+			insideOut: pointsInsideOut(),
+			alternating: pointsAlternating(),
+			bySize: pointsBySize(),
+			byAngle: pointsByAngle(),
+			shuffled: pointsShuffled(),
+		};
+		const result = mapping[pointOrdering()];
+		return pointOrderingReversed() ? result.toReversed() : result;
+	});
+	return pointsSelected;
+}
+
+function drawDft(
+	ctx: CanvasRenderingContext2D,
+	pointsSelected: Accessor<[Point, number][]>,
+	rotation: number,
+) {
+	let acc = new Point(0, 0);
+	ctx.strokeStyle = rgbToCss(turboColormapSample(0));
+	pointsSelected().forEach(([point, i], _, iPoints) => {
+		const samples = iPoints.length;
+
+		const shiftedIndex = i >= samples / 2 ? i - samples : i;
+
+		const rads = -((2 * Math.PI) / samples) * shiftedIndex * rotation;
+		ctx.beginPath();
+		ctx.moveTo(acc.x, acc.y);
+		acc = acc.add(point.rotate(rads));
+		/* ctx.strokeStyle = i >= samples / 2 ? "red" : "green"; */
+		ctx.strokeStyle =
+			i === 0
+				? `color-mix(in lch, ${rgbToCss(turboColormapSample(0.1))}, ${rgbToCss(
+						turboColormapSample(0.9),
+				  )})`
+				: rgbToCss(turboColormapSample((i / samples) * 0.8 + 0.1));
+		ctx.lineTo(acc.x, acc.y);
+		ctx.stroke();
+		ctx.closePath();
+	});
+}
+
 function attachDrawingLogic(
 	canvas: HTMLCanvasElement,
 	points: Accessor<Point[]>,
@@ -376,6 +352,10 @@ function attachDrawingLogic(
 	const startDrawing = (event: MouseEvent | TouchEvent) => {
 		isDrawing = true;
 		const point = getPosition("touches" in event ? event.touches[0] : event);
+		if (!point) {
+			stopDrawing();
+			return;
+		}
 		setPoints([...points(), point.asHidden()]);
 		setPoints([...points(), point.asVisible()]);
 		lastPoint = point;
@@ -385,6 +365,10 @@ function attachDrawingLogic(
 		event.preventDefault();
 		if (!isDrawing) return;
 		const point = getPosition("touches" in event ? event.touches[0] : event);
+		if (!point) {
+			stopDrawing();
+			return;
+		}
 		if (point.distance(lastPoint) < 0.01) return;
 		setPoints([...points(), point]);
 		lastPoint = point;
@@ -394,11 +378,12 @@ function attachDrawingLogic(
 		isDrawing = false;
 	};
 
-	const getPosition = (event: MouseEvent | Touch) => {
+	const getPosition = (event: MouseEvent | Touch): Point | null => {
 		const rect = canvas.getBoundingClientRect();
 		const x = (event.clientX - rect.left - canvas.width / 2) / (canvas.width / 2);
 		const y = -(event.clientY - rect.top - canvas.height / 2) / (canvas.height / 2);
-		return new Point(x, y);
+		const result = new Point(x, y);
+		return result.inBounds() ? result : null;
 	};
 
 	canvas.addEventListener("mousedown", startDrawing);
@@ -419,6 +404,7 @@ function attachDrawingLogic(
 		canvas.removeEventListener("touchend", stopDrawing);
 		canvas.removeEventListener("mouseout", stopDrawing);
 		canvas.removeEventListener("touchcancel", stopDrawing);
+		canvas.removeEventListener("mouseleave", stopDrawing);
 	});
 }
 /* style="width: 100%; border: 1px solid black; display: block;" */

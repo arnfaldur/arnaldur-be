@@ -7,7 +7,7 @@ export const topic = ["programming", "mathematics"];
 export default function Component() {
 	return (
 		<>
-			<h1>Inverse Fourier Transform</h1>
+			{/* 			<h1>Inverse Fourier Transform</h1>		 */}
 			<DrawingCanvas />
 		</>
 	);
