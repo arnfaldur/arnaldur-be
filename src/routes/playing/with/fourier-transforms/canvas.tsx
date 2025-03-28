@@ -5,53 +5,7 @@ import { createEffect, createMemo, createSignal, onCleanup, Setter } from "solid
 import { rgbToCss, turboColormapSample } from "~/utils/colormap";
 import { Point } from "./Point";
 import { ifft, idft, gifft, shuffleArray } from "./utils";
-
-export const Checkbox = (props: {
-	setValue: Setter<boolean>;
-	children: JSXElement;
-	ref?: Setter<HTMLInputElement>;
-}) => (
-	<label
-		style={{
-			width: "100%",
-			margin: "0 auto 0.75rem auto",
-		}}
-	>
-		<input
-			ref={(el) => {
-				props.setValue(el.checked);
-				if (props.ref) {
-					props.ref(el);
-				}
-			}}
-			type="checkbox"
-			onInput={(e) => props.setValue(e.target.checked)}
-		/>
-		{props.children}
-	</label>
-);
-
-const Slider = (props: {
-	setValue: Setter<number>;
-	value?: number;
-	ref?: Setter<HTMLInputElement>;
-}) => (
-	<input
-		ref={(el) => {
-			props.setValue(Number(el.value));
-			if (props.ref) props.ref(el);
-		}}
-		type="range"
-		value={props?.value ?? 0}
-		max={1}
-		step="any"
-		onInput={(e) => props.setValue(Number(e.target.value))}
-		style={{
-			width: "100%",
-			margin: "0 auto 0.75rem auto",
-		}}
-	/>
-);
+import { Checkbox, Slider } from "./components";
 
 type Ordering = "default" | "insideOut" | "alternating" | "bySize" | "byAngle" | "shuffled";
 
@@ -73,34 +27,25 @@ export function DrawingCanvas() {
 
 	const [points, setPoints] = createSignal<Point[]>([]);
 	const [rotation, setRotation] = createSignal(0);
+	const [pauseRotation, setPauseRotation] = createSignal(false);
 	const [unscaledRotationRate, setUnscaledRotationRate] = createSignal(0.5);
 	const [pointOrdering, setPointOrdering] = createSignal<Ordering>("default");
 	const [pointOrderingReversed, setPointOrderingReversed] = createSignal<boolean>(false);
-	const rotationRate = () => Math.pow(2, unscaledRotationRate() * 12 - 14);
+
+	const rotationRate = () => Math.pow(2, unscaledRotationRate() * 12 - 14) - Math.pow(2, -14);
 
 	const visiblePoints = createMemo(() => points().filter((point) => point.visible));
 
-	const pointsIfft = createMemo(() =>
-		gifft(visiblePoints()).map<[Point, number]>((point, i) => [point, i]),
-	);
-	/* createEffect(() => {
-		const boy = idft(visiblePoints());
-		const boi = fft(visiblePoints());
-		const gil = ifft(fft(ifft(visiblePoints())));
-		if (boy.length === gil.length) {
-			console.log("pointsIdft", boy);
-			console.log("pointsIfft", boi);
-			console.log("bibibi", gil);
-		}
-	});
- */
-	const pointsIdft = createMemo(() =>
+	/* const pointsIdft = createMemo(() =>
 		idft(visiblePoints()).map<[Point, number]>((point, i) => [point, i]),
-	);
-	const pointsSelectedIdft = createPointOrderings(
+	); */
+	/* const pointsSelectedIdft = createPointOrderings(
 		pointsIdft,
 		pointOrdering,
 		pointOrderingReversed,
+	); */
+	const pointsIfft = createMemo(() =>
+		gifft(visiblePoints()).map<[Point, number]>((point, i) => [point, i]),
 	);
 	const pointsSelectedIfft = createPointOrderings(
 		pointsIfft,
@@ -148,35 +93,19 @@ export function DrawingCanvas() {
 			const deltaTime = timestamp - lastTime;
 			lastTime = timestamp;
 			setRotation((rotation) => rotation + deltaTime * rotationRate());
-			if (pointsSelectedIdft().length === 0) {
+			if (pointsSelectedIfft().length === 0) {
 				setRotation(0);
-			} else if (rotation() >= pointsSelectedIdft().length) {
-				setRotation((rotation) => rotation % pointsSelectedIdft().length);
+			} else if (rotation() >= pointsSelectedIfft().length) {
+				setRotation((rotation) => rotation % pointsSelectedIfft().length);
 			}
-
-			const drawDrawing = (ctx: CanvasRenderingContext2D) => {
-				// Set the line width
-				ctx.lineWidth = lineWidth / (canvas.height ?? 400);
-				ctx.strokeStyle = strokeStyle;
-				ctx.beginPath();
-				ctx.moveTo(0, 0);
-				for (const point of points()) {
-					if (point?.visible) {
-						ctx.lineTo(point.x, point.y);
-					} else {
-						ctx.moveTo(point.x, point.y);
-					}
-				}
-				ctx.stroke();
-				ctx.closePath();
-			};
 
 			ctx.clearRect(-1, -1, 2, 2);
 
 			ctx.lineWidth = lineWidth / (ctx.canvas.height ?? 400);
-			/* drawDft(ctx, pointsSelectedIdft, rotation()); */
-			drawDft(ctx, pointsSelectedIfft, rotation());
-			drawDrawing(ctx);
+			/* drawDft(ctx, pointsSelectedIdft(), rotation()); */
+			drawDft(ctx, pointsSelectedIfft(), rotation());
+			ctx.strokeStyle = strokeStyle;
+			drawPoints(ctx, points());
 
 			requestAnimationFrame(animationLoop);
 		};
@@ -192,13 +121,30 @@ export function DrawingCanvas() {
 		/* redraw()(); */
 	};
 
-	let positionSlider!: HTMLInputElement;
+	const [positionSlider, setPositionSlider] = createSignal({} as HTMLInputElement);
+	const [animationSpeedSlider, setAnimationSpeedSlider] = createSignal({} as HTMLInputElement);
+	/* let positionSlider!: HTMLInputElement;
+	let animationSpeedSlider!: HTMLInputElement; */
 	createEffect(() => {
-		positionSlider.value = (rotation() / pointsSelectedIfft().length).toString();
+		const slider = positionSlider();
+		if (slider && unscaledRotationRate() > 0) {
+			slider.value = (rotation() / pointsSelectedIfft().length).toString();
+		}
+	});
+	createEffect(() => {
+		const slider = animationSpeedSlider();
+		if (slider) {
+			slider.value = unscaledRotationRate().toString();
+		}
 	});
 
-	positionSlider.addEventListener("mousedown", listener)
-
+	/* positionSlider.addEventListener("mousedown", () => {
+		setUnscaledRotationRate(0);
+	});
+	positionSlider.addEventListener("touchstart", () => {
+		setUnscaledRotationRate(0);
+	});
+ */
 	return (
 		<>
 			<canvas
@@ -216,60 +162,101 @@ export function DrawingCanvas() {
 			<fieldset style={{ display: "grid", grid: "auto-flow dense / 0fr 1fr", gap: "0 1rem" }}>
 				<legend>Animation speed</legend>
 				Progress
-				<span>
-					<Slider
-						ref={positionSlider}
-						value={0}
-						setValue={(v) => setRotation(Number(v) * pointsSelectedIfft().length)}
-					/>
-				</span>
+				<input
+					ref={(el) => {
+						setRotation(Number(el.value) * pointsSelectedIfft().length);
+						setPositionSlider(el);
+					}}
+					type="range"
+					value={0}
+					max={1}
+					step="any"
+					style={{
+						width: "100%",
+						margin: "0 auto 0.75rem auto",
+					}}
+					onInput={(v) => {
+						setUnscaledRotationRate(0);
+						setRotation(Number(v.target.value) * pointsSelectedIfft().length);
+					}}
+				/>
 				Speed
 				<span>
-					<Slider value={0.5} setValue={setUnscaledRotationRate} />
+					<Slider
+						ref={setAnimationSpeedSlider}
+						value={0.5}
+						setValue={setUnscaledRotationRate}
+					/>
 				</span>
 			</fieldset>
+
 			<div
 				style={{
 					display: "grid",
 					"grid-template-columns": "1fr 1fr 1fr",
 				}}
 			>
-				<button onClick={() => undoPoint(1)}>Undo</button>
-				<button onClick={() => undoPoint(10)}>Undo 10</button>
-				<button type="reset" onClick={resetPoints}>
-					Reset
-				</button>
-			</div>
-
-			<fieldset>
-				<legend>Ordering</legend>
-				<div
-					style={{
-						display: "grid",
-						"grid-template-columns": "1fr 1fr 1fr",
-					}}
-				>
-					<For each={Object.entries(orderingData)}>
-						{([ordering, description], i) => (
-							<label>
-								<input
-									type="radio"
-									name="ordering"
-									value={ordering}
-									onInput={(el) =>
-										setPointOrdering((previous) => el.target.value as Ordering)
-									}
-									checked={i() === 0}
-								/>
-								{description}
-							</label>
-						)}
-					</For>
-					<Checkbox setValue={setPointOrderingReversed}>Reversed</Checkbox>
-				</div>
-			</fieldset>
+				<fieldset>
+					<legend>Ordering</legend>
+					<div
+						style={{
+							display: "grid",
+							"grid-template-columns": "1fr",
+						}}
+					>
+						<For each={Object.entries(orderingData)}>
+							{([ordering, description], i) => (
+								<label>
+									<input
+										type="radio"
+										name="ordering"
+										value={ordering}
+										onInput={(el) =>
+											setPointOrdering(
+												(previous) => el.target.value as Ordering,
+											)
+										}
+										checked={i() === 0}
+									/>
+									{description}
+								</label>
+							)}
+						</For>
+						<Checkbox setValue={setPointOrderingReversed}>Reversed</Checkbox>
+					</div>
+				</fieldset>
+				<fieldset>
+					<legend>Ordering</legend>
+					<div
+						style={{
+							display: "grid",
+							"grid-template-rows": "1fr 1fr 1fr",
+						}}
+					>
+						<button onClick={() => undoPoint(1)}>Undo</button>
+						<button onClick={() => undoPoint(10)}>Undo 10</button>
+						<button type="reset" onClick={resetPoints}>
+							Reset
+						</button>
+					</div>
+				</fieldset>
+		</div>
 		</>
 	);
+}
+
+function drawPoints(ctx: CanvasRenderingContext2D, points: Point[]) {
+	ctx.beginPath();
+	ctx.moveTo(0, 0);
+	for (const point of points) {
+		if (point?.visible) {
+			ctx.lineTo(point.x, point.y);
+		} else {
+			ctx.moveTo(point.x, point.y);
+		}
+	}
+	ctx.stroke();
+	ctx.closePath();
 }
 
 function createPointOrderings(
@@ -314,12 +301,12 @@ function createPointOrderings(
 
 function drawDft(
 	ctx: CanvasRenderingContext2D,
-	pointsSelected: Accessor<[Point, number][]>,
+	pointsSelected: [Point, number][],
 	rotation: number,
 ) {
 	let acc = new Point(0, 0);
 	ctx.strokeStyle = rgbToCss(turboColormapSample(0));
-	pointsSelected().forEach(([point, i], _, iPoints) => {
+	pointsSelected.forEach(([point, i], _, iPoints) => {
 		const samples = iPoints.length;
 
 		const shiftedIndex = i >= samples / 2 ? i - samples : i;

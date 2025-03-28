@@ -12,3 +12,5 @@ export default function Component() {
 		</>
 	);
 }
+
+// homer video: https://www.youtube.com/watch?v=QVuU2YCwHjw
