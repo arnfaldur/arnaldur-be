@@ -32,8 +32,9 @@ export function DrawingCanvas() {
 	const [unscaledRotationRate, setUnscaledRotationRate] = createSignal(0.5);
 	const [pointOrdering, setPointOrdering] = createSignal<Ordering>("default");
 	const [pointOrderingReversed, setPointOrderingReversed] = createSignal<boolean>(false);
+	const [connectEnds, setConnectEnds] = createSignal<boolean>(false);
 	const [drawingParameter, setDrawingParameter] = createSignal(128);
-	setPoints(drawings.moore(Math.pow(4,4)));
+	setPoints(drawings.heart(Math.pow(4, 3)));
 
 	const rotationRate = () => Math.pow(2, unscaledRotationRate() * 12 - 14) - Math.pow(2, -14);
 
@@ -100,7 +101,7 @@ export function DrawingCanvas() {
 			/* drawDft(ctx, pointsSelectedIdft(), rotation()); */
 			drawDft(ctx, pointsSelectedIfft(), rotation());
 			ctx.strokeStyle = strokeStyle;
-			drawPoints(ctx, points());
+			drawPoints(ctx, points(), connectEnds());
 
 			requestAnimationFrame(animationLoop);
 		};
@@ -114,19 +115,21 @@ export function DrawingCanvas() {
 
 	const [positionSlider, setPositionSlider] = createSignal({} as HTMLInputElement);
 	const [animationSpeedSlider, setAnimationSpeedSlider] = createSignal({} as HTMLInputElement);
+	const [connectEndsCheckbox, setConnectEndsCheckbox] = createSignal({} as HTMLInputElement);
 	/* let positionSlider!: HTMLInputElement;
 	let animationSpeedSlider!: HTMLInputElement; */
 	createEffect(() => {
 		const slider = positionSlider();
-		if (slider && unscaledRotationRate() > 0) {
+		if (slider && unscaledRotationRate() > 0)
 			slider.value = (rotation() / pointsSelectedIfft().length).toString();
-		}
 	});
 	createEffect(() => {
 		const slider = animationSpeedSlider();
-		if (slider) {
-			slider.value = unscaledRotationRate().toString();
-		}
+		if (slider) slider.value = unscaledRotationRate().toString();
+	});
+	createEffect(() => {
+		const checkbox = connectEndsCheckbox();
+		if (checkbox) checkbox.checked = connectEnds();
 	});
 
 	/* positionSlider.addEventListener("mousedown", () => {
@@ -212,30 +215,42 @@ export function DrawingCanvas() {
 								onInput={(e) => setDrawingParameter(Number(e.target.value))}
 							/>
 						</span>
-						<button onClick={() => setPoints(drawings.circle(drawingParameter()))}>
-							Circle
-						</button>
-						<button onClick={() => setPoints(drawings.spiral(drawingParameter()))}>
-							Spiral
-						</button>
-						<button onClick={() => setPoints(drawings.logSpiral(drawingParameter()))}>
-							Log Spiral
-						</button>
-						<button onClick={() => setPoints(drawings.twoPoints(drawingParameter()))}>
-							Two Points
-						</button>
-						<button onClick={() => setPoints(drawings.heart(drawingParameter()))}>
-							Heart
-						</button>
-						<button onClick={() => setPoints(drawings.wave(drawingParameter()))}>
-							Wave
-						</button>
-						<button onClick={() => setPoints(drawings.hilbert(drawingParameter()))}>
-							Hilbert
-						</button>
-						<button onClick={() => setPoints(drawings.moore(drawingParameter()))}>
-							Moore
-						</button>
+						<For
+							each={[
+								{ title: "Circle", drawing: drawings.circle, connectEnds: true },
+								{ title: "Spiral", drawing: drawings.spiral, connectEnds: false },
+								{
+									title: "Log Spiral",
+									drawing: drawings.logSpiral,
+									connectEnds: false,
+								},
+								{
+									title: "Two Points",
+									drawing: drawings.twoPoints,
+									connectEnds: false,
+								},
+								{ title: "Heart", drawing: drawings.heart, connectEnds: true },
+								{ title: "Wave", drawing: drawings.wave, connectEnds: false },
+								{
+									title: "Infinity",
+									drawing: drawings.infinity,
+									connectEnds: true,
+								},
+								{ title: "Hilbert", drawing: drawings.hilbert, connectEnds: false },
+								{ title: "Moore", drawing: drawings.moore, connectEnds: true },
+							]}
+						>
+							{({ title, drawing, connectEnds }) => (
+								<button
+									onClick={() => {
+										setConnectEnds(connectEnds);
+										setPoints(drawing(drawingParameter()));
+									}}
+								>
+									{title}
+								</button>
+							)}
+						</For>
 					</div>
 				</fieldset>
 				<fieldset>
@@ -251,6 +266,14 @@ export function DrawingCanvas() {
 						<button type="reset" onClick={() => setPoints([])}>
 							Reset
 						</button>
+						<label>
+							<input
+								ref={setConnectEndsCheckbox}
+								type="checkbox"
+								onInput={(e) => setConnectEnds(e.target.checked)}
+							></input>
+							Connect Ends
+						</label>
 					</div>
 				</fieldset>
 			</div>
@@ -296,7 +319,7 @@ function OrderingFieldset({
 	);
 }
 
-function drawPoints(ctx: CanvasRenderingContext2D, points: Point[]) {
+function drawPoints(ctx: CanvasRenderingContext2D, points: Point[], connectEnds: boolean) {
 	ctx.beginPath();
 	ctx.moveTo(0, 0);
 	for (const point of points) {
@@ -306,6 +329,7 @@ function drawPoints(ctx: CanvasRenderingContext2D, points: Point[]) {
 			ctx.moveTo(point.x, point.y);
 		}
 	}
+	if (connectEnds) ctx.lineTo(points[0].x, points[0].y);
 	ctx.stroke();
 	ctx.closePath();
 }

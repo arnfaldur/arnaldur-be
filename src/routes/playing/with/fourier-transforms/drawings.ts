@@ -44,26 +44,38 @@ export function twoPoints(n: number): Point[] {
 	);
 }
 
-// Heart Shape
 export function heart(n: number): Point[] {
-	let points: Point[] = [];
-
-	for (let i = 0; i < n; i++) {
-		const t = (i * 2 * Math.PI) / (n - 1);
+	const points = Array.from({ length: n }, (_, i) => {
+		const t = (i * 2 * Math.PI) / n;
 		const x = 16 * Math.sin(t) ** 3;
 		const y =
 			13 * Math.cos(t) -
 			5 * Math.cos(2 * t) -
 			2 * Math.cos(3 * t) -
 			Math.cos(4 * t);
-		points.push(new Point(x / 20, y / 20));
-	}
+		return new Point(x / 20, y / 20);
+	});
 
 	points.unshift(points[0].asHidden());
 	return points;
 }
 
-// Wave Pattern
+export function infinity(n: number): Point[] {
+	const points = Array.from({ length: n }, (_, i) => {
+		// Parameter t goes from 0 to 2π
+		const t = (i * 2 * Math.PI) / n;
+
+		const x = 0.95 * Math.sin(t);
+
+		const y = 0.3 * Math.sin(2 * t);
+
+		return new Point(x, y);
+	});
+
+	points.unshift(points[0].asHidden());
+	return points;
+}
+
 export function wave(n: number): Point[] {
 	const amplitude = 0.5;
 	const frequency = 8;
@@ -78,13 +90,14 @@ export function wave(n: number): Point[] {
 }
 /**
  * Generates points on a Hilbert curve, with coordinates in the range [-0.9, 0.9]
- * @param numPoints The function will use the largest power of 4 less than or equal to this number
+ * @param n The function will use the largest power of 4 less than or equal to this number
  * @returns An array of Points representing the Hilbert curve
  */
-export function hilbert(numPoints: number): Point[] {
+export function hilbert(n: number): Point[] {
 	// Find the largest power of 4 less than or equal to numPoints
-	const order = Math.floor(Math.log(numPoints) / Math.log(4));
+	const order = Math.floor(Math.log(n) / Math.log(4));
 	const actualPoints = Math.pow(4, order);
+	const scale = 0.9;
 
 	const points: Point[] = [];
 	const size = 1 << order; // 2^order is the size of one dimension
@@ -96,8 +109,8 @@ export function hilbert(numPoints: number): Point[] {
 
 		// Normalize coordinates to [-0.9, 0.9]
 		const normalizedPoint = point
-			.scale(1.8 / (size - 1))
-			.sub(new Point(0.9, 0.9));
+			.scale((scale * 2) / (size - 1))
+			.sub(new Point(scale, scale));
 
 		points.push(normalizedPoint);
 	}
@@ -144,7 +157,7 @@ function hilbertIndexToXY(order: number, index: number): Point {
 
 export function moore(n: number): Point[] {
 	// Calculate depth as log base 4 of n, rounded down
-	const depth = Math.floor(Math.log(n) / Math.log(4));
+	const depth = Math.floor(Math.log(n) / Math.log(4)) - 1;
 	// const step = 1 << (Math.floor(Math.log2(n / 2)) * 1);
 	const step = 1 << depth;
 
@@ -237,8 +250,12 @@ export function moore(n: number): Point[] {
 	L(depth, points, state);
 	turnRight(state);
 	F(points, state);
-	F(points, state);
 
 	points.unshift(points[0].asHidden());
-	return points.map((p) => p.sub(new Point(-0.5, step - 0.5)).scale(1 / step));
+	return points.map((p) =>
+		p
+			.sub(new Point(-0.5, step - 0.5))
+			.scale(1 / step)
+			.scale(1),
+	);
 }
