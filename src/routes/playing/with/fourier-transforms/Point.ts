@@ -1,49 +1,47 @@
-export class Point {
+export class Complex {
 	x: number;
 	y: number;
 	visible: boolean;
-	/* constructor({ x, y, visible }: { x: number; y: number; visible?: boolean }) {
-		this.x = x;
-		this.y = y;
-		this.visible = visible;
-	} */
 	constructor(x: number = 0, y: number = 0, visible: boolean = true) {
 		this.x = x;
 		this.y = y;
 		this.visible = visible;
 	}
-	add(other: Point): Point {
-		return new Point(this.x + other.x, this.y + other.y);
+	add(other: Complex): Complex {
+		return new Complex(this.x + other.x, this.y + other.y);
 	}
-	sub(other: Point): Point {
-		return new Point(this.x - other.x, this.y - other.y);
+	sub(other: Complex): Complex {
+		return new Complex(this.x - other.x, this.y - other.y, this.visible);
 	}
-	mul(other: Point): Point {
-		return new Point(
+	mul(other: Complex): Complex {
+		return new Complex(
 			this.x * other.x - this.y * other.y,
 			this.x * other.y + this.y * other.x,
 		);
 	}
-	scale(scale: number): Point {
-		return new Point(this.x * scale, this.y * scale);
+	scale(scale: number): Complex {
+		return new Complex(this.x * scale, this.y * scale, this.visible);
 	}
-	conj(): Point {
-		return new Point(this.x, -this.y);
+	conj(): Complex {
+		return new Complex(this.x, -this.y, this.visible);
 	}
-	exp(): Point {
+	exp(): Complex {
 		const e = Math.exp(this.x);
-		return new Point(e * Math.cos(this.y), e * Math.sin(this.y));
+		return new Complex(e * Math.cos(this.y), e * Math.sin(this.y));
 	}
-	rotate(radians: number): Point {
-		return this.mul(new Point(Math.cos(radians), Math.sin(radians)));
+	pow(other: Complex): Complex {
+		return new Complex();
 	}
-	asVisible(): Point {
-		return new Point(this.x, this.y, true);
+	rotate(radians: number): Complex {
+		return this.mul(new Complex(Math.cos(radians), Math.sin(radians)));
 	}
-	asHidden(): Point {
-		return new Point(this.x, this.y, false);
+	asVisible(): Complex {
+		return new Complex(this.x, this.y, true);
 	}
-	distance(other: Point): number {
+	asHidden(): Complex {
+		return new Complex(this.x, this.y, false);
+	}
+	distance(other: Complex): number {
 		return Math.sqrt(
 			Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2),
 		);
@@ -57,4 +55,12 @@ export class Point {
 	inBounds(): boolean {
 		return Math.abs(this.x) <= 1 && Math.abs(this.y) <= 1;
 	}
+	round(): Point {
+		return new Point(Math.round(this.x), Math.round(this.y), this.visible);
+	}
+	toString(): string {
+		return `{ x: ${this.x}, y: ${this.y} }`
+	}
 }
+
+export class Point extends Complex {}

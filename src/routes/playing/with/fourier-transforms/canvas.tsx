@@ -1,11 +1,12 @@
-import { JSXElement } from "solid-js";
 import { For } from "solid-js";
 import { Accessor } from "solid-js";
 import { createEffect, createMemo, createSignal, onCleanup, Setter } from "solid-js";
+
 import { rgbToCss, turboColormapSample } from "~/utils/colormap";
 import { Point } from "./Point";
-import { ifft, idft, gifft, shuffleArray } from "./utils";
+import { ifft, idft, gifft, shuffleArray } from "./fourier-transforms";
 import { Checkbox, Slider } from "./components";
+import * as drawings from "./drawings";
 
 type Ordering = "default" | "insideOut" | "alternating" | "bySize" | "byAngle" | "shuffled";
 
@@ -31,19 +32,13 @@ export function DrawingCanvas() {
 	const [unscaledRotationRate, setUnscaledRotationRate] = createSignal(0.5);
 	const [pointOrdering, setPointOrdering] = createSignal<Ordering>("default");
 	const [pointOrderingReversed, setPointOrderingReversed] = createSignal<boolean>(false);
+	const [drawingParameter, setDrawingParameter] = createSignal(128);
+	setPoints(drawings.moore(Math.pow(4,4)));
 
 	const rotationRate = () => Math.pow(2, unscaledRotationRate() * 12 - 14) - Math.pow(2, -14);
 
 	const visiblePoints = createMemo(() => points().filter((point) => point.visible));
 
-	/* const pointsIdft = createMemo(() =>
-		idft(visiblePoints()).map<[Point, number]>((point, i) => [point, i]),
-	); */
-	/* const pointsSelectedIdft = createPointOrderings(
-		pointsIdft,
-		pointOrdering,
-		pointOrderingReversed,
-	); */
 	const pointsIfft = createMemo(() =>
 		gifft(visiblePoints()).map<[Point, number]>((point, i) => [point, i]),
 	);
@@ -112,10 +107,6 @@ export function DrawingCanvas() {
 		requestAnimationFrame(animationLoop);
 	};
 
-	const resetPoints = () => {
-		setPoints([]);
-		/* redraw()(); */
-	};
 	const undoPoint = (undos: number) => {
 		setPoints(points().slice(0, -undos));
 		/* redraw()(); */
@@ -181,13 +172,11 @@ export function DrawingCanvas() {
 					}}
 				/>
 				Speed
-				<span>
-					<Slider
-						ref={setAnimationSpeedSlider}
-						value={0.5}
-						setValue={setUnscaledRotationRate}
-					/>
-				</span>
+				<Slider
+					ref={setAnimationSpeedSlider}
+					value={0.5}
+					setValue={setUnscaledRotationRate}
+				/>
 			</fieldset>
 
 			<div
@@ -196,37 +185,61 @@ export function DrawingCanvas() {
 					"grid-template-columns": "1fr 1fr 1fr",
 				}}
 			>
+				<OrderingFieldset
+					setPointOrdering={setPointOrdering}
+					setPointOrderingReversed={setPointOrderingReversed}
+				/>
 				<fieldset>
-					<legend>Ordering</legend>
+					<legend>Drawings</legend>
 					<div
 						style={{
 							display: "grid",
-							"grid-template-columns": "1fr",
 						}}
 					>
-						<For each={Object.entries(orderingData)}>
-							{([ordering, description], i) => (
-								<label>
-									<input
-										type="radio"
-										name="ordering"
-										value={ordering}
-										onInput={(el) =>
-											setPointOrdering(
-												(previous) => el.target.value as Ordering,
-											)
-										}
-										checked={i() === 0}
-									/>
-									{description}
-								</label>
-							)}
-						</For>
-						<Checkbox setValue={setPointOrderingReversed}>Reversed</Checkbox>
+						<span
+							style={{
+								display: "grid",
+								grid: "auto-flow dense/ 0fr 1fr",
+								gap: "1rem",
+								"align-items": "center",
+							}}
+						>
+							Parameter:
+							<input
+								type="number"
+								value={128}
+								min={1}
+								onInput={(e) => setDrawingParameter(Number(e.target.value))}
+							/>
+						</span>
+						<button onClick={() => setPoints(drawings.circle(drawingParameter()))}>
+							Circle
+						</button>
+						<button onClick={() => setPoints(drawings.spiral(drawingParameter()))}>
+							Spiral
+						</button>
+						<button onClick={() => setPoints(drawings.logSpiral(drawingParameter()))}>
+							Log Spiral
+						</button>
+						<button onClick={() => setPoints(drawings.twoPoints(drawingParameter()))}>
+							Two Points
+						</button>
+						<button onClick={() => setPoints(drawings.heart(drawingParameter()))}>
+							Heart
+						</button>
+						<button onClick={() => setPoints(drawings.wave(drawingParameter()))}>
+							Wave
+						</button>
+						<button onClick={() => setPoints(drawings.hilbert(drawingParameter()))}>
+							Hilbert
+						</button>
+						<button onClick={() => setPoints(drawings.moore(drawingParameter()))}>
+							Moore
+						</button>
 					</div>
 				</fieldset>
 				<fieldset>
-					<legend>Ordering</legend>
+					<legend>Misc</legend>
 					<div
 						style={{
 							display: "grid",
@@ -235,13 +248,51 @@ export function DrawingCanvas() {
 					>
 						<button onClick={() => undoPoint(1)}>Undo</button>
 						<button onClick={() => undoPoint(10)}>Undo 10</button>
-						<button type="reset" onClick={resetPoints}>
+						<button type="reset" onClick={() => setPoints([])}>
 							Reset
 						</button>
 					</div>
 				</fieldset>
-		</div>
+			</div>
 		</>
+	);
+}
+
+function OrderingFieldset({
+	setPointOrdering,
+	setPointOrderingReversed,
+}: {
+	setPointOrdering: Setter<Ordering>;
+	setPointOrderingReversed: Setter<boolean>;
+}) {
+	return (
+		<fieldset>
+			<legend>Ordering</legend>
+			<div
+				style={{
+					display: "grid",
+					"grid-template-columns": "1fr",
+				}}
+			>
+				<For each={Object.entries(orderingData)}>
+					{([ordering, description], i) => (
+						<label>
+							<input
+								type="radio"
+								name="ordering"
+								value={ordering}
+								onInput={(el) =>
+									setPointOrdering((previous) => el.target.value as Ordering)
+								}
+								checked={i() === 0}
+							/>
+							{description}
+						</label>
+					)}
+				</For>
+				<Checkbox setValue={setPointOrderingReversed}>Reversed</Checkbox>
+			</div>
+		</fieldset>
 	);
 }
 
