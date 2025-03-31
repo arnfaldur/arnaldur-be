@@ -88,8 +88,8 @@ export function infinityGeometric(n: number): Point[] {
 	for (let i = 1; i < thefts; ++i) {
 		points.push(new Point(0.32, 0.24).scale(i / thefts));
 	}
-	const boi = n / 2 - thefts * 2;
-	for (let i = 0; i < boi; ++i) {
+	const halfN = n / 2 - thefts * 2;
+	for (let i = 0; i < halfN; ++i) {
 		const prog = i / (n - 2 - thefts * 4);
 		const scaledProg = prog * 2;
 		const inProg = spin * (scaledProg - 0.5);
@@ -106,7 +106,7 @@ export function infinityGeometric(n: number): Point[] {
 		points.push(new Point(-0.32, 0.24).scale(i / thefts));
 	}
 	let ringDistance = 0;
-	for (let i = 0; i < boi; ++i) {
+	for (let i = 0; i < halfN; ++i) {
 		const prog = i / (n - 2 - thefts * 4);
 		const scaledProg = prog * 2;
 		const inProg = spin * scaledProg + leanOver;
@@ -136,6 +136,36 @@ export function wave(n: number): Point[] {
 
 	points.unshift(points[0].asHidden());
 	return points;
+}
+
+export function s(n: number): Point[] {
+	n = Math.floor((n - 1) / 2) * 2;
+
+	const scale = 0.5;
+	const offset = new Point(0.0, 0.5);
+	const spin = 2/3;
+	let points = [new Point(0, 0, false), new Point(0, 0)];
+	const halfN = Math.floor(n / 2);
+	for (let i = 0; i < halfN; ++i) {
+		const prog = (i / (n + 0)) * 2;
+		const inProg = spin * prog + 0.25 + (2 * spin) / n;
+		const point = new Point(Math.cos(inProg * TAU), Math.sin(inProg * TAU + PI))
+			.scale(scale)
+			.add(offset);
+		points.push(point);
+	}
+	for (let i = 0; i < halfN + 0; ++i) {
+		const prog = (i / (n + 0)) * 2;
+		const inProg = spin * -prog + spin - 0.25;
+		const point = new Point(Math.cos(inProg * TAU), Math.sin(inProg * TAU + PI))
+			.scale(scale)
+			.add(offset.neg());
+		if (i === 0) points.push(point.asHidden());
+
+		points.push(point);
+	}
+	console.log("n len", n, points.length);
+	return points.map((p) => p.scale(0.75));
 }
 /**
  * Generates points on a Hilbert curve, with coordinates in the range [-0.9, 0.9]

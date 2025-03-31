@@ -34,7 +34,7 @@ export function DrawingCanvas() {
 	const [pointOrderingReversed, setPointOrderingReversed] = createSignal<boolean>(false);
 	const [connectEnds, setConnectEnds] = createSignal<boolean>(false);
 	const [drawingParameter, setDrawingParameter] = createSignal(128);
-	setPoints(drawings.infinityGeometric(Math.pow(2, 4)));
+	setPoints(drawings.s(Math.pow(2, 5)-1));
 	setConnectEnds(true);
 
 	const rotationRate = () => Math.pow(2, unscaledRotationRate() * 12 - 14) - Math.pow(2, -14);
@@ -232,6 +232,7 @@ export function DrawingCanvas() {
 								},
 								{ title: "Heart", drawing: drawings.heart, connectEnds: true },
 								{ title: "Wave", drawing: drawings.wave, connectEnds: false },
+								{ title: "S", drawing: drawings.s, connectEnds: true },
 								{
 									title: "Infinity",
 									drawing: drawings.infinity,
