@@ -59,7 +59,10 @@ export class Complex {
 		return new Point(Math.round(this.x), Math.round(this.y), this.visible);
 	}
 	toString(): string {
-		return `{ x: ${this.x}, y: ${this.y} }`
+		return `{ x: ${this.x}, y: ${this.y} }`;
+	}
+	neg(): Point {
+		return new Point(-this.x, -this.y, this.visible);
 	}
 }
 

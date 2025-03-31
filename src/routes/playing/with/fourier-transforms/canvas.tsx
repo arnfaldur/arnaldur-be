@@ -30,11 +30,11 @@ export function DrawingCanvas() {
 	const [rotation, setRotation] = createSignal(0);
 	const [pauseRotation, setPauseRotation] = createSignal(false);
 	const [unscaledRotationRate, setUnscaledRotationRate] = createSignal(0.5);
-	const [pointOrdering, setPointOrdering] = createSignal<Ordering>("default");
+	const [pointOrdering, setPointOrdering] = createSignal<Ordering>("alternating");
 	const [pointOrderingReversed, setPointOrderingReversed] = createSignal<boolean>(false);
 	const [connectEnds, setConnectEnds] = createSignal<boolean>(false);
 	const [drawingParameter, setDrawingParameter] = createSignal(128);
-	setPoints(drawings.heart(Math.pow(4, 3)));
+	setPoints(drawings.infinityGeometric(Math.pow(2, 6)));
 
 	const rotationRate = () => Math.pow(2, unscaledRotationRate() * 12 - 14) - Math.pow(2, -14);
 
@@ -236,6 +236,11 @@ export function DrawingCanvas() {
 									drawing: drawings.infinity,
 									connectEnds: true,
 								},
+								{
+									title: "Infinity (Geometric)",
+									drawing: drawings.infinityGeometric,
+									connectEnds: true,
+								},
 								{ title: "Hilbert", drawing: drawings.hilbert, connectEnds: false },
 								{ title: "Moore", drawing: drawings.moore, connectEnds: true },
 							]}
@@ -307,7 +312,7 @@ function OrderingFieldset({
 								onInput={(el) =>
 									setPointOrdering((previous) => el.target.value as Ordering)
 								}
-								checked={i() === 0}
+								checked={ordering === "alternating"}
 							/>
 							{description}
 						</label>
@@ -381,8 +386,11 @@ function drawDft(
 ) {
 	let acc = new Point(0, 0);
 	ctx.strokeStyle = rgbToCss(turboColormapSample(0));
-	pointsSelected.forEach(([point, i], _, iPoints) => {
-		const samples = iPoints.length;
+	/* for (const [point, i] of pointsSelected) {
+
+	} */
+	pointsSelected.forEach(([point, i]) => {
+		const samples = pointsSelected.length;
 
 		const shiftedIndex = i >= samples / 2 ? i - samples : i;
 

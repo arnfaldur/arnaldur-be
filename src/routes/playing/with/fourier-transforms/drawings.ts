@@ -1,28 +1,27 @@
 import { Point } from "./Point";
 
+const PI = Math.PI;
+const TAU = PI * 2;
+
 export function circle(n: number): Point[] {
-	return Array.from(
-		{ length: n + 1 },
-		(_, i) =>
-			new Point(
-				Math.cos(((i - 1) * Math.PI * 2) / n),
-				Math.sin(((i - 1) * Math.PI * 2) / n),
-				i !== 0,
-			),
+	const result = Array.from(
+		{ length: n },
+		(_, i) => new Point(Math.cos((i * TAU) / n), Math.sin((i * TAU) / n)),
 	);
+	result.unshift(result[0].asHidden());
+	return result;
 }
 
 export function spiral(n: number): Point[] {
 	return Array.from({ length: n }, (_, i) =>
-		new Point(
-			Math.cos((i * Math.PI * 8) / n),
-			Math.sin((i * Math.PI * 8) / n),
-		).scale(i / n),
+		new Point(Math.cos((i * PI * 8) / n), Math.sin((i * PI * 8) / n)).scale(
+			i / n,
+		),
 	);
 }
 
 export function logSpiral(n: number): Point[] {
-	const thetaMax = Math.PI * 2 * 4;
+	const thetaMax = TAU * 4;
 	const deltaTheta = thetaMax / (n - 1);
 	const [b] = [0.1];
 	let result = Array.from({ length: n }, (_, i) => {
@@ -46,7 +45,7 @@ export function twoPoints(n: number): Point[] {
 
 export function heart(n: number): Point[] {
 	const points = Array.from({ length: n }, (_, i) => {
-		const t = (i * 2 * Math.PI) / n;
+		const t = (i * TAU) / n;
 		const x = 16 * Math.sin(t) ** 3;
 		const y =
 			13 * Math.cos(t) -
@@ -63,7 +62,7 @@ export function heart(n: number): Point[] {
 export function infinity(n: number): Point[] {
 	const points = Array.from({ length: n }, (_, i) => {
 		// Parameter t goes from 0 to 2π
-		const t = (i * 2 * Math.PI) / n;
+		const t = (i * TAU) / n;
 
 		const x = 0.95 * Math.sin(t);
 
@@ -75,13 +74,51 @@ export function infinity(n: number): Point[] {
 	points.unshift(points[0].asHidden());
 	return points;
 }
+function sec(n: number): number {
+	return 1 / Math.cos(n);
+}
+function asec(n: number): number {
+	return Math.acos(1 / n);
+}
+export function infinityGeometric(n: number): Point[] {
+	const scale = 0.3;
+	const offset = new Point(0.5, 0);
+	const boi = asec(offset.x / scale) / PI / 2;
+	const spin = 1.0 - 2 * boi;
+	console.log("asec(offset.x / scale)", asec(offset.x / scale));
+	const points = Array.from({ length: n }, (_, i) => {
+		const prog = i / n;
+		if (prog < 0.25) {
+			const scaledProg = prog * 2;
+			const inProg = spin * scaledProg;
+			return new Point(Math.cos(inProg * TAU), Math.sin(inProg * TAU + PI))
+				.scale(scale)
+				.add(offset);
+		} else if (prog < 0.75) {
+			const scaledProg = (prog - 0.25) * 2;
+			const inProg = spin * scaledProg + boi;
+			return new Point(Math.cos(inProg * TAU), -Math.sin(inProg * TAU + PI))
+				.scale(scale)
+				.add(offset.neg());
+		} else {
+			const scaledProg = (prog - 0.75) * 2;
+			const inProg = spin * scaledProg + 0.5 + boi;
+			return new Point(Math.cos(inProg * TAU), Math.sin(inProg * TAU + PI))
+				.scale(scale)
+				.add(offset);
+		}
+	});
+
+	points.unshift(points[0].asHidden());
+	return points;
+}
 
 export function wave(n: number): Point[] {
 	const amplitude = 0.5;
 	const frequency = 8;
 	const points = Array.from({ length: n }, (_, i) => {
 		const x = (i * 2) / (n - 1) - 1;
-		const y = amplitude * Math.sin(frequency * Math.PI * x);
+		const y = amplitude * Math.sin(frequency * PI * x);
 		return new Point(x, y).scale(0.9);
 	});
 
