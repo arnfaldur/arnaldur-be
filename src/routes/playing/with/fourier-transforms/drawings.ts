@@ -74,42 +74,54 @@ export function infinity(n: number): Point[] {
 	points.unshift(points[0].asHidden());
 	return points;
 }
-function sec(n: number): number {
-	return 1 / Math.cos(n);
-}
 function asec(n: number): number {
 	return Math.acos(1 / n);
 }
 export function infinityGeometric(n: number): Point[] {
+	n = Math.floor(n / 2) * 2;
 	const scale = 0.3;
 	const offset = new Point(0.5, 0);
-	const boi = asec(offset.x / scale) / PI / 2;
-	const spin = 1.0 - 2 * boi;
-	console.log("asec(offset.x / scale)", asec(offset.x / scale));
-	const points = Array.from({ length: n }, (_, i) => {
-		const prog = i / n;
-		if (prog < 0.25) {
-			const scaledProg = prog * 2;
-			const inProg = spin * scaledProg;
-			return new Point(Math.cos(inProg * TAU), Math.sin(inProg * TAU + PI))
-				.scale(scale)
-				.add(offset);
-		} else if (prog < 0.75) {
-			const scaledProg = (prog - 0.25) * 2;
-			const inProg = spin * scaledProg + boi;
-			return new Point(Math.cos(inProg * TAU), -Math.sin(inProg * TAU + PI))
-				.scale(scale)
-				.add(offset.neg());
-		} else {
-			const scaledProg = (prog - 0.75) * 2;
-			const inProg = spin * scaledProg + 0.5 + boi;
-			return new Point(Math.cos(inProg * TAU), Math.sin(inProg * TAU + PI))
-				.scale(scale)
-				.add(offset);
-		}
-	});
-
-	points.unshift(points[0].asHidden());
+	const leanOver = asec(offset.x / scale) / PI / 2;
+	const spin = 1.0 - 2 * leanOver;
+	let points = [new Point(0, 0, false), new Point(0, 0)];
+	const thefts = Math.floor(n / 10);
+	for (let i = 1; i < thefts; ++i) {
+		points.push(new Point(0.32, 0.24).scale(i / thefts));
+	}
+	const boi = n / 2 - thefts * 2;
+	for (let i = 0; i < boi; ++i) {
+		const prog = i / (n - 2 - thefts * 4);
+		const scaledProg = prog * 2;
+		const inProg = spin * (scaledProg - 0.5);
+		const point = new Point(Math.cos(inProg * TAU), Math.sin(inProg * TAU + PI))
+			.scale(scale)
+			.add(offset);
+		points.push(point);
+	}
+	for (let i = thefts - 1; i > 0; --i) {
+		points.push(new Point(0.32, -0.24).scale(i / thefts));
+	}
+	points.push(new Point(0, 0));
+	for (let i = 1; i < thefts; ++i) {
+		points.push(new Point(-0.32, 0.24).scale(i / thefts));
+	}
+	let ringDistance = 0;
+	for (let i = 0; i < boi; ++i) {
+		const prog = i / (n - 2 - thefts * 4);
+		const scaledProg = prog * 2;
+		const inProg = spin * scaledProg + leanOver;
+		const point = new Point(
+			Math.cos(inProg * TAU),
+			-Math.sin(inProg * TAU + PI),
+		)
+			.scale(scale)
+			.add(offset.neg());
+		points.push(point);
+		ringDistance = points.at(-1)?.distance(points.at(-2));
+	}
+	for (let i = thefts - 1; i > 0; --i) {
+		points.push(new Point(-0.32, -0.24).scale(i / thefts));
+	}
 	return points;
 }
 

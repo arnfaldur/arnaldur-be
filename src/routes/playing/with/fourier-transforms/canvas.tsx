@@ -34,7 +34,8 @@ export function DrawingCanvas() {
 	const [pointOrderingReversed, setPointOrderingReversed] = createSignal<boolean>(false);
 	const [connectEnds, setConnectEnds] = createSignal<boolean>(false);
 	const [drawingParameter, setDrawingParameter] = createSignal(128);
-	setPoints(drawings.infinityGeometric(Math.pow(2, 6)));
+	setPoints(drawings.infinityGeometric(Math.pow(2, 4)));
+	setConnectEnds(true);
 
 	const rotationRate = () => Math.pow(2, unscaledRotationRate() * 12 - 14) - Math.pow(2, -14);
 
@@ -99,7 +100,7 @@ export function DrawingCanvas() {
 
 			ctx.lineWidth = lineWidth / (ctx.canvas.height ?? 400);
 			/* drawDft(ctx, pointsSelectedIdft(), rotation()); */
-			drawDft(ctx, pointsSelectedIfft(), rotation());
+			drawDft(ctx, pointsSelectedIfft, rotation());
 			ctx.strokeStyle = strokeStyle;
 			drawPoints(ctx, points(), connectEnds());
 
@@ -334,7 +335,7 @@ function drawPoints(ctx: CanvasRenderingContext2D, points: Point[], connectEnds:
 			ctx.moveTo(point.x, point.y);
 		}
 	}
-	if (connectEnds) ctx.lineTo(points[0].x, points[0].y);
+	if (connectEnds && points.length >= 2) ctx.lineTo(points[0].x, points[0].y);
 	ctx.stroke();
 	ctx.closePath();
 }
@@ -364,16 +365,16 @@ function createPointOrderings(
 
 	const pointsSelected = createMemo(() => {
 		const mapping: {
-			[key in Ordering]: [Point, number][];
+			[key in Ordering]: Accessor<[Point, number][]>;
 		} = {
-			default: points(),
-			insideOut: pointsInsideOut(),
-			alternating: pointsAlternating(),
-			bySize: pointsBySize(),
-			byAngle: pointsByAngle(),
-			shuffled: pointsShuffled(),
+			default: points,
+			insideOut: pointsInsideOut,
+			alternating: pointsAlternating,
+			bySize: pointsBySize,
+			byAngle: pointsByAngle,
+			shuffled: pointsShuffled,
 		};
-		const result = mapping[pointOrdering()];
+		const result = mapping[pointOrdering()]();
 		return pointOrderingReversed() ? result.toReversed() : result;
 	});
 	return pointsSelected;
@@ -381,7 +382,7 @@ function createPointOrderings(
 
 function drawDft(
 	ctx: CanvasRenderingContext2D,
-	pointsSelected: [Point, number][],
+	pointsSelected: Accessor<[Point, number][]>,
 	rotation: number,
 ) {
 	let acc = new Point(0, 0);
@@ -389,8 +390,8 @@ function drawDft(
 	/* for (const [point, i] of pointsSelected) {
 
 	} */
-	pointsSelected.forEach(([point, i]) => {
-		const samples = pointsSelected.length;
+	pointsSelected().forEach(([point, i]) => {
+		const samples = pointsSelected().length;
 
 		const shiftedIndex = i >= samples / 2 ? i - samples : i;
 
