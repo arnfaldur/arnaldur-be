@@ -143,7 +143,7 @@ export function s(n: number): Point[] {
 
 	const scale = 0.5;
 	const offset = new Point(0.0, 0.5);
-	const spin = 2/3;
+	const spin = 2 / 3;
 	let points = [new Point(0, 0, false), new Point(0, 0)];
 	const halfN = Math.floor(n / 2);
 	for (let i = 0; i < halfN; ++i) {
@@ -337,4 +337,30 @@ export function moore(n: number): Point[] {
 			.scale(1 / step)
 			.scale(1),
 	);
+}
+
+export function uniform(n: number): Point[] {
+	const scale = 0.9;
+	const result = Array.from({ length: n }, (_, i) =>
+		new Point(Math.random() * 2 - 1, Math.random() * 2 - 1).scale(scale),
+	);
+	result.unshift(result[0].asHidden());
+	return result;
+}
+
+function boxMuller(): number {
+	return (
+		Math.sqrt(-2.0 * Math.log(Math.random())) *
+		Math.cos(2.0 * Math.PI * Math.random())
+	);
+}
+
+export function gaussian(n: number): Point[] {
+	let points: Point[] = [];
+	for (let i = 0; i < n; ++i) {
+		const point = new Point(boxMuller(), boxMuller()).scale(0.25);
+		points.push(point);
+	}
+	// points.unshift(points[0].asHidden());
+	return points;
 }

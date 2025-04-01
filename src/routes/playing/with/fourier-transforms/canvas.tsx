@@ -28,13 +28,16 @@ export function DrawingCanvas() {
 
 	const [points, setPoints] = createSignal<Point[]>([]);
 	const [rotation, setRotation] = createSignal(0);
-	const [pauseRotation, setPauseRotation] = createSignal(false);
 	const [unscaledRotationRate, setUnscaledRotationRate] = createSignal(0.5);
 	const [pointOrdering, setPointOrdering] = createSignal<Ordering>("alternating");
 	const [pointOrderingReversed, setPointOrderingReversed] = createSignal<boolean>(false);
 	const [connectEnds, setConnectEnds] = createSignal<boolean>(false);
 	const [drawingParameter, setDrawingParameter] = createSignal(128);
-	setPoints(drawings.s(Math.pow(2, 5)-1));
+
+	const [focusedElement, setFocusedElement] = createSignal(1);
+	const [focusPoint, setFocusPoint] = createSignal(new Point(0, 0));
+
+	setPoints(drawings.moore(Math.pow(2, 8)));
 	setConnectEnds(true);
 
 	const rotationRate = () => Math.pow(2, unscaledRotationRate() * 12 - 14) - Math.pow(2, -14);
@@ -49,6 +52,40 @@ export function DrawingCanvas() {
 		pointOrdering,
 		pointOrderingReversed,
 	);
+	const pointsFtAcc = createMemo(() => {
+		let acc = new Point(0, 0);
+		let result: [Point, number][] = [];
+		const pointsFt = pointsSelectedIfft();
+		for (var i = 0; i < pointsFt.length; ++i) {
+			const [point, idx] = pointsFt[i];
+
+			const samples = pointsSelectedIfft().length;
+			const shiftedIndex = idx >= samples / 2 ? idx - samples : idx;
+			const rads = -((2 * Math.PI) / samples) * shiftedIndex * rotation();
+			acc = acc.add(point.rotate(rads));
+			if (focusedElement() === i) {
+				setFocusPoint(acc);
+			}
+			result.push([acc, idx]);
+		}
+		return result;
+	});
+	/* const focusPoint = createMemo(() =>
+		focusedElement() === 0 ? new Point(0, 0) : pointsSelectedIfft()[focusedElement() - 1][0],
+	); */
+	/* createEffect(() => {
+		console.log("pos", pointsSelectedIfft());
+		console.log("posft", pointsFtAcc());
+		console.log("fe", focusedElement());
+		console.log("fp", focusPoint());
+	}); */
+	const pointsTransformed = createMemo(() => points().map((p) => p.sub(focusPoint())));
+	const pointsFtTransformed = createMemo(() =>
+		pointsSelectedIfft().map(([p, i]) => [p.sub(focusPoint()), i]),
+	);
+	/* createEffect(() => {
+		console.log("ts", pointstransformed());
+	}); */
 
 	const setupCanvas = (canvas: HTMLCanvasElement) => {
 		const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
@@ -100,9 +137,9 @@ export function DrawingCanvas() {
 
 			ctx.lineWidth = lineWidth / (ctx.canvas.height ?? 400);
 			/* drawDft(ctx, pointsSelectedIdft(), rotation()); */
-			drawDft(ctx, pointsSelectedIfft, rotation());
+			drawDft(ctx, pointsFtAcc, rotation());
 			ctx.strokeStyle = strokeStyle;
-			drawPoints(ctx, points(), connectEnds());
+			drawPoints(ctx, pointsTransformed(), connectEnds());
 
 			requestAnimationFrame(animationLoop);
 		};
@@ -115,31 +152,24 @@ export function DrawingCanvas() {
 	};
 
 	const [positionSlider, setPositionSlider] = createSignal({} as HTMLInputElement);
-	const [animationSpeedSlider, setAnimationSpeedSlider] = createSignal({} as HTMLInputElement);
-	const [connectEndsCheckbox, setConnectEndsCheckbox] = createSignal({} as HTMLInputElement);
-	/* let positionSlider!: HTMLInputElement;
-	let animationSpeedSlider!: HTMLInputElement; */
 	createEffect(() => {
 		const slider = positionSlider();
 		if (slider && unscaledRotationRate() > 0)
 			slider.value = (rotation() / pointsSelectedIfft().length).toString();
 	});
+
+	const [animationSpeedSlider, setAnimationSpeedSlider] = createSignal({} as HTMLInputElement);
 	createEffect(() => {
 		const slider = animationSpeedSlider();
 		if (slider) slider.value = unscaledRotationRate().toString();
 	});
+
+	const [connectEndsCheckbox, setConnectEndsCheckbox] = createSignal({} as HTMLInputElement);
 	createEffect(() => {
 		const checkbox = connectEndsCheckbox();
 		if (checkbox) checkbox.checked = connectEnds();
 	});
 
-	/* positionSlider.addEventListener("mousedown", () => {
-		setUnscaledRotationRate(0);
-	});
-	positionSlider.addEventListener("touchstart", () => {
-		setUnscaledRotationRate(0);
-	});
- */
 	return (
 		<>
 			<canvas
@@ -176,6 +206,31 @@ export function DrawingCanvas() {
 					}}
 				/>
 				Speed
+				<Slider
+					ref={setAnimationSpeedSlider}
+					value={0.5}
+					setValue={setUnscaledRotationRate}
+				/>
+			</fieldset>
+			<fieldset style={{ display: "grid", grid: "auto-flow dense / 0fr 1fr", gap: "0 1rem" }}>
+				<legend>Camera</legend>
+				Element
+				<input
+					type="range"
+					value={0}
+					max={1}
+					step={1 / (points().length + 1)}
+					style={{
+						width: "100%",
+						margin: "0 auto 0.75rem auto",
+					}}
+					onInput={(e) => {
+						setFocusedElement(
+							Math.round(Number(e.target.value) * (points().length + 1)),
+						);
+					}}
+				/>
+				Zoom
 				<Slider
 					ref={setAnimationSpeedSlider}
 					value={0.5}
@@ -245,6 +300,16 @@ export function DrawingCanvas() {
 								},
 								{ title: "Hilbert", drawing: drawings.hilbert, connectEnds: false },
 								{ title: "Moore", drawing: drawings.moore, connectEnds: true },
+								{
+									title: "Random uniform",
+									drawing: drawings.uniform,
+									connectEnds: false,
+								},
+								{
+									title: "Random gaussian",
+									drawing: drawings.uniform,
+									connectEnds: false,
+								},
 							]}
 						>
 							{({ title, drawing, connectEnds }) => (
@@ -388,29 +453,31 @@ function drawDft(
 ) {
 	let acc = new Point(0, 0);
 	ctx.strokeStyle = rgbToCss(turboColormapSample(0));
-	/* for (const [point, i] of pointsSelected) {
+	const points = pointsSelected();
+	console.log('points',points);
+	for (let i = 0; i < points.length; ++i) {
+		const idx = points[i][1];
 
-	} */
-	pointsSelected().forEach(([point, i]) => {
-		const samples = pointsSelected().length;
+		const samples = points.length;
 
-		const shiftedIndex = i >= samples / 2 ? i - samples : i;
-
-		const rads = -((2 * Math.PI) / samples) * shiftedIndex * rotation;
 		ctx.beginPath();
-		ctx.moveTo(acc.x, acc.y);
-		acc = acc.add(point.rotate(rads));
+
+		if (i === 0) {
+			ctx.moveTo(0, 0);
+		} else {
+			ctx.moveTo(points[i - 1][0].x, points[i - 1][0].y);
+		}
 		/* ctx.strokeStyle = i >= samples / 2 ? "red" : "green"; */
 		ctx.strokeStyle =
-			i === 0
+			idx === 0
 				? `color-mix(in lch, ${rgbToCss(turboColormapSample(0.1))}, ${rgbToCss(
 						turboColormapSample(0.9),
 				  )})`
-				: rgbToCss(turboColormapSample((i / samples) * 0.8 + 0.1));
-		ctx.lineTo(acc.x, acc.y);
+				: rgbToCss(turboColormapSample((idx / samples) * 0.8 + 0.1));
+		ctx.lineTo(points[i][0].x, points[i][0].y);
 		ctx.stroke();
 		ctx.closePath();
-	});
+	}
 }
 
 function attachDrawingLogic(
