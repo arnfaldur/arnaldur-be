@@ -29,17 +29,16 @@ export function logSpiral(n: number): Point[] {
 		const r = Math.exp(b * theta) / Math.exp(b * (n - 1) * deltaTheta);
 		const x = r * Math.cos(theta);
 		const y = r * Math.sin(theta);
-		return new Point(x, y).scale(0.9);
+		return new Point(x, y);
 	});
 	result.unshift(result[0].asHidden());
 	return result;
 }
 
 export function twoPoints(n: number): Point[] {
-	const scale = 0.6;
 	return Array.from(
 		{ length: n },
-		(_, i) => new Point(i < n / 2 ? -scale : scale, i < n / 2 ? -scale : scale),
+		(_, i) => new Point(i < n / 2 ? -1 : 1, i < n / 2 ? -1 : 1),
 	);
 }
 

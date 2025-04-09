@@ -28,42 +28,45 @@ export function DrawingCanvas() {
 
 	const [points, setPoints] = createSignal<Point[]>([]);
 	const [rotation, setRotation] = createSignal(0);
-	const [unscaledRotationRate, setUnscaledRotationRate] = createSignal(0.5);
 	const [pointOrdering, setPointOrdering] = createSignal<Ordering>("alternating");
 	const [pointOrderingReversed, setPointOrderingReversed] = createSignal<boolean>(false);
 	const [connectEnds, setConnectEnds] = createSignal<boolean>(false);
 	const [drawingParameter, setDrawingParameter] = createSignal(128);
 
-	const [focusedElement, setFocusedElement] = createSignal(1);
+	const [focusedElement, setFocusedElement] = createSignal(0);
 	const [focusPoint, setFocusPoint] = createSignal(new Point(0, 0));
 
-	setPoints(drawings.moore(Math.pow(2, 8)));
-	setConnectEnds(true);
+	const [unscaledRotationRate, setUnscaledRotationRate] = createSignal(0.5);
+	const rotationRate = createMemo(
+		() => Math.pow(2, unscaledRotationRate() * 12 - 14) - Math.pow(2, -14),
+	);
 
-	const rotationRate = () => Math.pow(2, unscaledRotationRate() * 12 - 14) - Math.pow(2, -14);
+	const [rawZoom, setRawZoom] = createSignal(0.25);
+	const zoom = createMemo(() => Math.pow(2, rawZoom() * 12 - 3));
+
+	setPoints(drawings.spiral(Math.pow(2, 8)));
+	setConnectEnds(true);
 
 	const visiblePoints = createMemo(() => points().filter((point) => point.visible));
 
-	const pointsIfft = createMemo(() =>
+	const pointsIft = createMemo(() =>
 		gifft(visiblePoints()).map<[Point, number]>((point, i) => [point, i]),
 	);
-	const pointsSelectedIfft = createPointOrderings(
-		pointsIfft,
-		pointOrdering,
-		pointOrderingReversed,
-	);
-	const pointsFtAcc = createMemo(() => {
+	const pointsIftSel = createPointOrderings(pointsIft, pointOrdering, pointOrderingReversed);
+	const pointsIftAcc = createMemo(() => {
 		let acc = new Point(0, 0);
 		let result: [Point, number][] = [];
-		const pointsFt = pointsSelectedIfft();
+		result.push([acc, -1]);
+		setFocusPoint(acc);
+		const pointsFt = pointsIftSel();
 		for (var i = 0; i < pointsFt.length; ++i) {
 			const [point, idx] = pointsFt[i];
 
-			const samples = pointsSelectedIfft().length;
+			const samples = pointsIftSel().length;
 			const shiftedIndex = idx >= samples / 2 ? idx - samples : idx;
 			const rads = -((2 * Math.PI) / samples) * shiftedIndex * rotation();
 			acc = acc.add(point.rotate(rads));
-			if (focusedElement() === i) {
+			if (focusedElement() === i + 1) {
 				setFocusPoint(acc);
 			}
 			result.push([acc, idx]);
@@ -79,9 +82,11 @@ export function DrawingCanvas() {
 		console.log("fe", focusedElement());
 		console.log("fp", focusPoint());
 	}); */
-	const pointsTransformed = createMemo(() => points().map((p) => p.sub(focusPoint())));
-	const pointsFtTransformed = createMemo(() =>
-		pointsSelectedIfft().map(([p, i]) => [p.sub(focusPoint()), i]),
+	const pointsTransformed = createMemo(() =>
+		points().map((p) => p.sub(focusPoint()).scale(zoom())),
+	);
+	const pointsIftTransformed = createMemo(() =>
+		pointsIftAcc().map(([p, i]) => [p.sub(focusPoint()).scale(zoom()), i]),
 	);
 	/* createEffect(() => {
 		console.log("ts", pointstransformed());
@@ -127,17 +132,17 @@ export function DrawingCanvas() {
 			const deltaTime = timestamp - lastTime;
 			lastTime = timestamp;
 			setRotation((rotation) => rotation + deltaTime * rotationRate());
-			if (pointsSelectedIfft().length === 0) {
+			if (pointsIftSel().length === 0) {
 				setRotation(0);
-			} else if (rotation() >= pointsSelectedIfft().length) {
-				setRotation((rotation) => rotation % pointsSelectedIfft().length);
+			} else if (rotation() >= pointsIftSel().length) {
+				setRotation((rotation) => rotation % pointsIftSel().length);
 			}
 
 			ctx.clearRect(-1, -1, 2, 2);
 
 			ctx.lineWidth = lineWidth / (ctx.canvas.height ?? 400);
 			/* drawDft(ctx, pointsSelectedIdft(), rotation()); */
-			drawDft(ctx, pointsFtAcc, rotation());
+			drawDft(ctx, pointsIftTransformed, rotation());
 			ctx.strokeStyle = strokeStyle;
 			drawPoints(ctx, pointsTransformed(), connectEnds());
 
@@ -155,7 +160,7 @@ export function DrawingCanvas() {
 	createEffect(() => {
 		const slider = positionSlider();
 		if (slider && unscaledRotationRate() > 0)
-			slider.value = (rotation() / pointsSelectedIfft().length).toString();
+			slider.value = (rotation() / pointsIftSel().length).toString();
 	});
 
 	const [animationSpeedSlider, setAnimationSpeedSlider] = createSignal({} as HTMLInputElement);
@@ -189,7 +194,7 @@ export function DrawingCanvas() {
 				Progress
 				<input
 					ref={(el) => {
-						setRotation(Number(el.value) * pointsSelectedIfft().length);
+						setRotation(Number(el.value) * pointsIftSel().length);
 						setPositionSlider(el);
 					}}
 					type="range"
@@ -202,7 +207,7 @@ export function DrawingCanvas() {
 					}}
 					onInput={(v) => {
 						setUnscaledRotationRate(0);
-						setRotation(Number(v.target.value) * pointsSelectedIfft().length);
+						setRotation(Number(v.target.value) * pointsIftSel().length);
 					}}
 				/>
 				Speed
@@ -219,23 +224,17 @@ export function DrawingCanvas() {
 					type="range"
 					value={0}
 					max={1}
-					step={1 / (points().length + 1)}
+					step={1 / points().length}
 					style={{
 						width: "100%",
 						margin: "0 auto 0.75rem auto",
 					}}
 					onInput={(e) => {
-						setFocusedElement(
-							Math.round(Number(e.target.value) * (points().length + 1)),
-						);
+						setFocusedElement(Math.round(Number(e.target.value) * pointsIft().length));
 					}}
 				/>
 				Zoom
-				<Slider
-					ref={setAnimationSpeedSlider}
-					value={0.5}
-					setValue={setUnscaledRotationRate}
-				/>
+				<Slider value={0.25} setValue={setRawZoom} />
 			</fieldset>
 
 			<div
@@ -317,6 +316,7 @@ export function DrawingCanvas() {
 									onClick={() => {
 										setConnectEnds(connectEnds);
 										setPoints(drawing(drawingParameter()));
+										setRawZoom(0.25);
 									}}
 								>
 									{title}
@@ -393,7 +393,6 @@ function OrderingFieldset({
 
 function drawPoints(ctx: CanvasRenderingContext2D, points: Point[], connectEnds: boolean) {
 	ctx.beginPath();
-	ctx.moveTo(0, 0);
 	for (const point of points) {
 		if (point?.visible) {
 			ctx.lineTo(point.x, point.y);
@@ -424,10 +423,6 @@ function createPointOrderings(
 	const pointsBySize = createMemo(() => points().toSorted((a, b) => b[0].abs() - a[0].abs()));
 	const pointsByAngle = createMemo(() => points().toSorted((a, b) => b[0].arg() - a[0].arg()));
 	const pointsShuffled = () => shuffleArray(points().slice());
-	/* const [pointsShuffled, setPointsShuffled] = createSignal()
-	const updatePointsShuffled = () => {
-		setPointsShuffled(shuffleArray(points().slice()));
-	}; */
 
 	const pointsSelected = createMemo(() => {
 		const mapping: {
@@ -454,7 +449,6 @@ function drawDft(
 	let acc = new Point(0, 0);
 	ctx.strokeStyle = rgbToCss(turboColormapSample(0));
 	const points = pointsSelected();
-	console.log('points',points);
 	for (let i = 0; i < points.length; ++i) {
 		const idx = points[i][1];
 
@@ -462,9 +456,7 @@ function drawDft(
 
 		ctx.beginPath();
 
-		if (i === 0) {
-			ctx.moveTo(0, 0);
-		} else {
+		if (i !== 0) {
 			ctx.moveTo(points[i - 1][0].x, points[i - 1][0].y);
 		}
 		/* ctx.strokeStyle = i >= samples / 2 ? "red" : "green"; */
