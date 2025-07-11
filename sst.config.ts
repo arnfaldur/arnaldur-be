@@ -19,7 +19,7 @@ export default $config({
                 'invalid stage, only "production" and "staging" are allowed'
             );
         }
-        new sst.aws.StaticSite("arnaldur.be", {
+        new sst.aws.StaticSite("arnaldur-be", {
             domain:
                 $app.stage === "production"
                     ? {
