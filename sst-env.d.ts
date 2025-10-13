@@ -5,7 +5,7 @@
 
 declare module "sst" {
   export interface Resource {
-    "arnaldur.be": {
+    "arnaldur-be": {
       "type": "sst.aws.StaticSite"
       "url": string
     }
