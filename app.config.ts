@@ -55,7 +55,7 @@ const server = {
         autoSubfolderIndex: false,
         concurrency: 4,
         failOnError: true,
-        routes: ["/writing", "/laughing", "/experimenting"],
+        routes: ["/", "/writing", "/laughing", "/experimenting"],
         crawlLinks: true,
     },
 };
