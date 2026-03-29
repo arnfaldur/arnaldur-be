@@ -5,7 +5,7 @@ import { Point } from "./Point";
 import { gifft, shuffleArray } from "./fourier-transforms";
 import { Slider } from "./components";
 import * as drawings from "./drawings";
-import { DrawingsFieldset, OrderingFieldset, type Ordering } from "./fieldsets";
+import { DrawingsFieldset, MiscFieldset, OrderingFieldset, type Ordering } from "./fieldsets";
 
 export function DrawingCanvas() {
 	const relativeWidth = 0.99;
@@ -14,7 +14,7 @@ export function DrawingCanvas() {
 	const strokeStyle = "white";
 	const lineWidth = 2;
 
-	const [points, setPoints] = createSignal<Point[]>([]);
+	const [points, setPoints] = createSignal<Point[]>(drawings.spiral(Math.pow(2, 8)));
 	const [rotation, setRotation] = createSignal(0);
 	const [pointOrdering, setPointOrdering] = createSignal<Ordering>("alternating");
 	const [pointOrderingReversed, setPointOrderingReversed] = createSignal<boolean>(false);
@@ -22,7 +22,6 @@ export function DrawingCanvas() {
 	const [drawingParameter, setDrawingParameter] = createSignal(128);
 
 	const [focusedElement, setFocusedElement] = createSignal(0);
-	const [focusPoint, setFocusPoint] = createSignal(new Point(0, 0));
 
 	const [unscaledRotationRate, setUnscaledRotationRate] = createSignal(0.5);
 	const rotationRate = createMemo(
@@ -31,9 +30,6 @@ export function DrawingCanvas() {
 
 	const [rawZoom, setRawZoom] = createSignal(0.25);
 	const zoom = createMemo(() => Math.pow(2, rawZoom() * 12 - 3));
-
-	setPoints(drawings.spiral(Math.pow(2, 8)));
-	setConnectEnds(true);
 
 	const visiblePoints = createMemo(() => points().filter((point) => point.visible));
 
@@ -57,10 +53,10 @@ export function DrawingCanvas() {
 		}
 		return result;
 	});
-	createEffect(() => {
+	const focusPoint = createMemo(() => {
 		const acc = pointsIftAcc();
 		const focus = focusedElement();
-		setFocusPoint(focus < acc.length ? acc[focus][0] : new Point(0, 0));
+		return focus < acc.length ? acc[focus][0] : new Point(0, 0);
 	});
 	const pointsTransformed = createMemo(() =>
 		points().map((p) => p.sub(focusPoint()).scale(zoom())),
@@ -208,29 +204,15 @@ export function DrawingCanvas() {
 					drawingParameter={drawingParameter}
 					setRawZoom={setRawZoom}
 				/>
-				<fieldset>
-					<legend>Misc</legend>
-					<div
-						style={{
-							display: "grid",
-							"grid-template-rows": "1fr 1fr 1fr",
-						}}
-					>
-						<button onClick={() => undoPoint(1)}>Undo</button>
-						<button onClick={() => undoPoint(10)}>Undo 10</button>
-						<button type="reset" onClick={() => setPoints([])}>
-							Reset
-						</button>
-						<label>
-							<input
-								ref={setConnectEndsCheckbox}
-								type="checkbox"
-								onInput={(e) => setConnectEnds(e.target.checked)}
-							></input>
-							Connect Ends
-						</label>
-					</div>
-				</fieldset>
+				<MiscFieldset
+					setPoints={setPoints}
+					setConnectEnds={setConnectEnds}
+					setConnectEndsCheckbox={setConnectEndsCheckbox}
+					setRawZoom={setRawZoom}
+				>
+					<button onClick={() => undoPoint(1)}>Undo</button>
+					<button onClick={() => undoPoint(10)}>Undo 10</button>
+				</MiscFieldset>
 			</div>
 		</>
 	);

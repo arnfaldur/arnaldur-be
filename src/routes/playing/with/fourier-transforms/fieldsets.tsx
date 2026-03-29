@@ -1,4 +1,4 @@
-import { For } from "solid-js";
+import { For, JSXElement } from "solid-js";
 import { Accessor, Setter } from "solid-js";
 
 import { Point } from "./Point";
@@ -78,6 +78,51 @@ export function DrawingsFieldset({
 						</button>
 					)}
 				</For>
+			</div>
+		</fieldset>
+	);
+}
+
+export function MiscFieldset({
+	setPoints,
+	setConnectEnds,
+	setConnectEndsCheckbox,
+	setRawZoom,
+	children,
+}: {
+	setPoints: Setter<Point[]>;
+	setConnectEnds: Setter<boolean>;
+	setConnectEndsCheckbox: Setter<HTMLInputElement>;
+	setRawZoom: Setter<number>;
+	children?: JSXElement;
+}) {
+	return (
+		<fieldset>
+			<legend>Misc</legend>
+			<div
+				style={{
+					display: "grid",
+					"grid-template-rows": "1fr 1fr 1fr",
+				}}
+			>
+				{children}
+				<button
+					type="reset"
+					onClick={() => {
+						setPoints([]);
+						setRawZoom(0.25);
+					}}
+				>
+					Reset
+				</button>
+				<label>
+					<input
+						ref={setConnectEndsCheckbox}
+						type="checkbox"
+						onInput={(e) => setConnectEnds(e.target.checked)}
+					></input>
+					Connect Ends
+				</label>
 			</div>
 		</fieldset>
 	);
