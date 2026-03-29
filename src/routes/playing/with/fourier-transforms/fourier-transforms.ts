@@ -1,38 +1,6 @@
 import { Point } from "./Point";
 
-// Derived from https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Definition
-function dft(points: Point[]): Point[] {
-	return points.map((_, k) =>
-		points.reduce((acc, point, n) =>
-			acc.add(
-				point.mul(
-					new Point(
-						Math.cos(((2 * Math.PI * k) / points.length) * n),
-						-Math.sin(((2 * Math.PI * k) / points.length) * n),
-					),
-				),
-			),
-		),
-	);
-}
-export function idft(points: Point[]): Point[] {
-	return points.map((_, k) =>
-		points
-			.reduce((acc, point, n) =>
-				acc.add(
-					point.mul(
-						new Point(
-							Math.cos(((2 * Math.PI * k) / points.length) * n),
-							Math.sin(((2 * Math.PI * k) / points.length) * n),
-						),
-					),
-				),
-			)
-			.scale(1 / points.length),
-	);
-}
-
-export function fft(points: Point[]): Point[] {
+function fftCore(points: Point[], sign: 1 | -1): Point[] {
 	const longer = Math.pow(2, Math.ceil(Math.log2(points.length)));
 	const result = points.slice();
 	while (result.length < longer) {
@@ -53,10 +21,10 @@ export function fft(points: Point[]): Point[] {
 		const even = recurse(a[0]);
 		const odd = recurse(a[1]);
 
-		const boi = even.map((e, i) =>
+		const boi = even.map((_e, i) =>
 			new Point(
 				Math.cos((2 * Math.PI * i) / points.length),
-				-Math.sin((2 * Math.PI * i) / points.length),
+				sign * Math.sin((2 * Math.PI * i) / points.length),
 			).mul(odd[i]),
 		);
 
@@ -66,39 +34,15 @@ export function fft(points: Point[]): Point[] {
 	}
 	return recurse(result);
 }
+
+export function fft(points: Point[]): Point[] {
+	return fftCore(points, -1);
+}
+
 export function ifft(points: Point[]): Point[] {
-	const longer = Math.pow(2, Math.ceil(Math.log2(points.length)));
-	const result = points.slice();
-	while (result.length < longer) {
-		result.push(new Point(0, 0));
-	}
-	function recurse(points: Point[]): Point[] {
-		if (points.length <= 1) {
-			return points;
-		} else if (points.length == 2) {
-			// this is just for slightly better performance by saving one recursive call
-			const [a, b] = points;
-			return [a.add(b), a.sub(b)];
-		}
-		const a: Point[][] = [[], []];
-		for (let i = 0; i < points.length; ++i) {
-			a[i % 2].push(points[i]);
-		}
-		const even = recurse(a[0]);
-		const odd = recurse(a[1]);
-
-		const boi = even.map((e, i) =>
-			new Point(
-				Math.cos((2 * Math.PI * i) / points.length),
-				Math.sin((2 * Math.PI * i) / points.length),
-			).mul(odd[i]),
-		);
-
-		const left = even.map((e, i) => e.add(boi[i]));
-		const right = even.map((e, i) => e.sub(boi[i]));
-		return [...left, ...right];
-	}
-	return recurse(result).map((point) => point.scale(1 / result.length));
+	const result = fftCore(points, 1);
+	const n = Math.pow(2, Math.ceil(Math.log2(points.length)));
+	return result.map((point) => point.scale(1 / n));
 }
 
 export function shuffleArray<T>(array: T[]) {
@@ -116,9 +60,7 @@ export function gifft(x: Point[]): Point[] {
 	const M = 1 << (32 - Math.clz32(2 * N - 1));
 
 	const j = new Point(0, 1);
-	const W = Array.from({ length: N }, (_, n) =>
-		j.scale((-Math.PI * (n * n)) / N).exp(),
-	);
+	const W = Array.from({ length: N }, (_, n) => j.scale((-Math.PI * (n * n)) / N).exp());
 
 	const a = x.map((xi, n) => xi.conj().mul(W[n]));
 	const b = Array.from({ length: M }, (_, k) => {

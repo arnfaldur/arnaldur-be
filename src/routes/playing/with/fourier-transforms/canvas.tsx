@@ -45,27 +45,28 @@ export function DrawingCanvas() {
 		let acc = new Point(0, 0);
 		let result: [Point, number][] = [];
 		result.push([acc, -1]);
-		setFocusPoint(acc);
 		const pointsFt = pointsIftSel();
-		for (var i = 0; i < pointsFt.length; ++i) {
+		const samples = pointsFt.length;
+		for (var i = 0; i < samples; ++i) {
 			const [point, idx] = pointsFt[i];
 
-			const samples = pointsIftSel().length;
 			const shiftedIndex = idx >= samples / 2 ? idx - samples : idx;
 			const rads = -((2 * Math.PI) / samples) * shiftedIndex * rotation();
 			acc = acc.add(point.rotate(rads));
-			if (focusedElement() === i + 1) {
-				setFocusPoint(acc);
-			}
 			result.push([acc, idx]);
 		}
 		return result;
+	});
+	createEffect(() => {
+		const acc = pointsIftAcc();
+		const focus = focusedElement();
+		setFocusPoint(focus < acc.length ? acc[focus][0] : new Point(0, 0));
 	});
 	const pointsTransformed = createMemo(() =>
 		points().map((p) => p.sub(focusPoint()).scale(zoom())),
 	);
 	const pointsIftTransformed = createMemo(() =>
-		pointsIftAcc().map(([p, i]) => [p.sub(focusPoint()).scale(zoom()), i]),
+		pointsIftAcc().map<[Point, number]>(([p, i]) => [p.sub(focusPoint()).scale(zoom()), i]),
 	);
 
 	const setupCanvas = (canvas: HTMLCanvasElement) => {
@@ -82,6 +83,7 @@ export function DrawingCanvas() {
 		attachResizingLogic(relativeWidth, relativeHeight, canvas, ctx);
 
 		let lastTime = performance.now();
+		let frameId: number;
 		const animationLoop = (timestamp: DOMHighResTimeStamp) => {
 			const deltaTime = timestamp - lastTime;
 			lastTime = timestamp;
@@ -95,19 +97,18 @@ export function DrawingCanvas() {
 			ctx.clearRect(-1, -1, 2, 2);
 
 			ctx.lineWidth = lineWidth / (ctx.canvas.height ?? 400);
-			/* drawDft(ctx, pointsSelectedIdft(), rotation()); */
-			drawDft(ctx, pointsIftTransformed, rotation());
+			drawDft(ctx, pointsIftTransformed);
 			ctx.strokeStyle = strokeStyle;
 			drawPoints(ctx, pointsTransformed(), connectEnds());
 
-			requestAnimationFrame(animationLoop);
+			frameId = requestAnimationFrame(animationLoop);
 		};
-		requestAnimationFrame(animationLoop);
+		frameId = requestAnimationFrame(animationLoop);
+		onCleanup(() => cancelAnimationFrame(frameId));
 	};
 
 	const undoPoint = (undos: number) => {
 		setPoints(points().slice(0, -undos));
-		/* redraw()(); */
 	};
 
 	const [positionSlider, setPositionSlider] = createSignal({} as HTMLInputElement);
@@ -136,7 +137,6 @@ export function DrawingCanvas() {
 				width="400"
 				height="400"
 				style={{
-					/* width: "99vw", */
 					border: "1px solid black",
 					position: "relative",
 					left: "50%",
@@ -286,12 +286,7 @@ function createPointOrderings(
 	return pointsSelected;
 }
 
-function drawDft(
-	ctx: CanvasRenderingContext2D,
-	pointsSelected: Accessor<[Point, number][]>,
-	rotation: number,
-) {
-	let acc = new Point(0, 0);
+function drawDft(ctx: CanvasRenderingContext2D, pointsSelected: Accessor<[Point, number][]>) {
 	ctx.strokeStyle = rgbToCss(turboColormapSample(0));
 	const points = pointsSelected();
 	for (let i = 0; i < points.length; ++i) {
@@ -304,7 +299,6 @@ function drawDft(
 		if (i !== 0) {
 			ctx.moveTo(points[i - 1][0].x, points[i - 1][0].y);
 		}
-		/* ctx.strokeStyle = i >= samples / 2 ? "red" : "green"; */
 		ctx.strokeStyle =
 			idx === 0
 				? `color-mix(in lch, ${rgbToCss(turboColormapSample(0.1))}, ${rgbToCss(
@@ -332,8 +326,8 @@ function attachDrawingLogic(
 			stopDrawing();
 			return;
 		}
-		setPoints([...points(), point.asHidden()]);
-		setPoints([...points(), point.asVisible()]);
+		// first point needs an extra hidden point.
+		setPoints([...points(), point.asHidden(), point.asVisible()]);
 		lastPoint = point;
 	};
 
@@ -414,4 +408,3 @@ function attachResizingLogic(
 
 	resizeCanvas();
 }
-/* style="width: 100%; border: 1px solid black; display: block;" */

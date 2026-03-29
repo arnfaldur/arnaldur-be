@@ -30,7 +30,9 @@ export class Complex {
 		return new Complex(e * Math.cos(this.y), e * Math.sin(this.y));
 	}
 	pow(other: Complex): Complex {
-		return new Complex();
+		// z^w = exp(w * ln(z)), where ln(z) = ln(|z|) + i*arg(z)
+		const lnZ = new Complex(Math.log(this.abs()), this.arg());
+		return other.mul(lnZ).exp();
 	}
 	rotate(radians: number): Complex {
 		return this.mul(new Complex(Math.cos(radians), Math.sin(radians)));
@@ -42,9 +44,7 @@ export class Complex {
 		return new Complex(this.x, this.y, false);
 	}
 	distance(other: Complex): number {
-		return Math.sqrt(
-			Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2),
-		);
+		return Math.sqrt(Math.pow(this.x - other.x, 2) + Math.pow(this.y - other.y, 2));
 	}
 	abs(): number {
 		return Math.sqrt(this.x * this.x + this.y * this.y);

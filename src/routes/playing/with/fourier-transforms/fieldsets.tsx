@@ -29,7 +29,7 @@ const drawingConfigs = [
 	{ title: "Hilbert", drawing: drawings.hilbert, connectEnds: false },
 	{ title: "Moore", drawing: drawings.moore, connectEnds: true },
 	{ title: "Random uniform", drawing: drawings.uniform, connectEnds: false },
-	{ title: "Random gaussian", drawing: drawings.uniform, connectEnds: false },
+	{ title: "Random gaussian", drawing: drawings.gaussian, connectEnds: false },
 ];
 
 export function DrawingsFieldset({
@@ -100,7 +100,7 @@ export function OrderingFieldset({
 				}}
 			>
 				<For each={Object.entries(orderingData)}>
-					{([ordering, description], i) => (
+					{([ordering, description]) => (
 						<label>
 							<input
 								type="radio"

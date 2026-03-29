@@ -14,16 +14,14 @@ export function circle(n: number): Point[] {
 
 export function spiral(n: number): Point[] {
 	return Array.from({ length: n }, (_, i) =>
-		new Point(Math.cos((i * PI * 8) / n), Math.sin((i * PI * 8) / n)).scale(
-			i / n,
-		),
+		new Point(Math.cos((i * PI * 8) / n), Math.sin((i * PI * 8) / n)).scale(i / n),
 	);
 }
 
 export function logSpiral(n: number): Point[] {
 	const thetaMax = TAU * 4;
 	const deltaTheta = thetaMax / (n - 1);
-	const [b] = [0.1];
+	const b = 0.1;
 	let result = Array.from({ length: n }, (_, i) => {
 		const theta = i * deltaTheta;
 		const r = Math.exp(b * theta) / Math.exp(b * (n - 1) * deltaTheta);
@@ -36,21 +34,14 @@ export function logSpiral(n: number): Point[] {
 }
 
 export function twoPoints(n: number): Point[] {
-	return Array.from(
-		{ length: n },
-		(_, i) => new Point(i < n / 2 ? -1 : 1, i < n / 2 ? -1 : 1),
-	);
+	return Array.from({ length: n }, (_, i) => new Point(i < n / 2 ? -1 : 1, i < n / 2 ? -1 : 1));
 }
 
 export function heart(n: number): Point[] {
 	const points = Array.from({ length: n }, (_, i) => {
 		const t = (i * TAU) / n;
 		const x = 16 * Math.sin(t) ** 3;
-		const y =
-			13 * Math.cos(t) -
-			5 * Math.cos(2 * t) -
-			2 * Math.cos(3 * t) -
-			Math.cos(4 * t);
+		const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
 		return new Point(x / 20, y / 20);
 	});
 
@@ -104,19 +95,14 @@ export function infinityGeometric(n: number): Point[] {
 	for (let i = 1; i < thefts; ++i) {
 		points.push(new Point(-0.32, 0.24).scale(i / thefts));
 	}
-	let ringDistance = 0;
 	for (let i = 0; i < halfN; ++i) {
 		const prog = i / (n - 2 - thefts * 4);
 		const scaledProg = prog * 2;
 		const inProg = spin * scaledProg + leanOver;
-		const point = new Point(
-			Math.cos(inProg * TAU),
-			-Math.sin(inProg * TAU + PI),
-		)
+		const point = new Point(Math.cos(inProg * TAU), -Math.sin(inProg * TAU + PI))
 			.scale(scale)
 			.add(offset.neg());
 		points.push(point);
-		ringDistance = points.at(-1)?.distance(points.at(-2));
 	}
 	for (let i = thefts - 1; i > 0; --i) {
 		points.push(new Point(-0.32, -0.24).scale(i / thefts));
@@ -163,7 +149,6 @@ export function s(n: number): Point[] {
 
 		points.push(point);
 	}
-	console.log("n len", n, points.length);
 	return points.map((p) => p.scale(0.75));
 }
 /**
@@ -186,9 +171,7 @@ export function hilbert(n: number): Point[] {
 		const point = hilbertIndexToXY(order, i);
 
 		// Normalize coordinates to [-0.9, 0.9]
-		const normalizedPoint = point
-			.scale((scale * 2) / (size - 1))
-			.sub(new Point(scale, scale));
+		const normalizedPoint = point.scale((scale * 2) / (size - 1)).sub(new Point(scale, scale));
 
 		points.push(normalizedPoint);
 	}
@@ -289,10 +272,7 @@ export function moore(n: number): Point[] {
 	}
 
 	// F: Draw forward
-	function F(
-		points: Point[],
-		state: { x: number; y: number; dx: number; dy: number },
-	): void {
+	function F(points: Point[], state: { x: number; y: number; dx: number; dy: number }): void {
 		// Add current position to points
 		points.push(new Point(state.x, state.y));
 
@@ -330,17 +310,12 @@ export function moore(n: number): Point[] {
 	F(points, state);
 
 	points.unshift(points[0].asHidden());
-	return points.map((p) =>
-		p
-			.sub(new Point(-0.5, step - 0.5))
-			.scale(1 / step)
-			.scale(1),
-	);
+	return points.map((p) => p.sub(new Point(-0.5, step - 0.5)).scale(1 / step));
 }
 
 export function uniform(n: number): Point[] {
 	const scale = 0.9;
-	const result = Array.from({ length: n }, (_, i) =>
+	const result = Array.from({ length: n }, () =>
 		new Point(Math.random() * 2 - 1, Math.random() * 2 - 1).scale(scale),
 	);
 	result.unshift(result[0].asHidden());
@@ -348,10 +323,7 @@ export function uniform(n: number): Point[] {
 }
 
 function boxMuller(): number {
-	return (
-		Math.sqrt(-2.0 * Math.log(Math.random())) *
-		Math.cos(2.0 * Math.PI * Math.random())
-	);
+	return Math.sqrt(-2.0 * Math.log(Math.random())) * Math.cos(2.0 * Math.PI * Math.random());
 }
 
 export function gaussian(n: number): Point[] {
@@ -360,6 +332,5 @@ export function gaussian(n: number): Point[] {
 		const point = new Point(boxMuller(), boxMuller()).scale(0.25);
 		points.push(point);
 	}
-	// points.unshift(points[0].asHidden());
 	return points;
 }
