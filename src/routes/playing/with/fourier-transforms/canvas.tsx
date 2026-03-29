@@ -1,23 +1,11 @@
-import { For } from "solid-js";
-import { Accessor } from "solid-js";
-import { createEffect, createMemo, createSignal, onCleanup, Setter } from "solid-js";
+import { Accessor, createEffect, createMemo, createSignal, onCleanup, Setter } from "solid-js";
 
 import { rgbToCss, turboColormapSample } from "~/utils/colormap";
 import { Point } from "./Point";
-import { ifft, idft, gifft, shuffleArray } from "./fourier-transforms";
-import { Checkbox, Slider } from "./components";
+import { gifft, shuffleArray } from "./fourier-transforms";
+import { Slider } from "./components";
 import * as drawings from "./drawings";
-
-type Ordering = "default" | "insideOut" | "alternating" | "bySize" | "byAngle" | "shuffled";
-
-const orderingData: { [key in Ordering]: string } = {
-	default: "Default",
-	insideOut: "Inside Out",
-	alternating: "Alternating",
-	bySize: "By Size",
-	byAngle: "By Angle",
-	shuffled: "Shuffled",
-};
+import { DrawingsFieldset, OrderingFieldset, type Ordering } from "./fieldsets";
 
 export function DrawingCanvas() {
 	const relativeWidth = 0.99;
@@ -73,24 +61,12 @@ export function DrawingCanvas() {
 		}
 		return result;
 	});
-	/* const focusPoint = createMemo(() =>
-		focusedElement() === 0 ? new Point(0, 0) : pointsSelectedIfft()[focusedElement() - 1][0],
-	); */
-	/* createEffect(() => {
-		console.log("pos", pointsSelectedIfft());
-		console.log("posft", pointsFtAcc());
-		console.log("fe", focusedElement());
-		console.log("fp", focusPoint());
-	}); */
 	const pointsTransformed = createMemo(() =>
 		points().map((p) => p.sub(focusPoint()).scale(zoom())),
 	);
 	const pointsIftTransformed = createMemo(() =>
 		pointsIftAcc().map(([p, i]) => [p.sub(focusPoint()).scale(zoom()), i]),
 	);
-	/* createEffect(() => {
-		console.log("ts", pointstransformed());
-	}); */
 
 	const setupCanvas = (canvas: HTMLCanvasElement) => {
 		const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
@@ -103,29 +79,7 @@ export function DrawingCanvas() {
 
 		attachDrawingLogic(canvas, points, setPoints);
 
-		const resizeCanvas = () => {
-			const width = Math.min(
-				window.innerWidth * relativeWidth,
-				window.innerHeight * relativeHeight,
-			);
-			const height = width;
-
-			if (canvas.width !== width || canvas.height !== height) {
-				canvas.width = width;
-				canvas.height = height;
-
-				// Scale the canvas to fit the coordinate system
-				ctx.translate(canvas.width / 2, canvas.height / 2);
-				ctx.scale(canvas.width / 2, -canvas.height / 2);
-			}
-		};
-
-		window.addEventListener("resize", resizeCanvas);
-		onCleanup(() => {
-			window.removeEventListener("resize", resizeCanvas);
-		});
-
-		resizeCanvas();
+		attachResizingLogic(relativeWidth, relativeHeight, canvas, ctx);
 
 		let lastTime = performance.now();
 		const animationLoop = (timestamp: DOMHighResTimeStamp) => {
@@ -247,84 +201,13 @@ export function DrawingCanvas() {
 					setPointOrdering={setPointOrdering}
 					setPointOrderingReversed={setPointOrderingReversed}
 				/>
-				<fieldset>
-					<legend>Drawings</legend>
-					<div
-						style={{
-							display: "grid",
-						}}
-					>
-						<span
-							style={{
-								display: "grid",
-								grid: "auto-flow dense/ 0fr 1fr",
-								gap: "1rem",
-								"align-items": "center",
-							}}
-						>
-							Parameter:
-							<input
-								type="number"
-								value={128}
-								min={1}
-								onInput={(e) => setDrawingParameter(Number(e.target.value))}
-							/>
-						</span>
-						<For
-							each={[
-								{ title: "Circle", drawing: drawings.circle, connectEnds: true },
-								{ title: "Spiral", drawing: drawings.spiral, connectEnds: false },
-								{
-									title: "Log Spiral",
-									drawing: drawings.logSpiral,
-									connectEnds: false,
-								},
-								{
-									title: "Two Points",
-									drawing: drawings.twoPoints,
-									connectEnds: false,
-								},
-								{ title: "Heart", drawing: drawings.heart, connectEnds: true },
-								{ title: "Wave", drawing: drawings.wave, connectEnds: false },
-								{ title: "S", drawing: drawings.s, connectEnds: true },
-								{
-									title: "Infinity",
-									drawing: drawings.infinity,
-									connectEnds: true,
-								},
-								{
-									title: "Infinity (Geometric)",
-									drawing: drawings.infinityGeometric,
-									connectEnds: true,
-								},
-								{ title: "Hilbert", drawing: drawings.hilbert, connectEnds: false },
-								{ title: "Moore", drawing: drawings.moore, connectEnds: true },
-								{
-									title: "Random uniform",
-									drawing: drawings.uniform,
-									connectEnds: false,
-								},
-								{
-									title: "Random gaussian",
-									drawing: drawings.uniform,
-									connectEnds: false,
-								},
-							]}
-						>
-							{({ title, drawing, connectEnds }) => (
-								<button
-									onClick={() => {
-										setConnectEnds(connectEnds);
-										setPoints(drawing(drawingParameter()));
-										setRawZoom(0.25);
-									}}
-								>
-									{title}
-								</button>
-							)}
-						</For>
-					</div>
-				</fieldset>
+				<DrawingsFieldset
+					setDrawingParameter={setDrawingParameter}
+					setConnectEnds={setConnectEnds}
+					setPoints={setPoints}
+					drawingParameter={drawingParameter}
+					setRawZoom={setRawZoom}
+				/>
 				<fieldset>
 					<legend>Misc</legend>
 					<div
@@ -350,44 +233,6 @@ export function DrawingCanvas() {
 				</fieldset>
 			</div>
 		</>
-	);
-}
-
-function OrderingFieldset({
-	setPointOrdering,
-	setPointOrderingReversed,
-}: {
-	setPointOrdering: Setter<Ordering>;
-	setPointOrderingReversed: Setter<boolean>;
-}) {
-	return (
-		<fieldset>
-			<legend>Ordering</legend>
-			<div
-				style={{
-					display: "grid",
-					"grid-template-columns": "1fr",
-				}}
-			>
-				<For each={Object.entries(orderingData)}>
-					{([ordering, description], i) => (
-						<label>
-							<input
-								type="radio"
-								name="ordering"
-								value={ordering}
-								onInput={(el) =>
-									setPointOrdering((previous) => el.target.value as Ordering)
-								}
-								checked={ordering === "alternating"}
-							/>
-							{description}
-						</label>
-					)}
-				</For>
-				<Checkbox setValue={setPointOrderingReversed}>Reversed</Checkbox>
-			</div>
-		</fieldset>
 	);
 }
 
@@ -464,7 +309,7 @@ function drawDft(
 			idx === 0
 				? `color-mix(in lch, ${rgbToCss(turboColormapSample(0.1))}, ${rgbToCss(
 						turboColormapSample(0.9),
-				  )})`
+					)})`
 				: rgbToCss(turboColormapSample((idx / samples) * 0.8 + 0.1));
 		ctx.lineTo(points[i][0].x, points[i][0].y);
 		ctx.stroke();
@@ -537,5 +382,36 @@ function attachDrawingLogic(
 		canvas.removeEventListener("touchcancel", stopDrawing);
 		canvas.removeEventListener("mouseleave", stopDrawing);
 	});
+}
+
+function attachResizingLogic(
+	relativeWidth: number,
+	relativeHeight: number,
+	canvas: HTMLCanvasElement,
+	ctx: CanvasRenderingContext2D,
+) {
+	const resizeCanvas = () => {
+		const width = Math.min(
+			window.innerWidth * relativeWidth,
+			window.innerHeight * relativeHeight,
+		);
+		const height = width;
+
+		if (canvas.width !== width || canvas.height !== height) {
+			canvas.width = width;
+			canvas.height = height;
+
+			// Scale the canvas to fit the coordinate system
+			ctx.translate(canvas.width / 2, canvas.height / 2);
+			ctx.scale(canvas.width / 2, -canvas.height / 2);
+		}
+	};
+
+	window.addEventListener("resize", resizeCanvas);
+	onCleanup(() => {
+		window.removeEventListener("resize", resizeCanvas);
+	});
+
+	resizeCanvas();
 }
 /* style="width: 100%; border: 1px solid black; display: block;" */
