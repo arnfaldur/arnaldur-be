@@ -1,0 +1,49 @@
+#fft-drawer {
+	position: fixed;
+	inset: 0;
+	display: flex;
+
+	> aside {
+		overflow: scroll;
+		margin-right: 0;
+
+		> fieldset {
+			margin-bottom: 0;
+
+			&.slider-grid {
+				display: grid;
+				grid: auto-flow dense / 0fr 1fr;
+				gap: 0 1rem;
+
+				> input[type="range"] {
+					width: 100%;
+					margin: 0 auto 0.75rem auto;
+				}
+			}
+
+			> div {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+
+				> span {
+					display: grid;
+					grid: auto-flow dense / 0fr 1fr;
+					gap: 1rem;
+					align-items: center;
+					grid-column: 1 / -1;
+				}
+			}
+		}
+	}
+
+	> div {
+		width: 6px;
+		cursor: col-resize;
+		flex-shrink: 0;
+	}
+
+	> canvas {
+		flex: 1;
+		min-width: 0;
+	}
+}

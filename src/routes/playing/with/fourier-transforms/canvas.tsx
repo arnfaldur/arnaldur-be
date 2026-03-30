@@ -53,7 +53,7 @@ export function DrawingCanvas() {
 	const focusPoint = createMemo(() => {
 		const acc = pointsIftAcc();
 		const focus = focusedElement();
-		return focus < acc.length ? acc[focus][0] : new Point(0, 0);
+		return acc[Math.min(acc.length - 1, focus)][0];
 	});
 	const pointsTransformed = createMemo(() =>
 		points().map((p) => p.sub(focusPoint()).scale(zoom())),
@@ -121,7 +121,7 @@ export function DrawingCanvas() {
 		if (checkbox) checkbox.checked = connectEnds();
 	});
 
-	const [sidebarWidth, setSidebarWidth] = createSignal(416);
+	const [sidebarWidth, setSidebarWidth] = createSignal(327);
 
 	const onGripPointerDown = (e: PointerEvent) => {
 		const grip = e.currentTarget as HTMLElement;
@@ -137,14 +137,9 @@ export function DrawingCanvas() {
 	};
 
 	return (
-		<div style={{ position: "fixed", inset: "0", display: "flex" }}>
-			<aside
-				class="left"
-				style={{ overflow: "scroll", width: `${sidebarWidth()}px`, "margin-right": 0 }}
-			>
-				<fieldset
-					style={{ display: "grid", grid: "auto-flow dense / 0fr 1fr", gap: "0 1rem" }}
-				>
+		<div id="fft-drawer">
+			<aside class="left" style={{ width: `${sidebarWidth()}px` }}>
+				<fieldset class="slider-grid">
 					<legend>Animation speed</legend>
 					Progress
 					<input
@@ -156,10 +151,6 @@ export function DrawingCanvas() {
 						value={0}
 						max={1}
 						step="any"
-						style={{
-							width: "100%",
-							margin: "0 auto 0.75rem auto",
-						}}
 						onInput={(v) => {
 							setUnscaledRotationRate(0);
 							setRotation(Number(v.target.value) * pointsIftSel().length);
@@ -172,9 +163,7 @@ export function DrawingCanvas() {
 						setValue={setUnscaledRotationRate}
 					/>
 				</fieldset>
-				<fieldset
-					style={{ display: "grid", grid: "auto-flow dense / 0fr 1fr", gap: "0 1rem" }}
-				>
+				<fieldset class="slider-grid">
 					<legend>Camera</legend>
 					Element
 					<input
@@ -182,10 +171,6 @@ export function DrawingCanvas() {
 						value={0}
 						max={1}
 						step={1 / points().length}
-						style={{
-							width: "100%",
-							margin: "0 auto 0.75rem auto",
-						}}
 						onInput={(e) => {
 							setFocusedElement(
 								Math.round(Number(e.target.value) * pointsIft().length),
@@ -195,45 +180,29 @@ export function DrawingCanvas() {
 					Zoom
 					<Slider value={0.25} setValue={setRawZoom} />
 				</fieldset>
-
-				<div
-					style={{
-						display: "grid",
-						"grid-template-columns": "1fr 1fr 1fr",
-					}}
+				<OrderingFieldset
+					setPointOrdering={setPointOrdering}
+					setPointOrderingReversed={setPointOrderingReversed}
+				/>
+				<MiscFieldset
+					setPoints={setPoints}
+					setConnectEnds={setConnectEnds}
+					setConnectEndsCheckbox={setConnectEndsCheckbox}
+					setRawZoom={setRawZoom}
 				>
-					<OrderingFieldset
-						setPointOrdering={setPointOrdering}
-						setPointOrderingReversed={setPointOrderingReversed}
-					/>
-					<DrawingsFieldset
-						setDrawingParameter={setDrawingParameter}
-						setConnectEnds={setConnectEnds}
-						setPoints={setPoints}
-						drawingParameter={drawingParameter}
-						setRawZoom={setRawZoom}
-					/>
-					<MiscFieldset
-						setPoints={setPoints}
-						setConnectEnds={setConnectEnds}
-						setConnectEndsCheckbox={setConnectEndsCheckbox}
-						setRawZoom={setRawZoom}
-					>
-						<button onClick={() => undoPoint(1)}>Undo</button>
-						<button onClick={() => undoPoint(10)}>Undo 10</button>
-					</MiscFieldset>
-				</div>
+					<button onClick={() => undoPoint(1)}>Undo</button>
+					<button onClick={() => undoPoint(10)}>Undo 10</button>
+				</MiscFieldset>
+				<DrawingsFieldset
+					setDrawingParameter={setDrawingParameter}
+					setConnectEnds={setConnectEnds}
+					setPoints={setPoints}
+					drawingParameter={drawingParameter}
+					setRawZoom={setRawZoom}
+				/>
 			</aside>
-			<div
-				onPointerDown={onGripPointerDown}
-				style={{ width: "6px", cursor: "col-resize", "flex-shrink": "0" }}
-			/>
-			<canvas
-				ref={setupCanvas}
-				width="400"
-				height="400"
-				style={{ flex: "1", "min-width": "0" }}
-			/>
+			<div onPointerDown={onGripPointerDown} />
+			<canvas ref={setupCanvas} width="400" height="400" />
 		</div>
 	);
 }

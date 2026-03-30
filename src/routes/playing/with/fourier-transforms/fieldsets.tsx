@@ -48,15 +48,8 @@ export function DrawingsFieldset({
 	return (
 		<fieldset>
 			<legend>Drawings</legend>
-			<div style={{ display: "grid" }}>
-				<span
-					style={{
-						display: "grid",
-						grid: "auto-flow dense/ 0fr 1fr",
-						gap: "1rem",
-						"align-items": "center",
-					}}
-				>
+			<div>
+				<span>
 					Parameter:
 					<input
 						type="number"
@@ -71,7 +64,7 @@ export function DrawingsFieldset({
 							onClick={() => {
 								setConnectEnds(connectEnds);
 								setPoints(drawing(drawingParameter()));
-								setRawZoom(0.25);
+								//setRawZoom(0.25);
 							}}
 						>
 							{title}
@@ -99,12 +92,7 @@ export function MiscFieldset({
 	return (
 		<fieldset>
 			<legend>Misc</legend>
-			<div
-				style={{
-					display: "grid",
-					"grid-template-rows": "1fr 1fr 1fr",
-				}}
-			>
+			<div>
 				{children}
 				<button
 					type="reset"
@@ -138,12 +126,7 @@ export function OrderingFieldset({
 	return (
 		<fieldset>
 			<legend>Ordering</legend>
-			<div
-				style={{
-					display: "grid",
-					"grid-template-columns": "1fr",
-				}}
-			>
+			<div>
 				<For each={Object.entries(orderingData)}>
 					{([ordering, description]) => (
 						<label>
