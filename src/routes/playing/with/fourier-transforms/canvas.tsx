@@ -8,9 +8,6 @@ import * as drawings from "./drawings";
 import { DrawingsFieldset, MiscFieldset, OrderingFieldset, type Ordering } from "./fieldsets";
 
 export function DrawingCanvas() {
-	const relativeWidth = 0.99;
-	const relativeHeight = 0.7;
-
 	const strokeStyle = "white";
 	const lineWidth = 2;
 
@@ -69,14 +66,9 @@ export function DrawingCanvas() {
 		const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
 		if (!ctx) return null;
 
-		const reScale = window?.devicePixelRatio ?? 1;
-		// Scale the canvas to fit the desired coordinate system
-		ctx.translate(canvas.width / 2, canvas.height / 2);
-		ctx.scale((canvas.width / 2) * reScale, (-canvas.height / 2) * reScale);
-
 		attachDrawingLogic(canvas, points, setPoints);
 
-		attachResizingLogic(relativeWidth, relativeHeight, canvas, ctx);
+		attachResizingLogic(canvas, ctx);
 
 		let lastTime = performance.now();
 		let frameId: number;
@@ -90,9 +82,12 @@ export function DrawingCanvas() {
 				setRotation((rotation) => rotation % pointsIftSel().length);
 			}
 
-			ctx.clearRect(-1, -1, 2, 2);
+			const s = Math.min(canvas.width, canvas.height);
+			const cw = canvas.width / s;
+			const ch = canvas.height / s;
+			ctx.clearRect(-cw, -ch, 2 * cw, 2 * ch);
 
-			ctx.lineWidth = lineWidth / (ctx.canvas.height ?? 400);
+			ctx.lineWidth = lineWidth / (s ?? 400);
 			drawDft(ctx, pointsIftTransformed);
 			ctx.strokeStyle = strokeStyle;
 			drawPoints(ctx, pointsTransformed(), connectEnds());
@@ -126,95 +121,120 @@ export function DrawingCanvas() {
 		if (checkbox) checkbox.checked = connectEnds();
 	});
 
+	const [sidebarWidth, setSidebarWidth] = createSignal(416);
+
+	const onGripPointerDown = (e: PointerEvent) => {
+		const grip = e.currentTarget as HTMLElement;
+		grip.setPointerCapture(e.pointerId);
+		const offset = e.clientX - sidebarWidth();
+		const onMove = (e: PointerEvent) => setSidebarWidth(Math.max(0, e.clientX - offset));
+		const onUp = () => {
+			grip.removeEventListener("pointermove", onMove);
+			grip.removeEventListener("pointerup", onUp);
+		};
+		grip.addEventListener("pointermove", onMove);
+		grip.addEventListener("pointerup", onUp);
+	};
+
 	return (
-		<>
+		<div style={{ position: "fixed", inset: "0", display: "flex" }}>
+			<aside
+				class="left"
+				style={{ overflow: "scroll", width: `${sidebarWidth()}px`, "margin-right": 0 }}
+			>
+				<fieldset
+					style={{ display: "grid", grid: "auto-flow dense / 0fr 1fr", gap: "0 1rem" }}
+				>
+					<legend>Animation speed</legend>
+					Progress
+					<input
+						ref={(el) => {
+							setRotation(Number(el.value) * pointsIftSel().length);
+							setPositionSlider(el);
+						}}
+						type="range"
+						value={0}
+						max={1}
+						step="any"
+						style={{
+							width: "100%",
+							margin: "0 auto 0.75rem auto",
+						}}
+						onInput={(v) => {
+							setUnscaledRotationRate(0);
+							setRotation(Number(v.target.value) * pointsIftSel().length);
+						}}
+					/>
+					Speed
+					<Slider
+						ref={setAnimationSpeedSlider}
+						value={0.5}
+						setValue={setUnscaledRotationRate}
+					/>
+				</fieldset>
+				<fieldset
+					style={{ display: "grid", grid: "auto-flow dense / 0fr 1fr", gap: "0 1rem" }}
+				>
+					<legend>Camera</legend>
+					Element
+					<input
+						type="range"
+						value={0}
+						max={1}
+						step={1 / points().length}
+						style={{
+							width: "100%",
+							margin: "0 auto 0.75rem auto",
+						}}
+						onInput={(e) => {
+							setFocusedElement(
+								Math.round(Number(e.target.value) * pointsIft().length),
+							);
+						}}
+					/>
+					Zoom
+					<Slider value={0.25} setValue={setRawZoom} />
+				</fieldset>
+
+				<div
+					style={{
+						display: "grid",
+						"grid-template-columns": "1fr 1fr 1fr",
+					}}
+				>
+					<OrderingFieldset
+						setPointOrdering={setPointOrdering}
+						setPointOrderingReversed={setPointOrderingReversed}
+					/>
+					<DrawingsFieldset
+						setDrawingParameter={setDrawingParameter}
+						setConnectEnds={setConnectEnds}
+						setPoints={setPoints}
+						drawingParameter={drawingParameter}
+						setRawZoom={setRawZoom}
+					/>
+					<MiscFieldset
+						setPoints={setPoints}
+						setConnectEnds={setConnectEnds}
+						setConnectEndsCheckbox={setConnectEndsCheckbox}
+						setRawZoom={setRawZoom}
+					>
+						<button onClick={() => undoPoint(1)}>Undo</button>
+						<button onClick={() => undoPoint(10)}>Undo 10</button>
+					</MiscFieldset>
+				</div>
+			</aside>
+			<div
+				onPointerDown={onGripPointerDown}
+				style={{ width: "6px", cursor: "col-resize", "flex-shrink": "0" }}
+			/>
 			<canvas
 				ref={setupCanvas}
 				width="400"
 				height="400"
-				style={{
-					border: "1px solid black",
-					position: "relative",
-					left: "50%",
-					"margin-left": `max(-${relativeWidth * 50}vw, -${relativeHeight * 50}vh)`,
-				}}
+				style={{ flex: "1", "min-width": "0" }}
 			/>
-			<fieldset style={{ display: "grid", grid: "auto-flow dense / 0fr 1fr", gap: "0 1rem" }}>
-				<legend>Animation speed</legend>
-				Progress
-				<input
-					ref={(el) => {
-						setRotation(Number(el.value) * pointsIftSel().length);
-						setPositionSlider(el);
-					}}
-					type="range"
-					value={0}
-					max={1}
-					step="any"
-					style={{
-						width: "100%",
-						margin: "0 auto 0.75rem auto",
-					}}
-					onInput={(v) => {
-						setUnscaledRotationRate(0);
-						setRotation(Number(v.target.value) * pointsIftSel().length);
-					}}
-				/>
-				Speed
-				<Slider
-					ref={setAnimationSpeedSlider}
-					value={0.5}
-					setValue={setUnscaledRotationRate}
-				/>
-			</fieldset>
-			<fieldset style={{ display: "grid", grid: "auto-flow dense / 0fr 1fr", gap: "0 1rem" }}>
-				<legend>Camera</legend>
-				Element
-				<input
-					type="range"
-					value={0}
-					max={1}
-					step={1 / points().length}
-					style={{
-						width: "100%",
-						margin: "0 auto 0.75rem auto",
-					}}
-					onInput={(e) => {
-						setFocusedElement(Math.round(Number(e.target.value) * pointsIft().length));
-					}}
-				/>
-				Zoom
-				<Slider value={0.25} setValue={setRawZoom} />
-			</fieldset>
-
-			<div
-				style={{
-					display: "grid",
-					"grid-template-columns": "1fr 1fr 1fr",
-				}}
-			>
-				<OrderingFieldset
-					setPointOrdering={setPointOrdering}
-					setPointOrderingReversed={setPointOrderingReversed}
-				/>
-				<DrawingsFieldset
-					setDrawingParameter={setDrawingParameter}
-					setConnectEnds={setConnectEnds}
-					setPoints={setPoints}
-					drawingParameter={drawingParameter}
-					setRawZoom={setRawZoom}
-				/>
-				<MiscFieldset
-					setPoints={setPoints}
-					setConnectEnds={setConnectEnds}
-					setConnectEndsCheckbox={setConnectEndsCheckbox}
-					setRawZoom={setRawZoom}
-				>
-					<button onClick={() => undoPoint(1)}>Undo</button>
-					<button onClick={() => undoPoint(10)}>Undo 10</button>
-				</MiscFieldset>
-			</div>
-		</>
+		</div>
 	);
 }
 
@@ -332,8 +352,9 @@ function attachDrawingLogic(
 
 	const getPosition = (event: MouseEvent | Touch): Point | null => {
 		const rect = canvas.getBoundingClientRect();
-		const x = (event.clientX - rect.left - canvas.width / 2) / (canvas.width / 2);
-		const y = -(event.clientY - rect.top - canvas.height / 2) / (canvas.height / 2);
+		const s = Math.min(rect.width, rect.height) / 2;
+		const x = (event.clientX - rect.left - rect.width / 2) / s;
+		const y = -(event.clientY - rect.top - rect.height / 2) / s;
 		const result = new Point(x, y);
 		return result.inBounds() ? result : null;
 	};
@@ -360,33 +381,27 @@ function attachDrawingLogic(
 	});
 }
 
-function attachResizingLogic(
-	relativeWidth: number,
-	relativeHeight: number,
-	canvas: HTMLCanvasElement,
-	ctx: CanvasRenderingContext2D,
-) {
+function applyCanvasTransform(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
+	const s = Math.min(canvas.width, canvas.height) / 2;
+	ctx.translate(canvas.width / 2, canvas.height / 2);
+	ctx.scale(s, -s);
+}
+
+function attachResizingLogic(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
 	const resizeCanvas = () => {
-		const width = Math.min(
-			window.innerWidth * relativeWidth,
-			window.innerHeight * relativeHeight,
-		);
-		const height = width;
+		const width = canvas.clientWidth;
+		const height = canvas.clientHeight;
 
 		if (canvas.width !== width || canvas.height !== height) {
 			canvas.width = width;
 			canvas.height = height;
-
-			// Scale the canvas to fit the coordinate system
-			ctx.translate(canvas.width / 2, canvas.height / 2);
-			ctx.scale(canvas.width / 2, -canvas.height / 2);
+			applyCanvasTransform(canvas, ctx);
 		}
 	};
 
-	window.addEventListener("resize", resizeCanvas);
-	onCleanup(() => {
-		window.removeEventListener("resize", resizeCanvas);
-	});
+	const observer = new ResizeObserver(resizeCanvas);
+	observer.observe(canvas);
+	onCleanup(() => observer.disconnect());
 
 	resizeCanvas();
 }
