@@ -111,8 +111,20 @@ export function DrawingCanvas() {
 
 			frameId = requestAnimationFrame(animationLoop);
 		};
-		frameId = requestAnimationFrame(animationLoop);
-		onCleanup(() => cancelAnimationFrame(frameId));
+		const startLoop = () => {
+			lastTime = performance.now();
+			frameId = requestAnimationFrame(animationLoop);
+		};
+		const onBlur = () => cancelAnimationFrame(frameId);
+		const onFocus = () => startLoop();
+		window.addEventListener("blur", onBlur);
+		window.addEventListener("focus", onFocus);
+		startLoop();
+		onCleanup(() => {
+			cancelAnimationFrame(frameId);
+			window.removeEventListener("blur", onBlur);
+			window.removeEventListener("focus", onFocus);
+		});
 	};
 
 	const undoPoint = (undos: number) => {
