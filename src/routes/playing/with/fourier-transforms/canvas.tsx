@@ -5,7 +5,13 @@ import { Point } from "./Point";
 import { gifft, shuffleArray } from "./fourier-transforms";
 import { Slider } from "./components";
 import * as drawings from "./drawings";
-import { DrawingsFieldset, MiscFieldset, type Ordering, OrderingFieldset } from "./fieldsets";
+import {
+	DrawingsFieldset,
+	MiscFieldset,
+	OpacityFieldset,
+	type Ordering,
+	OrderingFieldset,
+} from "./fieldsets";
 
 export function DrawingCanvas() {
 	const strokeStyle = "white";
@@ -27,6 +33,10 @@ export function DrawingCanvas() {
 
 	const [rawZoom, setRawZoom] = createSignal(0.25);
 	const zoom = createMemo(() => Math.pow(2, rawZoom() * 12 - 3));
+
+	const [drawingOpacity, setDrawingOpacity] = createSignal(1);
+	const [dftOpacity, setDftOpacity] = createSignal(1);
+	const [trailOpacity, setTrailOpacity] = createSignal(1);
 
 	const visiblePoints = createMemo(() => points().filter((point) => point.visible));
 
@@ -88,9 +98,16 @@ export function DrawingCanvas() {
 			ctx.clearRect(-cw, -ch, 2 * cw, 2 * ch);
 
 			ctx.lineWidth = lineWidth / (s ?? 400);
-			drawDft(ctx, pointsIftTransformed);
-			ctx.strokeStyle = strokeStyle;
-			drawPoints(ctx, pointsTransformed(), connectEnds());
+			if (dftOpacity() > 0) {
+				ctx.globalAlpha = dftOpacity();
+				drawDft(ctx, pointsIftTransformed);
+			}
+			if (drawingOpacity() > 0) {
+				ctx.globalAlpha = drawingOpacity();
+				ctx.strokeStyle = strokeStyle;
+				drawPoints(ctx, pointsTransformed(), connectEnds());
+			}
+			ctx.globalAlpha = 1;
 
 			frameId = requestAnimationFrame(animationLoop);
 		};
@@ -181,6 +198,11 @@ export function DrawingCanvas() {
 					Zoom
 					<Slider value={0.25} setValue={setRawZoom} />
 				</fieldset>
+				<OpacityFieldset
+					setDrawingOpacity={setDrawingOpacity}
+					setDftOpacity={setDftOpacity}
+					setTrailOpacity={setTrailOpacity}
+				/>
 				<OrderingFieldset
 					setPointOrdering={setPointOrdering}
 					setPointOrderingReversed={setPointOrderingReversed}

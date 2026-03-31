@@ -2,7 +2,7 @@ import { For, JSXElement } from "solid-js";
 import { Accessor, Setter } from "solid-js";
 
 import { Point } from "./Point";
-import { Checkbox } from "./components";
+import { Checkbox, Slider } from "./components";
 import * as drawings from "./drawings";
 
 export type Ordering = "default" | "insideOut" | "alternating" | "bySize" | "byAngle" | "shuffled";
@@ -112,6 +112,28 @@ export function MiscFieldset({
 				</input>
 				Connect Ends
 			</label>
+		</fieldset>
+	);
+}
+
+export function OpacityFieldset({
+	setDrawingOpacity,
+	setDftOpacity,
+	setTrailOpacity,
+}: {
+	setDrawingOpacity: Setter<number>;
+	setDftOpacity: Setter<number>;
+	setTrailOpacity: Setter<number>;
+}) {
+	return (
+		<fieldset class="slider-grid">
+			<legend>Opacity</legend>
+			Drawing
+			<Slider value={1} setValue={setDrawingOpacity} />
+			DFT
+			<Slider value={1} setValue={setDftOpacity} />
+			Trail
+			<Slider value={1} setValue={setTrailOpacity} />
 		</fieldset>
 	);
 }
