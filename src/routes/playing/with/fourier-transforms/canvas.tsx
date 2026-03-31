@@ -257,28 +257,33 @@ function createPointOrderings(
 	return pointsSelected;
 }
 
+const dcColor = `color-mix(in lch, ${rgbToCss(turboColormapSample(0.1))}, ${rgbToCss(turboColormapSample(0.9))})`;
+
+let strokeStyleCache: string[] = [];
+
+function getStrokeStyles(samples: number): string[] {
+	if (samples === strokeStyleCache.length) return strokeStyleCache;
+	strokeStyleCache = new Array(samples);
+	for (let i = 0; i < samples; ++i) {
+		strokeStyleCache[i] = rgbToCss(turboColormapSample((i / samples) * 0.8 + 0.1));
+	}
+	return strokeStyleCache;
+}
+
 function drawDft(ctx: CanvasRenderingContext2D, pointsSelected: Accessor<[Point, number][]>) {
-	ctx.strokeStyle = rgbToCss(turboColormapSample(0));
 	const points = pointsSelected();
-	for (let i = 0; i < points.length; ++i) {
+	const samples = points.length;
+	const styles = getStrokeStyles(samples);
+	for (let i = 0; i < samples; ++i) {
 		const idx = points[i][1];
-
-		const samples = points.length;
-
 		ctx.beginPath();
 
 		if (i !== 0) {
 			ctx.moveTo(points[i - 1][0].x, points[i - 1][0].y);
 		}
-		ctx.strokeStyle =
-			idx === 0
-				? `color-mix(in lch, ${rgbToCss(turboColormapSample(0.1))}, ${rgbToCss(
-						turboColormapSample(0.9),
-					)})`
-				: rgbToCss(turboColormapSample((idx / samples) * 0.8 + 0.1));
+		ctx.strokeStyle = idx === 0 ? dcColor : styles[idx];
 		ctx.lineTo(points[i][0].x, points[i][0].y);
 		ctx.stroke();
-		ctx.closePath();
 	}
 }
 
