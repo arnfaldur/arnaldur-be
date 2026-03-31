@@ -81,12 +81,6 @@ export function DrawingCanvas() {
 		const focus = focusedElement();
 		return acc[Math.min(acc.length - 1, focus)][0];
 	});
-	const pointsTransformed = createMemo(() =>
-		points().map((p) => p.sub(focusPoint()).scale(zoom()))
-	);
-	const pointsIftTransformed = createMemo(() =>
-		pointsIftAcc().map<[Point, number]>(([p, i]) => [p.sub(focusPoint()).scale(zoom()), i])
-	);
 
 	const setupCanvas = (canvas: HTMLCanvasElement) => {
 		const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
@@ -113,7 +107,13 @@ export function DrawingCanvas() {
 			const ch = canvas.height / s;
 			ctx.clearRect(-cw, -ch, 2 * cw, 2 * ch);
 
-			ctx.lineWidth = lineWidth / (s ?? 400);
+			ctx.save();
+			const z = zoom();
+			ctx.scale(z, z);
+			const fp = focusPoint();
+			ctx.translate(-fp.x, -fp.y);
+			ctx.lineWidth = lineWidth / (s * z);
+
 			if (trailOpacity() > 0 && trailLength() > 0) {
 				ctx.globalAlpha = trailOpacity();
 				ctx.strokeStyle = strokeStyle;
@@ -127,22 +127,20 @@ export function DrawingCanvas() {
 					const tailExact = headExact - trailLength() * M;
 					const tailInt = Math.ceil(tailExact);
 					const tailFrac = tailInt - tailExact;
-					const fp = focusPoint();
-					const z = zoom();
 					const acc = pointsIftAcc();
 					const tip = acc[acc.length - 1][0];
 					ctx.beginPath();
-					ctx.moveTo((tip.x - fp.x) * z, (tip.y - fp.y) * z);
+					ctx.moveTo(tip.x, tip.y);
 					for (let i = headInt; i >= tailInt; i--) {
 						const p = at(i);
-						ctx.lineTo((p.x - fp.x) * z, (p.y - fp.y) * z);
+						ctx.lineTo(p.x, p.y);
 					}
 					if (tailFrac > 0) {
 						const a = at(tailInt);
 						const b = at(tailInt - 1);
 						ctx.lineTo(
-							(a.x + (b.x - a.x) * tailFrac - fp.x) * z,
-							(a.y + (b.y - a.y) * tailFrac - fp.y) * z,
+							a.x + (b.x - a.x) * tailFrac,
+							a.y + (b.y - a.y) * tailFrac,
 						);
 					}
 					ctx.stroke();
@@ -150,14 +148,15 @@ export function DrawingCanvas() {
 			}
 			if (dftOpacity() > 0) {
 				ctx.globalAlpha = dftOpacity();
-				drawDft(ctx, pointsIftTransformed);
+				drawDft(ctx, pointsIftAcc);
 			}
 			if (drawingOpacity() > 0) {
 				ctx.globalAlpha = drawingOpacity();
 				ctx.strokeStyle = strokeStyle;
-				drawPoints(ctx, pointsTransformed(), connectEnds());
+				drawPoints(ctx, points(), connectEnds());
 			}
 			ctx.globalAlpha = 1;
+			ctx.restore();
 
 			frameId = requestAnimationFrame(animationLoop);
 		};
