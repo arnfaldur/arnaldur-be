@@ -2,7 +2,7 @@ import { Accessor, createEffect, createMemo, createSignal, onCleanup, Setter } f
 
 import { rgbToCss, turboColormapSample } from "~/utils/colormap";
 import { Point } from "./Point";
-import { gifft, shuffleArray } from "./fourier-transforms";
+import { fft, gifft, shuffleArray } from "./fourier-transforms";
 import { Slider } from "./components";
 import * as drawings from "./drawings";
 import {
@@ -36,13 +36,29 @@ export function DrawingCanvas() {
 
 	const [drawingOpacity, setDrawingOpacity] = createSignal(1);
 	const [dftOpacity, setDftOpacity] = createSignal(1);
-	const [trailOpacity, setTrailOpacity] = createSignal(1);
+	const [trailOpacity, setTrailOpacity] = createSignal(0.25);
+	const [trailLength, setTrailLength] = createSignal(0.1);
 
 	const visiblePoints = createMemo(() => points().filter((point) => point.visible));
 
 	const pointsIft = createMemo(() =>
 		gifft(visiblePoints()).map<[Point, number]>((point, i) => [point, i])
 	);
+	const trail = createMemo(() => {
+		const coeffs = pointsIft();
+		const N = coeffs.length;
+		if (N === 0) return [];
+		const M = Math.pow(2, Math.ceil(Math.log2(8 * N)));
+		const D: Point[] = Array.from({ length: M }, () => new Point(0, 0));
+		for (let k = 0; k < N; k++) {
+			if (k < N / 2) {
+				D[k] = coeffs[k][0];
+			} else {
+				D[M - N + k] = coeffs[k][0];
+			}
+		}
+		return fft(D);
+	});
 	const pointsIftSel = createPointOrderings(pointsIft, pointOrdering, pointOrderingReversed);
 	const pointsIftAcc = createMemo(() => {
 		let acc = new Point(0, 0);
@@ -98,6 +114,40 @@ export function DrawingCanvas() {
 			ctx.clearRect(-cw, -ch, 2 * cw, 2 * ch);
 
 			ctx.lineWidth = lineWidth / (s ?? 400);
+			if (trailOpacity() > 0 && trailLength() > 0) {
+				ctx.globalAlpha = trailOpacity();
+				ctx.strokeStyle = strokeStyle;
+				const trailPoints = trail();
+				const M = trailPoints.length;
+				if (M > 0) {
+					const N = pointsIft().length;
+					const at = (i: number) => trailPoints[((i % M) + M) % M];
+					const headExact = ((rotation() % N) / N) * M;
+					const headInt = Math.floor(headExact);
+					const tailExact = headExact - trailLength() * M;
+					const tailInt = Math.ceil(tailExact);
+					const tailFrac = tailInt - tailExact;
+					const fp = focusPoint();
+					const z = zoom();
+					const acc = pointsIftAcc();
+					const tip = acc[acc.length - 1][0];
+					ctx.beginPath();
+					ctx.moveTo((tip.x - fp.x) * z, (tip.y - fp.y) * z);
+					for (let i = headInt; i >= tailInt; i--) {
+						const p = at(i);
+						ctx.lineTo((p.x - fp.x) * z, (p.y - fp.y) * z);
+					}
+					if (tailFrac > 0) {
+						const a = at(tailInt);
+						const b = at(tailInt - 1);
+						ctx.lineTo(
+							(a.x + (b.x - a.x) * tailFrac - fp.x) * z,
+							(a.y + (b.y - a.y) * tailFrac - fp.y) * z,
+						);
+					}
+					ctx.stroke();
+				}
+			}
 			if (dftOpacity() > 0) {
 				ctx.globalAlpha = dftOpacity();
 				drawDft(ctx, pointsIftTransformed);
@@ -170,7 +220,7 @@ export function DrawingCanvas() {
 		<div id="fft-drawer">
 			<aside class="left" style={{ width: `${sidebarWidth()}px` }}>
 				<fieldset class="slider-grid">
-					<legend>Animation speed</legend>
+					<legend>Animation</legend>
 					Progress
 					<input
 						ref={(el) => {
@@ -225,6 +275,10 @@ export function DrawingCanvas() {
 					setConnectEndsCheckbox={setConnectEndsCheckbox}
 					setRawZoom={setRawZoom}
 				>
+					<span>
+						Trail length
+						<Slider value={1} setValue={setTrailLength} />
+					</span>
 					<button onClick={() => undoPoint(1)}>Undo</button>
 					<button onClick={() => undoPoint(10)}>Undo 10</button>
 				</MiscFieldset>

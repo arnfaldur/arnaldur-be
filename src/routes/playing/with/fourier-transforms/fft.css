@@ -22,6 +22,20 @@
 				display: flex;
 				flex-wrap: wrap;
 				gap: 0.5rem;
+
+				> span {
+					display: flex;
+					width: 100%;
+					gap: 1rem;
+					align-items: center;
+					margin-bottom: 0.25rem;
+
+					> input[type="range"] {
+						flex: 1;
+						min-width: 0;
+						margin: 0;
+					}
+				}
 			}
 
 			> :not(legend) {
