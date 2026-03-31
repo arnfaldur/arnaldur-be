@@ -46,32 +46,32 @@ export function DrawingsFieldset({
 	setRawZoom: Setter<number>;
 }) {
 	return (
-		<fieldset>
+		<fieldset class="flex">
 			<legend>Drawings</legend>
-			<div>
-				<span>
-					Parameter:
-					<input
-						type="number"
-						value={128}
-						min={1}
-						onInput={(e) => setDrawingParameter(Number(e.target.value))}
-					/>
-				</span>
-				<For each={drawingConfigs}>
-					{({ title, drawing, connectEnds }) => (
-						<button
-							onClick={() => {
-								setConnectEnds(connectEnds);
-								setPoints(drawing(drawingParameter()));
-								//setRawZoom(0.25);
-							}}
-						>
-							{title}
-						</button>
-					)}
-				</For>
-			</div>
+
+			<label style={{ display: "flex", "align-items": "center", gap: "0.25rem" }}>
+				Parameter:
+				<input
+					style={{ "margin-top": 0 }}
+					type="number"
+					value={128}
+					min={1}
+					onInput={(e) => setDrawingParameter(Number(e.target.value))}
+				/>
+			</label>
+			<For each={drawingConfigs}>
+				{({ title, drawing, connectEnds }) => (
+					<button
+						onClick={() => {
+							setConnectEnds(connectEnds);
+							setPoints(drawing(drawingParameter()));
+							//setRawZoom(0.25);
+						}}
+					>
+						{title}
+					</button>
+				)}
+			</For>
 		</fieldset>
 	);
 }
@@ -90,28 +90,27 @@ export function MiscFieldset({
 	children?: JSXElement;
 }) {
 	return (
-		<fieldset>
+		<fieldset class="flex">
 			<legend>Misc</legend>
-			<div>
-				{children}
-				<button
-					type="reset"
-					onClick={() => {
-						setPoints([]);
-						setRawZoom(0.25);
-					}}
-				>
-					Reset
-				</button>
-				<label>
-					<input
-						ref={setConnectEndsCheckbox}
-						type="checkbox"
-						onInput={(e) => setConnectEnds(e.target.checked)}
-					></input>
-					Connect Ends
-				</label>
-			</div>
+
+			{children}
+			<button
+				type="reset"
+				onClick={() => {
+					setPoints([]);
+					setRawZoom(0.25);
+				}}
+			>
+				Reset
+			</button>
+			<label>
+				<input
+					ref={setConnectEndsCheckbox}
+					type="checkbox"
+					onInput={(e) => setConnectEnds(e.target.checked)}
+				></input>
+				Connect Ends
+			</label>
 		</fieldset>
 	);
 }
@@ -124,27 +123,26 @@ export function OrderingFieldset({
 	setPointOrderingReversed: Setter<boolean>;
 }) {
 	return (
-		<fieldset>
+		<fieldset class="flex">
 			<legend>Ordering</legend>
-			<div>
-				<For each={Object.entries(orderingData)}>
-					{([ordering, description]) => (
-						<label>
-							<input
-								type="radio"
-								name="ordering"
-								value={ordering}
-								onInput={(el) =>
-									setPointOrdering((_previous) => el.target.value as Ordering)
-								}
-								checked={ordering === "alternating"}
-							/>
-							{description}
-						</label>
-					)}
-				</For>
-				<Checkbox setValue={setPointOrderingReversed}>Reversed</Checkbox>
-			</div>
+
+			<For each={Object.entries(orderingData)}>
+				{([ordering, description]) => (
+					<label>
+						<input
+							type="radio"
+							name="ordering"
+							value={ordering}
+							onInput={(el) =>
+								setPointOrdering((_previous) => el.target.value as Ordering)
+							}
+							checked={ordering === "alternating"}
+						/>
+						{description}
+					</label>
+				)}
+			</For>
+			<Checkbox setValue={setPointOrderingReversed}>Reversed</Checkbox>
 		</fieldset>
 	);
 }

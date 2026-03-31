@@ -121,7 +121,7 @@ export function DrawingCanvas() {
 		if (checkbox) checkbox.checked = connectEnds();
 	});
 
-	const [sidebarWidth, setSidebarWidth] = createSignal(327);
+	const [sidebarWidth, setSidebarWidth] = createSignal(400);
 
 	const onGripPointerDown = (e: PointerEvent) => {
 		const grip = e.currentTarget as HTMLElement;

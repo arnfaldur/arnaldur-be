@@ -6,12 +6,7 @@ export const Checkbox = (props: {
 	children: JSXElement;
 	ref?: Setter<HTMLInputElement>;
 }) => (
-	<label
-		style={{
-			width: "100%",
-			margin: "0 auto 0.75rem auto",
-		}}
-	>
+	<label>
 		<input
 			ref={(el) => {
 				props.setValue(el.checked);
@@ -45,10 +40,6 @@ export const Slider = (props: SliderProps) => {
 			max={1}
 			step="any"
 			onInput={(e) => custom.setValue(Number(e.target.value))}
-			style={{
-				width: "100%",
-				margin: "0 auto 0.75rem auto",
-			}}
 			{...rest}
 		/>
 	);

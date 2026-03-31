@@ -8,36 +8,30 @@
 		margin-right: 0;
 
 		> fieldset {
-			margin-bottom: 0;
+			margin-bottom: 0.5rem;
+			padding-bottom: 1rem;
 
 			&.slider-grid {
 				display: grid;
 				grid: auto-flow dense / 0fr 1fr;
-				gap: 0 1rem;
-
-				> input[type="range"] {
-					width: 100%;
-					margin: 0 auto 0.75rem auto;
-				}
+				gap: 0.75rem 1rem;
+				align-items: center;
 			}
 
-			> div {
-				display: grid;
-				grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+			&.flex {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.5rem;
+			}
 
-				> span {
-					display: grid;
-					grid: auto-flow dense / 0fr 1fr;
-					gap: 1rem;
-					align-items: center;
-					grid-column: 1 / -1;
-				}
+			> :not(legend) {
+				margin: 0;
 			}
 		}
 	}
 
 	> div {
-		width: 6px;
+		width: 10px;
 		cursor: col-resize;
 		flex-shrink: 0;
 	}
