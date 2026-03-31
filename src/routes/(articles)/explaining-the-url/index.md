@@ -13,4 +13,4 @@ Unfortunately, the Belgians who decide the usage of their top level domain are l
 
 The joke works better in many ways when using the interesting [habitual _be_](https://en.wikipedia.org/wiki/Habitual_be) instead of _is_, whose tense is more present.
 
-This is the *easter egg* mentioned on the front page.
+This is the _easter egg_ mentioned on the front page.

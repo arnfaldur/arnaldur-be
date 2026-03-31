@@ -108,7 +108,8 @@ export function MiscFieldset({
 					ref={setConnectEndsCheckbox}
 					type="checkbox"
 					onInput={(e) => setConnectEnds(e.target.checked)}
-				></input>
+				>
+				</input>
 				Connect Ends
 			</label>
 		</fieldset>
@@ -134,8 +135,7 @@ export function OrderingFieldset({
 							name="ordering"
 							value={ordering}
 							onInput={(el) =>
-								setPointOrdering((_previous) => el.target.value as Ordering)
-							}
+								setPointOrdering((_previous) => el.target.value as Ordering)}
 							checked={ordering === "alternating"}
 						/>
 						{description}

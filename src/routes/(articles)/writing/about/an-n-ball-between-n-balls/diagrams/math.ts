@@ -5,7 +5,6 @@ export const sec = (x: number) => 1 / cos(x);
 export const csc = (x: number) => 1 / sin(x);
 export const cot = (x: number) => 1 / tan(x);
 
-
 export const asin = Math.asin;
 export const acos = Math.acos;
 export const atan = Math.atan;

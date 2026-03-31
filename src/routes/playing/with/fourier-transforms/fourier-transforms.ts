@@ -25,7 +25,7 @@ function fftCore(points: Point[], sign: 1 | -1): Point[] {
 			new Point(
 				Math.cos((2 * Math.PI * i) / points.length),
 				sign * Math.sin((2 * Math.PI * i) / points.length),
-			).mul(odd[i]),
+			).mul(odd[i])
 		);
 
 		const left = even.map((e, i) => e.add(boi[i]));
@@ -78,6 +78,5 @@ export function gifft(x: Point[]): Point[] {
 		c[n]
 			.mul(W[n])
 			.conj()
-			.scale(1 / N),
-	);
+			.scale(1 / N));
 }

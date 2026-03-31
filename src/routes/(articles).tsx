@@ -6,16 +6,16 @@ import Breadcrumb from "~/components/Breadcrumb";
 export const sitemapped = false;
 
 export default function ArticleLayout(props: ParentProps): JSX.Element {
-    return (
-        <>
-            <Title />
-            <header>
-                <Breadcrumb />
-            </header>
-            <main class="writing">{props.children}</main>
-            <footer>
-                <Breadcrumb />
-            </footer>
-        </>
-    );
+	return (
+		<>
+			<Title />
+			<header>
+				<Breadcrumb />
+			</header>
+			<main class="writing">{props.children}</main>
+			<footer>
+				<Breadcrumb />
+			</footer>
+		</>
+	);
 }

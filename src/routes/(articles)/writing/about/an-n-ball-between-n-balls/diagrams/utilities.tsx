@@ -8,206 +8,204 @@ export const outerBallColor = 4346763;
 export const centerBallColor = 8861753;
 
 export function segmentSlider(segments: number, value: number) {
-    return Array(segments)
-        .fill(0)
-        .map((_, i) =>
-            easeInOutQuad(THREE.MathUtils.clamp(value * segments - i, 0, 1))
-        );
+	return Array(segments)
+		.fill(0)
+		.map((_, i) => easeInOutQuad(THREE.MathUtils.clamp(value * segments - i, 0, 1)));
 }
 
 let outerRequestRender = () => {};
 export function updateCameraZoom(
-    camera: THREE.OrthographicCamera,
-    zoom: number
+	camera: THREE.OrthographicCamera,
+	zoom: number,
 ) {
-    const aspectRatio = camera.right / camera.top;
-    camera.top = zoom;
-    camera.bottom = -zoom;
-    const cW = zoom * aspectRatio; // camera width
-    camera.left = -cW;
-    camera.right = cW;
-    camera.updateProjectionMatrix();
-    outerRequestRender();
+	const aspectRatio = camera.right / camera.top;
+	camera.top = zoom;
+	camera.bottom = -zoom;
+	const cW = zoom * aspectRatio; // camera width
+	camera.left = -cW;
+	camera.right = cW;
+	camera.updateProjectionMatrix();
+	outerRequestRender();
 }
 export function updateCameraAspect(
-    camera: THREE.OrthographicCamera,
-    aspectRatio: number
+	camera: THREE.OrthographicCamera,
+	aspectRatio: number,
 ) {
-    const cW = camera.top * aspectRatio; // camera width
-    camera.left = -cW;
-    camera.right = cW;
-    camera.updateProjectionMatrix();
-    outerRequestRender();
+	const cW = camera.top * aspectRatio; // camera width
+	camera.left = -cW;
+	camera.right = cW;
+	camera.updateProjectionMatrix();
+	outerRequestRender();
 }
 export function setupScene(canvas: HTMLCanvasElement) {
-    const renderer = new THREE.WebGLRenderer({
-        canvas,
-        alpha: true,
-        antialias: true,
-        powerPreference: "low-power",
-    });
-    renderer.autoClear = false;
-    renderer.setPixelRatio(window.devicePixelRatio);
+	const renderer = new THREE.WebGLRenderer({
+		canvas,
+		alpha: true,
+		antialias: true,
+		powerPreference: "low-power",
+	});
+	renderer.autoClear = false;
+	renderer.setPixelRatio(window.devicePixelRatio);
 
-    const scene = new THREE.Scene();
+	const scene = new THREE.Scene();
 
-    const cH = 3.0; // camera height
-    const camera = new THREE.OrthographicCamera(-0, 0, cH, -cH, 0.1, 10000);
+	const cH = 3.0; // camera height
+	const camera = new THREE.OrthographicCamera(-0, 0, cH, -cH, 0.1, 10000);
 
-    function resizeRenderer(renderer: THREE.WebGLRenderer) {
-        const canvas = renderer?.domElement;
-        if (canvas?.parentElement === null) return;
-        const styleWidth = getComputedStyle(canvas.parentElement).width;
-        const width = Number.parseInt(styleWidth.slice(0, -2));
-        const height = Math.min(400, Number.parseInt(styleWidth.slice(0, -2)));
-        canvas.setAttribute("width", `${width}px`);
-        canvas.setAttribute("height", `${height}px`);
-        renderer.setSize(canvas.width, canvas.height);
-        const aspectRatio = canvas.width / canvas.height;
-        updateCameraAspect(camera, aspectRatio);
-        // it's kinda unneccesary to call this but it might not be called
-        // at early init time in updateCameraAspect and the cost is low so might as well
-        requestRender();
-    }
-    window.addEventListener("resize", () => resizeRenderer(renderer));
+	function resizeRenderer(renderer: THREE.WebGLRenderer) {
+		const canvas = renderer?.domElement;
+		if (canvas?.parentElement === null) return;
+		const styleWidth = getComputedStyle(canvas.parentElement).width;
+		const width = Number.parseInt(styleWidth.slice(0, -2));
+		const height = Math.min(400, Number.parseInt(styleWidth.slice(0, -2)));
+		canvas.setAttribute("width", `${width}px`);
+		canvas.setAttribute("height", `${height}px`);
+		renderer.setSize(canvas.width, canvas.height);
+		const aspectRatio = canvas.width / canvas.height;
+		updateCameraAspect(camera, aspectRatio);
+		// it's kinda unneccesary to call this but it might not be called
+		// at early init time in updateCameraAspect and the cost is low so might as well
+		requestRender();
+	}
+	window.addEventListener("resize", () => resizeRenderer(renderer));
 
-    camera.position.z = 1000;
-    const controls = new OrbitControls(camera, canvas);
-    controls.addEventListener("change", requestRender);
+	camera.position.z = 1000;
+	const controls = new OrbitControls(camera, canvas);
+	controls.addEventListener("change", requestRender);
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1);
-    scene.add(ambientLight);
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 3);
-    directionalLight.position.set(0, 0, 1);
-    scene.add(directionalLight);
+	const ambientLight = new THREE.AmbientLight(0xffffff, 1);
+	scene.add(ambientLight);
+	const directionalLight = new THREE.DirectionalLight(0xffffff, 3);
+	directionalLight.position.set(0, 0, 1);
+	scene.add(directionalLight);
 
-    let renderRequested = false;
-    function render(renderer: THREE.WebGLRenderer) {
-        renderer.clear();
-        renderer.render(scene, camera);
-        renderRequested = false;
-    }
-    function requestRender() {
-        if (!renderRequested) {
-            renderRequested = true;
-            requestAnimationFrame(() => render(renderer));
-        }
-    }
-    outerRequestRender = requestRender;
+	let renderRequested = false;
+	function render(renderer: THREE.WebGLRenderer) {
+		renderer.clear();
+		renderer.render(scene, camera);
+		renderRequested = false;
+	}
+	function requestRender() {
+		if (!renderRequested) {
+			renderRequested = true;
+			requestAnimationFrame(() => render(renderer));
+		}
+	}
+	outerRequestRender = requestRender;
 
-    return {
-        scene,
-        renderer,
-        camera,
-        controls,
-        directionalLight,
-        render,
-        requestRender,
-        resizeRenderer,
-    };
+	return {
+		scene,
+		renderer,
+		camera,
+		controls,
+		directionalLight,
+		render,
+		requestRender,
+		resizeRenderer,
+	};
 }
 
 export function createBall(
-    materialParameters: THREE.MeshStandardMaterialParameters | undefined
+	materialParameters: THREE.MeshStandardMaterialParameters | undefined,
 ) {
-    const geometry = new THREE.IcosahedronGeometry(1, sphereDetail);
-    const material = new THREE.MeshStandardMaterial({
-        side: THREE.DoubleSide,
-        ...materialParameters,
-    });
-    return new THREE.Mesh(geometry, material);
+	const geometry = new THREE.IcosahedronGeometry(1, sphereDetail);
+	const material = new THREE.MeshStandardMaterial({
+		side: THREE.DoubleSide,
+		...materialParameters,
+	});
+	return new THREE.Mesh(geometry, material);
 }
 export function createBox(
-    materialParameters?: THREE.LineBasicMaterialParameters
+	materialParameters?: THREE.LineBasicMaterialParameters,
 ) {
-    const points = [
-        new THREE.Vector3(-2, -2, -2),
-        new THREE.Vector3(-2, -2, 2),
-        new THREE.Vector3(-2, -2, -2),
-        new THREE.Vector3(-2, 2, -2),
-        new THREE.Vector3(-2, -2, -2),
-        new THREE.Vector3(2, -2, -2),
+	const points = [
+		new THREE.Vector3(-2, -2, -2),
+		new THREE.Vector3(-2, -2, 2),
+		new THREE.Vector3(-2, -2, -2),
+		new THREE.Vector3(-2, 2, -2),
+		new THREE.Vector3(-2, -2, -2),
+		new THREE.Vector3(2, -2, -2),
 
-        new THREE.Vector3(-2, 2, 2),
-        new THREE.Vector3(2, 2, 2),
-        new THREE.Vector3(-2, 2, 2),
-        new THREE.Vector3(-2, -2, 2),
-        new THREE.Vector3(-2, 2, 2),
-        new THREE.Vector3(-2, 2, -2),
+		new THREE.Vector3(-2, 2, 2),
+		new THREE.Vector3(2, 2, 2),
+		new THREE.Vector3(-2, 2, 2),
+		new THREE.Vector3(-2, -2, 2),
+		new THREE.Vector3(-2, 2, 2),
+		new THREE.Vector3(-2, 2, -2),
 
-        new THREE.Vector3(2, -2, 2),
-        new THREE.Vector3(-2, -2, 2),
-        new THREE.Vector3(2, -2, 2),
-        new THREE.Vector3(2, 2, 2),
-        new THREE.Vector3(2, -2, 2),
-        new THREE.Vector3(2, -2, -2),
+		new THREE.Vector3(2, -2, 2),
+		new THREE.Vector3(-2, -2, 2),
+		new THREE.Vector3(2, -2, 2),
+		new THREE.Vector3(2, 2, 2),
+		new THREE.Vector3(2, -2, 2),
+		new THREE.Vector3(2, -2, -2),
 
-        new THREE.Vector3(2, 2, -2),
-        new THREE.Vector3(-2, 2, -2),
-        new THREE.Vector3(2, 2, -2),
-        new THREE.Vector3(2, -2, -2),
-        new THREE.Vector3(2, 2, -2),
-        new THREE.Vector3(2, 2, 2),
-    ];
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const material = new THREE.LineBasicMaterial(materialParameters);
-    const box = new THREE.LineSegments(geometry, material);
-    return box;
+		new THREE.Vector3(2, 2, -2),
+		new THREE.Vector3(-2, 2, -2),
+		new THREE.Vector3(2, 2, -2),
+		new THREE.Vector3(2, -2, -2),
+		new THREE.Vector3(2, 2, -2),
+		new THREE.Vector3(2, 2, 2),
+	];
+	const geometry = new THREE.BufferGeometry().setFromPoints(points);
+	const material = new THREE.LineBasicMaterial(materialParameters);
+	const box = new THREE.LineSegments(geometry, material);
+	return box;
 }
 export function createSquare() {
-    const points = [
-        new THREE.Vector3(-2, -2, 0),
-        new THREE.Vector3(-2, 2, 0),
-        new THREE.Vector3(2, 2, 0),
-        new THREE.Vector3(2, -2, 0),
-    ];
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const material = new THREE.LineBasicMaterial({
-        color: 5403965,
-    });
-    const square = new THREE.LineLoop(geometry, material);
-    return square;
+	const points = [
+		new THREE.Vector3(-2, -2, 0),
+		new THREE.Vector3(-2, 2, 0),
+		new THREE.Vector3(2, 2, 0),
+		new THREE.Vector3(2, -2, 0),
+	];
+	const geometry = new THREE.BufferGeometry().setFromPoints(points);
+	const material = new THREE.LineBasicMaterial({
+		color: 5403965,
+	});
+	const square = new THREE.LineLoop(geometry, material);
+	return square;
 }
 export function createLine(color: number) {
-    const points = [new THREE.Vector3(-1, 0, 0), new THREE.Vector3(1, 0, 0)];
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const material = new THREE.LineBasicMaterial({
-        color,
-    });
-    const line = new THREE.Line(geometry, material);
-    return line;
+	const points = [new THREE.Vector3(-1, 0, 0), new THREE.Vector3(1, 0, 0)];
+	const geometry = new THREE.BufferGeometry().setFromPoints(points);
+	const material = new THREE.LineBasicMaterial({
+		color,
+	});
+	const line = new THREE.Line(geometry, material);
+	return line;
 }
 export function createPoint(color: number) {
-    const points = [new THREE.Vector3(0, 0, 0)];
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const material = new THREE.PointsMaterial({
-        color,
-    });
-    const point = new THREE.Points(geometry, material);
-    return point;
+	const points = [new THREE.Vector3(0, 0, 0)];
+	const geometry = new THREE.BufferGeometry().setFromPoints(points);
+	const material = new THREE.PointsMaterial({
+		color,
+	});
+	const point = new THREE.Points(geometry, material);
+	return point;
 }
 
 export function createContactPoint() {
-    const r = 0.05;
-    const points = [
-        new THREE.Vector3(-r, 0, 0),
-        new THREE.Vector3(r, 0, 0),
-        new THREE.Vector3(0, -r, 0),
-        new THREE.Vector3(0, r, 0),
-        new THREE.Vector3(0, 0, -r),
-        new THREE.Vector3(0, 0, r),
-    ];
-    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-    const material = new THREE.LineBasicMaterial({ color: 14267742 });
-    material.depthTest = false;
-    const contactPoint = new THREE.LineSegments(geometry, material);
-    contactPoint.renderOrder = 999;
-    return contactPoint;
+	const r = 0.05;
+	const points = [
+		new THREE.Vector3(-r, 0, 0),
+		new THREE.Vector3(r, 0, 0),
+		new THREE.Vector3(0, -r, 0),
+		new THREE.Vector3(0, r, 0),
+		new THREE.Vector3(0, 0, -r),
+		new THREE.Vector3(0, 0, r),
+	];
+	const geometry = new THREE.BufferGeometry().setFromPoints(points);
+	const material = new THREE.LineBasicMaterial({ color: 14267742 });
+	material.depthTest = false;
+	const contactPoint = new THREE.LineSegments(geometry, material);
+	contactPoint.renderOrder = 999;
+	return contactPoint;
 }
 
 export function easeInOutQuad(x: number): number {
-    return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+	return x < 0.5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
 }
 export function easeInOutSine(x: number): number {
-    return -(Math.cos(Math.PI * x) - 1) / 2;
+	return -(Math.cos(Math.PI * x) - 1) / 2;
 }

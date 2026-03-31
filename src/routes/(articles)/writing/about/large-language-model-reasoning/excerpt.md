@@ -1,6 +1,6 @@
 <!--
---- 
-geometry: margin=2cm 
+---
+geometry: margin=2cm
 ---
 -->
 
@@ -24,7 +24,7 @@ back into tokens, and the tokens into text. Embeddings can be considered to be
 the thoughts of an LLM. **Attention** is a mechanism that allows the LLM to
 _attend_ to the embeddings processed in previous forward passes. For a more
 thorough overview of the architecture, see its
-[wikipedia page](<https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)#Architecture>).
+[wikipedia page](https://en.wikipedia.org/wiki/Transformer_(deep_learning_architecture)#Architecture).
 
 ## _Just_ a next-token predictor
 

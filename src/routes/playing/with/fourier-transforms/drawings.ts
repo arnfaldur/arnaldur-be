@@ -13,8 +13,9 @@ export function circle(n: number): Point[] {
 }
 
 export function spiral(n: number): Point[] {
-	return Array.from({ length: n }, (_, i) =>
-		new Point(Math.cos((i * PI * 8) / n), Math.sin((i * PI * 8) / n)).scale(i / n),
+	return Array.from(
+		{ length: n },
+		(_, i) => new Point(Math.cos((i * PI * 8) / n), Math.sin((i * PI * 8) / n)).scale(i / n),
 	);
 }
 
@@ -315,8 +316,9 @@ export function moore(n: number): Point[] {
 
 export function uniform(n: number): Point[] {
 	const scale = 0.9;
-	const result = Array.from({ length: n }, () =>
-		new Point(Math.random() * 2 - 1, Math.random() * 2 - 1).scale(scale),
+	const result = Array.from(
+		{ length: n },
+		() => new Point(Math.random() * 2 - 1, Math.random() * 2 - 1).scale(scale),
 	);
 	result.unshift(result[0].asHidden());
 	return result;

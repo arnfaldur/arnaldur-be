@@ -5,7 +5,7 @@ import { Point } from "./Point";
 import { gifft, shuffleArray } from "./fourier-transforms";
 import { Slider } from "./components";
 import * as drawings from "./drawings";
-import { DrawingsFieldset, MiscFieldset, OrderingFieldset, type Ordering } from "./fieldsets";
+import { DrawingsFieldset, MiscFieldset, type Ordering, OrderingFieldset } from "./fieldsets";
 
 export function DrawingCanvas() {
 	const strokeStyle = "white";
@@ -31,7 +31,7 @@ export function DrawingCanvas() {
 	const visiblePoints = createMemo(() => points().filter((point) => point.visible));
 
 	const pointsIft = createMemo(() =>
-		gifft(visiblePoints()).map<[Point, number]>((point, i) => [point, i]),
+		gifft(visiblePoints()).map<[Point, number]>((point, i) => [point, i])
 	);
 	const pointsIftSel = createPointOrderings(pointsIft, pointOrdering, pointOrderingReversed);
 	const pointsIftAcc = createMemo(() => {
@@ -56,10 +56,10 @@ export function DrawingCanvas() {
 		return acc[Math.min(acc.length - 1, focus)][0];
 	});
 	const pointsTransformed = createMemo(() =>
-		points().map((p) => p.sub(focusPoint()).scale(zoom())),
+		points().map((p) => p.sub(focusPoint()).scale(zoom()))
 	);
 	const pointsIftTransformed = createMemo(() =>
-		pointsIftAcc().map<[Point, number]>(([p, i]) => [p.sub(focusPoint()).scale(zoom()), i]),
+		pointsIftAcc().map<[Point, number]>(([p, i]) => [p.sub(focusPoint()).scale(zoom()), i])
 	);
 
 	const setupCanvas = (canvas: HTMLCanvasElement) => {
@@ -105,8 +105,9 @@ export function DrawingCanvas() {
 	const [positionSlider, setPositionSlider] = createSignal({} as HTMLInputElement);
 	createEffect(() => {
 		const slider = positionSlider();
-		if (slider && unscaledRotationRate() > 0)
+		if (slider && unscaledRotationRate() > 0) {
 			slider.value = (rotation() / pointsIftSel().length).toString();
+		}
 	});
 
 	const [animationSpeedSlider, setAnimationSpeedSlider] = createSignal({} as HTMLInputElement);
@@ -230,7 +231,7 @@ function createPointOrderings(
 		points().map<[Point, number]>((_, i, arr) => {
 			const ix = i % 2 === 0 ? Math.floor(i / 2) : arr.length - Math.ceil(i / 2);
 			return [arr[ix][0], ix];
-		}),
+		})
 	);
 	const pointsInsideOut = createMemo(() => [
 		...points().slice(Math.ceil(points().length / 2)),
@@ -257,7 +258,9 @@ function createPointOrderings(
 	return pointsSelected;
 }
 
-const dcColor = `color-mix(in lch, ${rgbToCss(turboColormapSample(0.1))}, ${rgbToCss(turboColormapSample(0.9))})`;
+const dcColor = `color-mix(in lch, ${rgbToCss(turboColormapSample(0.1))}, ${
+	rgbToCss(turboColormapSample(0.9))
+})`;
 
 let strokeStyleCache: string[] = [];
 

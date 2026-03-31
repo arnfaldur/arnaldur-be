@@ -1,88 +1,88 @@
 :root {
-    --ct-width: 40rem;
-    --ft: "Open Sans", sans-serif;
-    --accent: oklch(80% 0.2 270);
-    --ft-size: 1em;
+	--ct-width: 40rem;
+	--ft: "Open Sans", sans-serif;
+	--accent: oklch(80% 0.2 270);
+	--ft-size: 1em;
 }
 
 body {
-    max-width: inherit;
-    padding: inherit;
-    /* font-size: 1.25em; */
+	max-width: inherit;
+	padding: inherit;
+	/* font-size: 1.25em; */
 }
 
 main {
-    max-width: 35em;
-    margin: auto;
-    padding: 0 1rem;
+	max-width: 35em;
+	margin: auto;
+	padding: 0 1rem;
 }
 
 #breadcrumb {
-    width: fit-content;
-    margin: auto;
-    padding: 1rem;
-    min-width: calc(100% - 2rem);
-    max-width: 100%;
-    font-size: 1.5em;
-    font-weight: 600;
-    border: none;
+	width: fit-content;
+	margin: auto;
+	padding: 1rem;
+	min-width: calc(100% - 2rem);
+	max-width: 100%;
+	font-size: 1.5em;
+	font-weight: 600;
+	border: none;
 }
 @media (min-width: 40rem) {
-    #breadcrumb {
-        min-width: 38rem;
-    }
+	#breadcrumb {
+		min-width: 38rem;
+	}
 }
 
 #breadcrumb > a {
-    border-bottom: 1px solid transparent;
-    border-color: var(--bd-muted);
-    text-decoration: none;
-    color: var(--color);
+	border-bottom: 1px solid transparent;
+	border-color: var(--bd-muted);
+	text-decoration: none;
+	color: var(--color);
 }
 #breadcrumb > a:hover {
-    border-color: currentColor;
+	border-color: currentColor;
 }
 #breadcrumb > span {
-    color: var(--muted);
+	color: var(--muted);
 }
 
 :is(h1, h2, h3, h4, h5, h6)[id] > a:hover::before {
-    color: oklch(80% 0.2 0);
+	color: oklch(80% 0.2 0);
 }
 
 /* disable hash hovers on breadcrumb */
 :is(h1, h2, h3, h4, h5, h6)#breadcrumb > a:hover::before {
-    content: none;
+	content: none;
 }
 /* add bottom border for all headings */
 :not(:is(dialog, article, body) > header:first-child) > :is(h1, h2, h3, h4, h5, h6) {
-    border-color: var(--bd-muted);
+	border-color: var(--bd-muted);
 }
 
 h1, h2, h3, h4, h5, h6, #breadcrumb {
-    font-family: "varela-round", sans-serif;
+	font-family: "varela-round", sans-serif;
 }
 h1 {
-    font-size: 2rem;
+	font-size: 2rem;
 }
 h2 {
-    font-size: 1.6rem;
+	font-size: 1.6rem;
 }
 h3 {
-    font-size: 1.4rem;
+	font-size: 1.4rem;
 }
 h4 {
-    font-size: 1.2rem;
+	font-size: 1.2rem;
 }
 h5 {
-    font-size: 1rem;
+	font-size: 1rem;
 }
 h6 {
-    font-size: 0.9rem;
+	font-size: 0.9rem;
 }
 
 em {
-    font-weight: 500;
+	font-weight: 500;
 }
 h1 em,
 h2 em,
@@ -90,76 +90,76 @@ h3 em,
 h4 em,
 h5 em,
 h6 em {
-    font-weight: inherit;
+	font-weight: inherit;
 }
 
 a {
-    color: oklch(80% 0.2 270);
+	color: oklch(80% 0.2 270);
 }
 
 a:visited {
-    color: oklch(80% 0.2 310);
-    button {
-        color: oklch(80% 0.2 310);
-    }
+	color: oklch(80% 0.2 310);
+	button {
+		color: oklch(80% 0.2 310);
+	}
 }
 
 q::before {
-    content: "“";
+	content: "“";
 }
 q::after {
-    content: "”";
+	content: "”";
 }
 
 figcaption > :is(h1, h2, h3, h4, h5, h6):first-child {
-    margin: 0;
+	margin: 0;
 }
 
 /* formatting the big LLM output table */
 table.llmr-numbers th {
-    writing-mode: vertical-rl;
-    width: 2.5rem;
-    padding: 1em 0.5em;
+	writing-mode: vertical-rl;
+	width: 2.5rem;
+	padding: 1em 0.5em;
 }
 table.llmr-numbers td {
-    text-align: right;
+	text-align: right;
 }
 table.llmr-numbers td.greater {
-    background-color: color-mix(in oklch, var(--danger) 15%, black 00%);
+	background-color: color-mix(in oklch, var(--danger) 15%, black 00%);
 }
 table.llmr-numbers td.lesser {
-    background-color: color-mix(in oklch, var(--accent) 15%, black 00%);
+	background-color: color-mix(in oklch, var(--accent) 15%, black 00%);
 }
 
 table td.red {
-    background-color: color-mix(in oklch, var(--danger) 15%, black 00%);
+	background-color: color-mix(in oklch, var(--danger) 15%, black 00%);
 }
 table td.blue {
-    background-color: color-mix(in oklch, var(--accent) 15%, black 00%);
+	background-color: color-mix(in oklch, var(--accent) 15%, black 00%);
 }
 table td.green {
-    background-color: color-mix(in oklch, var(--success) 15%, black 00%);
+	background-color: color-mix(in oklch, var(--success) 15%, black 00%);
 }
 
 details.red {
-    border-color: var(--danger);
-    /* background-color: color-mix(in oklch, var(--danger) 15%, black 00%); */
+	border-color: var(--danger);
+	/* background-color: color-mix(in oklch, var(--danger) 15%, black 00%); */
 }
 details.green {
-    border-color: var(--success);
-    /* background-color: color-mix(in oklch, var(--success) 15%, black 00%); */
+	border-color: var(--success);
+	/* background-color: color-mix(in oklch, var(--success) 15%, black 00%); */
 }
 details[open] > summary {
-    border-radius: calc(var(--bd-radius) - 1px) calc(var(--bd-radius) - 1px) 0 0;
+	border-radius: calc(var(--bd-radius) - 1px) calc(var(--bd-radius) - 1px) 0 0;
 }
 
 main.writing > .video {
-    container-type: inline-size;
-    width: 100%;
-    margin-bottom: 1rem;
+	container-type: inline-size;
+	width: 100%;
+	margin-bottom: 1rem;
 }
 
 main.writing > div.ar4-3 > * {
-    width: 100%;
-    height: calc(100cqi / 4 * 3);
+	width: 100%;
+	height: calc(100cqi / 4 * 3);
 }
