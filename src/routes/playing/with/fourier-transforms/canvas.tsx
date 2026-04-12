@@ -19,6 +19,46 @@ const orderingData: { [key in Ordering]: string } = {
 	shuffled: "Shuffled",
 };
 
+const drawingOptions = [
+	{ title: "Circle", drawing: drawings.circle, connectEnds: true },
+	{ title: "Spiral", drawing: drawings.spiral, connectEnds: false },
+	{
+		title: "Log Spiral",
+		drawing: drawings.logSpiral,
+		connectEnds: false,
+	},
+	{
+		title: "Two Points",
+		drawing: drawings.twoPoints,
+		connectEnds: false,
+	},
+	{ title: "Heart", drawing: drawings.heart, connectEnds: true },
+	{ title: "Wave", drawing: drawings.wave, connectEnds: false },
+	{ title: "S", drawing: drawings.s, connectEnds: true },
+	{
+		title: "Infinity",
+		drawing: drawings.infinity,
+		connectEnds: true,
+	},
+	{
+		title: "Infinity (Geometric)",
+		drawing: drawings.infinityGeometric,
+		connectEnds: true,
+	},
+	{ title: "Hilbert", drawing: drawings.hilbert, connectEnds: false },
+	{ title: "Moore", drawing: drawings.moore, connectEnds: true },
+	{
+		title: "Random uniform",
+		drawing: drawings.uniform,
+		connectEnds: false,
+	},
+	{
+		title: "Random gaussian",
+		drawing: drawings.uniform,
+		connectEnds: false,
+	},
+];
+
 export function DrawingCanvas() {
 	const relativeWidth = 0.99;
 	const relativeHeight = 0.7;
@@ -230,7 +270,7 @@ export function DrawingCanvas() {
 						margin: "0 auto 0.75rem auto",
 					}}
 					onInput={(e) => {
-						setFocusedElement(Math.round(Number(e.target.value) * pointsIft().length));
+						setFocusedElement(Math.floor(Number(e.target.value) * pointsIft().length));
 					}}
 				/>
 				Zoom
@@ -270,47 +310,7 @@ export function DrawingCanvas() {
 								onInput={(e) => setDrawingParameter(Number(e.target.value))}
 							/>
 						</span>
-						<For
-							each={[
-								{ title: "Circle", drawing: drawings.circle, connectEnds: true },
-								{ title: "Spiral", drawing: drawings.spiral, connectEnds: false },
-								{
-									title: "Log Spiral",
-									drawing: drawings.logSpiral,
-									connectEnds: false,
-								},
-								{
-									title: "Two Points",
-									drawing: drawings.twoPoints,
-									connectEnds: false,
-								},
-								{ title: "Heart", drawing: drawings.heart, connectEnds: true },
-								{ title: "Wave", drawing: drawings.wave, connectEnds: false },
-								{ title: "S", drawing: drawings.s, connectEnds: true },
-								{
-									title: "Infinity",
-									drawing: drawings.infinity,
-									connectEnds: true,
-								},
-								{
-									title: "Infinity (Geometric)",
-									drawing: drawings.infinityGeometric,
-									connectEnds: true,
-								},
-								{ title: "Hilbert", drawing: drawings.hilbert, connectEnds: false },
-								{ title: "Moore", drawing: drawings.moore, connectEnds: true },
-								{
-									title: "Random uniform",
-									drawing: drawings.uniform,
-									connectEnds: false,
-								},
-								{
-									title: "Random gaussian",
-									drawing: drawings.uniform,
-									connectEnds: false,
-								},
-							]}
-						>
+						<For each={drawingOptions}>
 							{({ title, drawing, connectEnds }) => (
 								<button
 									onClick={() => {
