@@ -86,7 +86,7 @@ export function DrawingCanvas() {
 		const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
 		if (!ctx) return null;
 
-		attachDrawingLogic(canvas, points, setPoints);
+		attachDrawingLogic(canvas, points, setPoints, zoom, focusPoint);
 
 		attachResizingLogic(canvas, ctx);
 
@@ -381,6 +381,8 @@ function attachDrawingLogic(
 	canvas: HTMLCanvasElement,
 	points: Accessor<Point[]>,
 	setPoints: Setter<Point[]>,
+	zoom: Accessor<number>,
+	focusPoint: Accessor<Point>,
 ) {
 	let lastPoint = new Point(0, 0);
 	let isDrawing = false;
@@ -419,8 +421,10 @@ function attachDrawingLogic(
 		const s = Math.min(rect.width, rect.height) / 2;
 		const x = (event.clientX - rect.left - rect.width / 2) / s;
 		const y = -(event.clientY - rect.top - rect.height / 2) / s;
-		const result = new Point(x, y);
-		return result.inBounds() ? result : null;
+		const fp = focusPoint();
+		const z = zoom();
+		const result = new Point(x / z + fp.x, y / z + fp.y);
+		return result;
 	};
 
 	canvas.addEventListener("mousedown", startDrawing);
