@@ -1,0 +1,43 @@
+#fractal-viewer {
+	position: fixed;
+	inset: 0;
+	display: flex;
+
+	> aside {
+		overflow: scroll;
+		margin-right: 0;
+
+		> fieldset {
+			margin-bottom: 0.5rem;
+			padding-bottom: 1rem;
+
+			&.slider-grid {
+				display: grid;
+				grid: auto-flow dense / 0fr 1fr;
+				gap: 0.75rem 1rem;
+				align-items: center;
+			}
+
+			&.flex {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.5rem;
+			}
+
+			> :not(legend) {
+				margin: 0;
+			}
+		}
+	}
+
+	> div {
+		width: 10px;
+		cursor: col-resize;
+		flex-shrink: 0;
+	}
+
+	> canvas {
+		flex: 1;
+		min-width: 0;
+	}
+}
