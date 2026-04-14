@@ -1,0 +1,4 @@
+allowBuilds:
+    "@parcel/watcher": true
+    aws-sdk: true
+    esbuild: true
